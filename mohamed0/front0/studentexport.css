@@ -1,0 +1,90 @@
+
+    body {
+      background: linear-gradient(135deg, #0b1020, #1b1f3b);
+      color: #fff;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 260px;
+      background: linear-gradient(180deg, #0a0f2c, #10163a);
+      min-height: 100vh;
+      position: fixed;
+      padding: 25px 20px;
+    }
+
+    .sidebar a {
+      color: #cfd3ff;
+      text-decoration: none;
+      display: block;
+      padding: 12px 15px;
+      border-radius: 10px;
+      margin-bottom: 6px;
+    }
+
+    .sidebar a.active,
+    .sidebar a:hover {
+      background: #2563eb;
+      color: #fff;
+    }
+
+    /* Content */
+    .content {
+      margin-left: 280px;
+      padding: 30px;
+    }
+
+    .page-card {
+      background: rgba(255,255,255,0.06);
+      border-radius: 20px;
+      padding: 28px;
+      margin-bottom: 25px;
+    }
+
+    label {
+      font-size: 14px;
+      color: #c7c9ff;
+    }
+
+    .form-control,
+    .form-select {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: #fff;
+      border-radius: 12px;
+    }
+
+    .form-control::placeholder {
+      color: #9aa0ff;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #2563eb, #3b82f6);
+      border: none;
+      border-radius: 14px;
+      padding: 12px 26px;
+    }
+
+    .quick-card {
+      background: rgba(255,255,255,0.07);
+      border-radius: 16px;
+      padding: 20px;
+      height: 100%;
+      transition: 0.2s;
+      cursor: pointer;
+    }
+
+    .quick-card:hover {
+      background: rgba(255,255,255,0.12);
+    }
+
+    .quick-title {
+      font-size: 15px;
+    }
+
+    .quick-sub {
+      font-size: 13px;
+      color: #c7c9ff;
+    }
+  

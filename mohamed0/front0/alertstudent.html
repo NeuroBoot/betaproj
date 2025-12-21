@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Alerts & Notifications</title>
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+<link rel="stylesheet" href="">
+  <style>
+    body {
+      background: linear-gradient(120deg, #0b1020, #1a1f4d);
+      color: #fff;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 260px;
+      background: linear-gradient(180deg, #0a1028, #111c3a);
+      min-height: 100vh;
+      padding: 20px;
+      position: fixed;
+    }
+
+    .sidebar a {
+      color: #cfd6ff;
+      text-decoration: none;
+      padding: 12px 15px;
+      display: block;
+      border-radius: 10px;
+      margin-bottom: 8px;
+    }
+
+    .sidebar a.active,
+    .sidebar a:hover {
+      background: #2563eb;
+      color: #fff;
+    }
+
+    .content {
+      margin-left: 280px;
+      padding: 30px;
+    }
+
+    .card-glass {
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 16px;
+      padding: 22px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+    }
+
+    .alert-item {
+      border-radius: 14px;
+      padding: 20px;
+      position: relative;
+      margin-bottom: 16px;
+    }
+
+    .alert-warning-custom {
+      background: #5a523c;
+      border-left: 5px solid #facc15;
+    }
+
+    .alert-info-custom {
+      background: #2b4370;
+      border-left: 5px solid #3b82f6;
+    }
+
+    .alert-success-custom {
+      background: #1f4d3f;
+      border-left: 5px solid #22c55e;
+    }
+
+    .alert-purple-custom {
+      background: #4b3b6b;
+      border-left: 5px solid #a855f7;
+    }
+
+    .alert-time {
+      font-size: 0.85rem;
+      opacity: 0.8;
+      margin-top: 6px;
+    }
+
+    .close-btn {
+      position: absolute;
+      right: 15px;
+      top: 15px;
+      cursor: pointer;
+      opacity: 0.7;
+    }
+
+    .close-btn:hover {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar">
+  <h4 class="mb-4">FaceMark</h4>
+
+  <a href="#">Dashboard</a>
+  <a href="#">View Courses</a>
+  <a href="#">Charts & Reports</a>
+  <a href="#" class="active"><i class="bi bi-bell me-2"></i>Alerts</a>
+  <a href="#">Export</a>
+  <a href="#">Report a Problem</a>
+
+  <hr class="text-secondary">
+  <a href="#">Settings</a>
+  <a href="#">Sign Out</a>
+</div>
+
+<!-- Content -->
+<div class="content">
+
+  <div class="card-glass mb-4">
+    <h3>Alerts & Notifications</h3>
+  </div>
+
+  <!-- Alert 1 -->
+  <div class="alert-item alert-warning-custom">
+    <i class="bi bi-exclamation-triangle-fill me-2 text-warning"></i>
+    <strong>Attendance Warning</strong>
+    <p class="mb-1">
+      Your attendance in Chemistry is <b>88%</b>. Maintain above 75% to avoid academic issues.
+    </p>
+    <div class="alert-time text-warning">1 hour ago</div>
+    <span class="close-btn"><i class="bi bi-x-lg"></i></span>
+  </div>
+
+  <!-- Alert 2 -->
+  <div class="alert-item alert-info-custom">
+    <i class="bi bi-clock-fill me-2 text-info"></i>
+    <strong>Upcoming Class</strong>
+    <p class="mb-1">
+      Physics class starts in <b>30 minutes</b>. Room: Lab 204
+    </p>
+    <div class="alert-time text-info">30 minutes ago</div>
+    <span class="close-btn"><i class="bi bi-x-lg"></i></span>
+  </div>
+
+  <!-- Alert 3 -->
+  <div class="alert-item alert-success-custom">
+    <i class="bi bi-check-circle-fill me-2 text-success"></i>
+    <strong>Perfect Attendance</strong>
+    <p class="mb-1">
+      Congratulations! You have perfect attendance in Mathematics this month.
+    </p>
+    <div class="alert-time text-success">2 days ago</div>
+    <span class="close-btn"><i class="bi bi-x-lg"></i></span>
+  </div>
+
+  <!-- Alert 4 -->
+  <div class="alert-item alert-purple-custom">
+    <i class="bi bi-calendar-event-fill me-2 text-purple"></i>
+    <strong>Schedule Change</strong>
+    <p class="mb-1">
+      Computer Science class has been rescheduled to <b>Friday 2:00 PM</b>.
+    </p>
+    <div class="alert-time text-light">3 days ago</div>
+    <span class="close-btn"><i class="bi bi-x-lg"></i></span>
+  </div>
+
+</div>
+
+</body>
+</html>

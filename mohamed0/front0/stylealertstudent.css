@@ -1,0 +1,86 @@
+
+    body {
+      background: linear-gradient(120deg, #0b1020, #1a1f4d);
+      color: #fff;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 260px;
+      background: linear-gradient(180deg, #0a1028, #111c3a);
+      min-height: 100vh;
+      padding: 20px;
+      position: fixed;
+    }
+
+    .sidebar a {
+      color: #cfd6ff;
+      text-decoration: none;
+      padding: 12px 15px;
+      display: block;
+      border-radius: 10px;
+      margin-bottom: 8px;
+    }
+
+    .sidebar a.active,
+    .sidebar a:hover {
+      background: #2563eb;
+      color: #fff;
+    }
+
+    .content {
+      margin-left: 280px;
+      padding: 30px;
+    }
+
+    .card-glass {
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 16px;
+      padding: 22px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+    }
+
+    .alert-item {
+      border-radius: 14px;
+      padding: 20px;
+      position: relative;
+      margin-bottom: 16px;
+    }
+
+    .alert-warning-custom {
+      background: #5a523c;
+      border-left: 5px solid #facc15;
+    }
+
+    .alert-info-custom {
+      background: #2b4370;
+      border-left: 5px solid #3b82f6;
+    }
+
+    .alert-success-custom {
+      background: #1f4d3f;
+      border-left: 5px solid #22c55e;
+    }
+
+    .alert-purple-custom {
+      background: #4b3b6b;
+      border-left: 5px solid #a855f7;
+    }
+
+    .alert-time {
+      font-size: 0.85rem;
+      opacity: 0.8;
+      margin-top: 6px;
+    }
+
+    .close-btn {
+      position: absolute;
+      right: 15px;
+      top: 15px;
+      cursor: pointer;
+      opacity: 0.7;
+    }
+
+    .close-btn:hover {
+      opacity: 1;
+    }

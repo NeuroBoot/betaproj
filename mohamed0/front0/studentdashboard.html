@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>FaceMark | Student Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/studentdashboard.css">
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <h4 class="mb-4">
+    <i class="fa-solid fa-face-smile text-primary"></i> FaceMark
+    <small class="d-block fs-6 text-muted">Student Portal</small>
+  </h4>
+
+  <p class="text-muted mb-4">Welcome,<br><strong>ss</strong></p>
+
+  <a class="active"><i class="fa-solid fa-chart-pie me-2"></i> Dashboard</a>
+  <a><i class="fa-solid fa-book me-2"></i> View Courses</a>
+  <a><i class="fa-solid fa-chart-line me-2"></i> Charts & Reports</a>
+  <a><i class="fa-solid fa-bell me-2"></i> Alerts</a>
+  <a><i class="fa-solid fa-file-export me-2"></i> Export</a>
+  <a><i class="fa-solid fa-triangle-exclamation me-2"></i> Report a Problem</a>
+
+  <hr class="text-secondary">
+
+  <a><i class="fa-solid fa-gear me-2"></i> Settings</a>
+  <a><i class="fa-solid fa-right-from-bracket me-2"></i> Sign Out</a>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+
+  <!-- TOP STATS -->
+ <div class="row g-4 mb-4">
+  <div class="col-md-4">
+    <div class="stats-card card-attendance">
+      <div class="stats-title">Overall Attendance</div>
+      <div class="stats-value">92%</div>
+      <div class="stats-sub text-success-soft">Excellent performance</div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="stats-card card-classes">
+      <div class="stats-title">Classes Attended</div>
+      <div class="stats-value">156/170</div>
+      <div class="stats-sub text-info-soft">This semester</div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="stats-card card-courses">
+      <div class="stats-title">Total Courses</div>
+      <div class="stats-value">4</div>
+      <div class="stats-sub text-muted-soft">Active courses</div>
+    </div>
+  </div>
+</div>
+
+  <!-- TODAY SCHEDULE -->
+  <div class="card-dark mb-4">
+    <h5 class="mb-3">Today's Schedule</h5>
+
+    <div class="schedule-item">
+      <strong>Mathematics</strong> – Dr. Ahmed Hassan
+      <span class="float-end badge badge-success">Attended</span>
+      <div class="text-muted">08:00 - 10:00</div>
+    </div>
+
+    <div class="schedule-item">
+      <strong>Physics</strong> – Dr. Sara Mohamed
+      <span class="float-end badge bg-primary">In Progress</span>
+      <div class="text-muted">10:30 - 12:30</div>
+    </div>
+
+    <div class="schedule-item">
+      <strong>Chemistry</strong> – Dr. Omar Ali
+      <span class="float-end badge bg-secondary">Upcoming</span>
+      <div class="text-muted">13:00 - 15:00</div>
+    </div>
+  </div>
+<!-- Recent Attendance History -->
+<div class="attendance-history">
+  <h5>Recent Attendance History</h5>
+
+  <table class="history-table">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Course</th>
+        <th>Time</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr>
+        <td>Nov 26, 2024</td>
+        <td>Mathematics</td>
+        <td>08:15 AM</td>
+        <td>
+          <span class="history-status history-present">Present</span>
+        </td>
+      </tr>
+
+      <tr>
+        <td>Nov 25, 2024</td>
+        <td>Physics</td>
+        <td>10:42 AM</td>
+        <td>
+          <span class="history-status history-present">Present</span>
+        </td>
+      </tr>
+
+      <tr>
+        <td>Nov 24, 2024</td>
+        <td>Chemistry</td>
+        <td>-</td>
+        <td>
+          <span class="history-status history-absent">Absent</span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Charts & Reports | FACEMARK</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    body {
+      background: linear-gradient(135deg, #0f1224, #15193a);
+      color: #fff;
+      min-height: 100vh;
+      font-family: system-ui;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      background: linear-gradient(180deg, #0c0f2d, #11164a);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .brand {
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+
+    .user-box {
+      background: linear-gradient(135deg, #1f2547, #2a2f5a);
+      border-radius: 14px;
+      padding: 14px;
+      margin: 18px 0 24px;
+    }
+
+    .user-box small {
+      color: #aab0ff;
+      font-size: 13px;
+    }
+
+    .user-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+      margin: 4px 0;
+    }
+
+    .sidebar .nav-link {
+      color: #bfc4ff;
+      margin-bottom: 10px;
+      border-radius: 10px;
+      padding: 10px 14px;
+    }
+
+    .sidebar .nav-link.active,
+    .sidebar .nav-link:hover {
+      background: #2b5cff;
+      color: #fff;
+    }
+    /* Panels */
+    .panel {
+      background: linear-gradient(135deg, #1f2547, #2a2f5a);
+      border-radius: 18px;
+      padding: 25px;
+      margin-bottom: 25px;
+    }
+
+    /* Progress bars */
+    .progress {
+      height: 26px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 20px;
+    }
+
+    .progress-bar {
+      border-radius: 20px;
+      font-weight: 500;
+    }
+
+    /* Metric rows */
+    .metric {
+      background: rgba(255,255,255,0.05);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container-fluid">
+  <div class="row">
+
+    <!-- Sidebar -->
+    <div class="col-md-2 sidebar">
+      <h5 class="mb-4"><i class="bi bi-eye"></i> FACEMARK</h5>
+      <p class="small text-muted">Staff Portal</p>
+<!-- Welcome Box -->
+      <div class="user-box">
+        <small>Welcome,</small>
+        <div class="user-name">سَس</div>
+        <small>Staff Portal</small>
+      </div>
+      <ul class="nav flex-column">
+        <li class="nav-item"><a class="nav-link" href="staffdashboard.html"><i class="bi bi-grid"></i> Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link" href="manualattendance.html"><i class="bi bi-person-check"></i> Manual Attendance</a></li>
+        <li class="nav-item"><a class="nav-link" href="face-capture.html"><i class="bi bi-camera"></i> Face Capture</a></li>
+        <li class="nav-item"><a class="nav-link active" href="#"><i class="bi bi-bar-chart"></i> Charts & Reports</a></li>
+        <li class="nav-item"><a class="nav-link" href="export.html"><i class="bi bi-download"></i> Export</a></li>
+        <li class="nav-item"><a class="nav-link" href="alerts.html"><i class="bi bi-bell"></i> Alerts</a></li>
+        <li class="nav-item mt-5"><a class="nav-link text-danger" href="#"><i class="bi bi-box-arrow-left"></i> Sign Out</a></li>
+      </ul>
+    </div>
+
+    <!-- Main -->
+    <div class="col-md-10 p-4">
+
+      <!-- Histogram -->
+      <div class="panel">
+        <h3>Charts & Reports</h3>
+        <h6 class="text-muted mb-3">Monthly Attendance Histogram</h6>
+        <canvas id="attendanceChart" height="100"></canvas>
+      </div>
+
+      <!-- Course-wise -->
+      <div class="panel">
+        <h5 class="mb-4">Course-wise Attendance Histogram</h5>
+
+        <p>Mathematics (185/201)</p>
+        <div class="progress mb-3">
+          <div class="progress-bar bg-primary" style="width:92%">92%</div>
+        </div>
+
+        <p>Physics (162/190)</p>
+        <div class="progress mb-3">
+          <div class="progress-bar bg-success" style="width:85%">85%</div>
+        </div>
+
+        <p>Chemistry (176/200)</p>
+        <div class="progress mb-3">
+          <div class="progress-bar bg-purple" style="width:88%; background:#a855f7;">88%</div>
+        </div>
+
+        <p>Computer Science (171/190)</p>
+        <div class="progress">
+          <div class="progress-bar bg-warning" style="width:90%">90%</div>
+        </div>
+      </div>
+
+      <!-- Bottom section -->
+      <div class="row">
+        <div class="col-md-6">
+          <div class="panel">
+            <h5 class="mb-3">Performance Metrics</h5>
+
+            <div class="metric"><span>Average Attendance</span><strong>87%</strong></div>
+            <div class="metric"><span>Top Performing Course</span><strong class="text-success">Mathematics</strong></div>
+            <div class="metric"><span>Students at Risk</span><strong class="text-danger">24</strong></div>
+            <div class="metric" style="background:#1e3a8a;"><span>Recognition Accuracy</span><strong>98.5%</strong></div>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="panel">
+            <h5 class="mb-3">Weekly Overview</h5>
+
+            <p>Monday</p>
+           <button class="btn-success">Present</button>
+
+            <p>Tuesday</p>
+           <button class="btn-success">Present</button>
+
+            <p>Wednesday</p>
+            <button class="btn-danger">Absent</button>
+
+            <p>Thursday</p>
+           <button class="btn-success">Present</button>
+
+            <p>Friday</p>
+            <button class=" btn btn-success">Present</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+const ctx = document.getElementById('attendanceChart');
+new Chart(ctx, {
+  type: 'bar',
+  data: {
+    labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+    datasets: [{
+      label: 'Average Attendance Rate (%)',
+      data: [82, 85, 88, 86, 90, 92, 91, 89, 87, 88, 90, 93],
+      backgroundColor: '#3b82f6',
+      borderRadius: 8
+    }]
+  },
+  options: {
+    scales: {
+      y: {
+        beginAtZero: true,
+        max: 100,
+        ticks: { color: '#ccc' },
+        grid: { color: 'rgba(255,255,255,0.1)' }
+      },
+      x: {
+        ticks: { color: '#ccc' },
+        grid: { display: false }
+      }
+    },
+    plugins: {
+      legend: { labels: { color: '#fff' } }
+    }
+  }
+});
+</script>
+
+</body>
+</html>
