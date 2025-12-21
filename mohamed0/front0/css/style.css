@@ -1,0 +1,107 @@
+ body {
+      background: linear-gradient(135deg, #0f1224, #15193a);
+      color: #fff;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      background: linear-gradient(180deg, #0c0f2d, #11164a);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .sidebar .nav-link {
+      color: #bfc4ff;
+      margin-bottom: 10px;
+      border-radius: 8px;
+    }
+
+    .sidebar .nav-link.active,
+    .sidebar .nav-link:hover {
+      background: #2b5cff;
+      color: #fff;
+    }
+
+    /* Cards */
+    .stat-card {
+      border-radius: 16px;
+      padding: 20px;
+      background: linear-gradient(135deg, #1e3c72, #2a5298);
+    }
+
+    .stat-green {
+      background: linear-gradient(135deg, #134e4a, #065f46);
+    }
+
+    .stat-purple {
+      background: linear-gradient(135deg, #3b1d5a, #5b2b82);
+    }
+
+    .stat-orange {
+      background: linear-gradient(135deg, #4a2c2a, #78350f);
+    }
+
+    /* Class cards */
+    .class-card {
+      border-radius: 14px;
+      padding: 20px;
+      background: linear-gradient(135deg, #1f2937, #334155);
+      margin-bottom: 15px;
+      position: relative;
+    }
+
+    .class-card::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 5px;
+      border-radius: 14px 0 0 14px;
+      background: #22c55e;
+    }
+
+    .in-progress::before { background: #3b82f6; }
+    .upcoming::before { background: #9ca3af; }
+
+    .badge-custom {
+      border-radius: 20px;
+      padding: 6px 12px;
+    }
+    .panel {
+  background: linear-gradient(135deg, #1f2547, #2a2f5a);
+  border-radius: 16px;
+  padding: 20px;
+}
+
+/* Activity item */
+.activity-item {
+  background: rgba(255,255,255,0.05);
+  border-radius: 10px;
+  padding: 12px 15px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.activity-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.dot-green { background: #22c55e; }
+.dot-blue { background: #3b82f6; }
+.dot-yellow { background: #facc15; }
+
+/* Quick stats rows */
+.quick-stat {
+  background: rgba(255,255,255,0.05);
+  border-radius: 10px;
+  padding: 12px 15px;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+}

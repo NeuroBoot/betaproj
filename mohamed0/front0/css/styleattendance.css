@@ -1,0 +1,164 @@
+
+    body{
+      background:linear-gradient(135deg,#0f1224,#15193a);
+      color:#fff;
+      min-height:100vh;
+      font-family:system-ui,-apple-system;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      background: linear-gradient(180deg, #0c0f2d, #11164a);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .brand {
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+
+    .user-box {
+      background: linear-gradient(135deg, #1f2547, #2a2f5a);
+      border-radius: 14px;
+      padding: 14px;
+      margin: 18px 0 24px;
+    }
+
+    .user-box small {
+      color: #aab0ff;
+      font-size: 13px;
+    }
+
+    .user-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+      margin: 4px 0;
+    }
+
+    .sidebar .nav-link {
+      color: #bfc4ff;
+      margin-bottom: 10px;
+      border-radius: 10px;
+      padding: 10px 14px;
+    }
+
+    .sidebar .nav-link.active,
+    .sidebar .nav-link:hover {
+      background: #2b5cff;
+      color: #fff;
+    }
+
+    /* Panel */
+    .panel{
+      background:linear-gradient(135deg,#1e2345,#2c2f6a);
+      border-radius:24px;
+      padding:26px;
+      margin-bottom:26px;
+    }
+
+    /* Inputs */
+    .form-control,
+    .form-select{
+      background:rgba(255,255,255,0.12);
+      border:1px solid rgba(255,255,255,0.18);
+      color:#fff;
+      border-radius:12px;
+    }
+
+    .form-control::placeholder{
+      color:#c7c9ff;
+    }
+
+    .form-control:focus,
+    .form-select:focus{
+      outline:none;
+      box-shadow:none;
+      border-color:#4f46e5;
+      background:rgba(255,255,255,0.15);
+      color:#fff;
+    }
+
+    /* Header */
+    .attendance-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:18px;
+    }
+
+    .search-input{
+      background:rgba(255,255,255,0.12);
+      border:1px solid rgba(255,255,255,0.18);
+      border-radius:12px;
+      padding:8px 14px;
+      color:#fff;
+      width:220px;
+    }
+
+    /* Table */
+    .attendance-table{
+      width:100%;
+      border-collapse:collapse;
+      color:#e5e7eb;
+    }
+
+    .attendance-table thead th{
+      padding:14px 10px;
+      font-size:14px;
+      font-weight:600;
+      color:#dbe0ff;
+      border-bottom:1px solid rgba(255,255,255,0.12);
+    }
+
+    .attendance-table tbody td{
+      padding:14px 10px;
+      border-bottom:1px solid rgba(255,255,255,0.06);
+    }
+
+    .attendance-table tbody tr:hover{
+      background:rgba(255,255,255,0.03);
+    }
+
+    /* Status */
+    .status{
+      padding:6px 16px;
+      border-radius:999px;
+      font-size:13px;
+      font-weight:500;
+      display:inline-block;
+    }
+
+    .present{ background:#14532d; color:#4ade80; }
+    .absent{ background:#581c1c; color:#f87171; }
+    .late{ background:#713f12; color:#facc15; }
+
+    .action-cell{ text-align:right; }
+
+    .action-select{
+      background:rgba(255,255,255,0.12);
+      border:1px solid rgba(255,255,255,0.18);
+      border-radius:10px;
+      color:#fff;
+      padding:6px 12px;
+    }
+
+    /* Buttons */
+    .load-btn{
+      background:linear-gradient(135deg,#2563eb,#4f46e5);
+      border:none;
+      color:#fff;
+      border-radius:14px;
+      padding:10px 30px;
+      width:180px;
+    }
+
+    .save-btn{
+      margin-top:22px;
+      background:linear-gradient(135deg,#2563eb,#4f46e5);
+      border:none;
+      color:#fff;
+      border-radius:14px;
+      padding:10px 30px;
+    }

@@ -1,0 +1,144 @@
+
+/*  GLOBAL  */
+body {
+  background: linear-gradient(135deg, #0f1224, #15193a);
+  color: #e5e7eb;
+  min-height: 100vh;
+  font-family: "Segoe UI", sans-serif;
+}
+
+/*  SIDEBAR  */
+
+    .sidebar {
+      background: linear-gradient(180deg, #0c0f2d, #11164a);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .brand {
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+
+    .user-box {
+      background: linear-gradient(135deg, #1f2547, #2a2f5a);
+      border-radius: 14px;
+      padding: 14px;
+      margin: 18px 0 24px;
+    }
+
+    .user-box small {
+      color: #aab0ff;
+      font-size: 13px;
+    }
+
+    .user-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+      margin: 4px 0;
+    }
+
+    .sidebar .nav-link {
+      color: #bfc4ff;
+      margin-bottom: 10px;
+      border-radius: 10px;
+      padding: 10px 14px;
+    }
+
+    .sidebar .nav-link.active,
+    .sidebar .nav-link:hover {
+      background: #2b5cff;
+      color: #fff;
+    }
+/* STAT CARDS */
+.stat-card {
+  border-radius: 18px;
+  padding: 20px;
+  background: linear-gradient(135deg, #1e3a8a, #1e40af);
+}
+
+.stat-green {
+  background: linear-gradient(135deg, #064e3b, #065f46);
+}
+
+.stat-purple {
+  background: linear-gradient(135deg, #3b1d5a, #5b2b82);
+}
+
+.stat-orange {
+  background: linear-gradient(135deg, #4a2c2a, #78350f);
+}
+
+.stat-card h6 { color: #c7d2fe; }
+.stat-card h2 { color: #fff; }
+.stat-card small { color: #93c5fd; }
+
+/* SECTION CARD  */
+.section-card {
+  background: linear-gradient(135deg, #1f2937, #273549);
+  border-radius: 18px;
+  padding: 20px;
+}
+
+/*CLASS CARDS  */
+.class-card {
+  background: linear-gradient(135deg, #1f2937, #334155);
+  border-radius: 16px;
+  padding: 18px;
+  margin-bottom: 15px;
+  position: relative;
+}
+
+.class-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 5px;
+  height: 100%;
+  border-radius: 16px 0 0 16px;
+  background: #22c55e;
+}
+
+.class-inprogress::before { background: #3b82f6; }
+.class-upcoming::before { background: #9ca3af; }
+
+.badge-custom {
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-weight: 500;
+}
+
+/* ACTIVITY  */
+.activity-item {
+  display: flex;
+  gap: 12px;
+  background: rgba(255,255,255,0.04);
+  padding: 14px;
+  border-radius: 14px;
+  margin-bottom: 12px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-top: 7px;
+}
+
+.dot-green { background: #22c55e; }
+.dot-blue { background: #3b82f6; }
+.dot-yellow { background: #facc15; }
+
+/* QUICK STATS  */
+.stat-line {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.05);
+  margin-bottom: 12px;
+}
+
+.stat-line span { color: #c7d2fe; }
