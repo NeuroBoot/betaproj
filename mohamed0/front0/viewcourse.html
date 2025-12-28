@@ -5,45 +5,55 @@
   <title>FaceMark | My Courses</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- Bootstrap -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Font Awesome -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 
   <style>
     body {
+      margin: 0;
       background: linear-gradient(135deg, #0b1020, #1b1f3b);
       color: #fff;
       min-height: 100vh;
+      display: flex; 
+      font-family: "Segoe UI", sans-serif;
     }
 
-    /* Sidebar */
+    /* ========== SIDEBAR  ========== */
     .sidebar {
-      width: 260px;
-      background: linear-gradient(180deg, #0a0f2c, #10163a);
+      width: 240px;
+      background: linear-gradient(180deg, #0c0f2d, #11164a);
       min-height: 100vh;
-      position: fixed;
-      padding: 25px 20px;
+      padding: 20px;
+      flex-shrink: 0;
     }
 
-    .sidebar a {
-      color: #cfd3ff;
-      text-decoration: none;
-      display: block;
-      padding: 12px 15px;
+    .user-box {
+      background: linear-gradient(135deg, #1f2547, #2a2f5a);
+      border-radius: 14px;
+      padding: 14px;
+      margin: 18px 0 24px;
+    }
+
+    .user-box small { color: #aab0ff; font-size: 13px; }
+    .user-name { font-size: 16px; font-weight: 600; color: #fff; }
+
+    .sidebar .nav-link {
+      color: #bfc4ff;
+      margin-bottom: 10px;
       border-radius: 10px;
-      margin-bottom: 6px;
+      padding: 10px 14px;
     }
 
-    .sidebar a.active,
-    .sidebar a:hover {
-      background: #2563eb;
+    .sidebar .nav-link.active,
+    .sidebar .nav-link:hover {
+      background: #2b5cff;
       color: #fff;
     }
 
-    /* Content */
+    /* ========== CONTENT ========== */
     .content {
-      margin-left: 280px;
+      flex: 1;              
       padding: 30px;
     }
 
@@ -53,12 +63,18 @@
       padding: 25px;
     }
 
-    /* Course Card */
+    /* ========== COURSE CARD ========== */
     .course-card {
       background: rgba(255,255,255,0.08);
       border-radius: 18px;
       padding: 22px;
       height: 100%;
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+
+    .course-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
     }
 
     .credits-badge {
@@ -90,23 +106,25 @@
 
 <!-- SIDEBAR -->
 <div class="sidebar">
-  <h4 class="mb-4">
-    <i class="fa-solid fa-face-smile text-primary"></i> FaceMark
-    <small class="d-block fs-6 text-muted">Student Portal</small>
-  </h4>
+  <h5 class="mb-4"><i class="bi bi-eye"></i> FACEMARK</h5>
+  <p class="small text-muted">Student Portal</p>
 
-  <p class="text-muted mb-4">Welcome,<br><strong>ss</strong></p>
+  <div class="user-box">
+    <small>Welcome,</small>
+    <div class="user-name">سَس</div>
+    <small>Student Portal</small>
+  </div>
 
-  <a><i class="fa-solid fa-chart-pie me-2"></i> Dashboard</a>
-  <a class="active"><i class="fa-solid fa-book-open me-2"></i> View Courses</a>
-  <a><i class="fa-solid fa-chart-line me-2"></i> Charts & Reports</a>
-  <a><i class="fa-solid fa-bell me-2"></i> Alerts</a>
-  <a><i class="fa-solid fa-file-export me-2"></i> Export</a>
-  <a><i class="fa-solid fa-triangle-exclamation me-2"></i> Report a Problem</a>
+  <ul class="nav flex-column">
+    <li class="nav-item"><a class="nav-link" href="studentdashboard.html"><i class="bi bi-grid"></i> Dashboard</a></li>
+    <li class="nav-item"><a class="nav-link active" href="#"><i class="fa-solid fa-book me-2"></i> View Courses</a></li>
+    <li class="nav-item"><a class="nav-link" href="studentcharts.html"><i class="bi bi-bar-chart"></i> Charts & Reports</a></li>
+    <li class="nav-item"><a class="nav-link" href="alertstudent.html"><i class="bi bi-bell"></i> Alerts</a></li>
+    <li class="nav-item"><a class="nav-link" href="studentexport.html"><i class="bi bi-download"></i> Export</a></li>
+    <li class="nav-item"><a class="nav-link" href="reportstudent.html"><i class="fa-solid fa-triangle-exclamation me-2"></i> Report a Problem</a></li>
+  </ul>
 
   <hr class="text-secondary">
-
-  <a><i class="fa-solid fa-gear me-2"></i> Settings</a>
   <a><i class="fa-solid fa-right-from-bracket me-2"></i> Sign Out</a>
 </div>
 
@@ -117,108 +135,76 @@
     <h4 class="mb-4">My Courses</h4>
 
     <div class="row g-4">
-
+      <!-- كل الكورسات زي ما هي بالظبط -->
       <!-- Mathematics -->
       <div class="col-md-6">
         <div class="course-card">
-          <div class="d-flex justify-content-between align-items-start mb-2">
+          <div class="d-flex justify-content-between mb-2">
             <h5>Mathematics</h5>
             <span class="credits-badge">3 Credits</span>
           </div>
-
-          <p class="text-soft mb-1">Dr. Ahmed Hassan</p>
-
-          <div class="d-flex justify-content-between text-soft mb-2">
-            <span>Schedule:</span>
-            <span>Mon, Wed 08:00 - 10:00</span>
+          <p class="text-soft">Dr. Ahmed Hassan</p>
+          <div class="d-flex justify-content-between text-soft">
+            <span>Schedule:</span><span>Mon, Wed 08:00 - 10:00</span>
           </div>
-
-          <div class="d-flex justify-content-between align-items-center mb-1">
-            <span class="text-soft">Attendance:</span>
-            <span class="text-success">95%</span>
+          <div class="d-flex justify-content-between">
+            <span class="text-soft">Attendance:</span><span class="text-success">95%</span>
           </div>
-
-          <div class="progress">
-            <div class="progress-bar bg-success" style="width:95%"></div>
-          </div>
+          <div class="progress"><div class="progress-bar bg-success" style="width:95%"></div></div>
         </div>
       </div>
 
       <!-- Physics -->
       <div class="col-md-6">
         <div class="course-card">
-          <div class="d-flex justify-content-between align-items-start mb-2">
+          <div class="d-flex justify-content-between mb-2">
             <h5>Physics</h5>
             <span class="credits-badge">4 Credits</span>
           </div>
-
-          <p class="text-soft mb-1">Dr. Sara Mohamed</p>
-
-          <div class="d-flex justify-content-between text-soft mb-2">
-            <span>Schedule:</span>
-            <span>Tue, Thu 10:30 - 12:30</span>
+          <p class="text-soft">Dr. Sara Mohamed</p>
+          <div class="d-flex justify-content-between text-soft">
+            <span>Schedule:</span><span>Tue, Thu 10:30 - 12:30</span>
           </div>
-
-          <div class="d-flex justify-content-between align-items-center mb-1">
-            <span class="text-soft">Attendance:</span>
-            <span class="text-info">88%</span>
+          <div class="d-flex justify-content-between">
+            <span class="text-soft">Attendance:</span><span class="text-info">88%</span>
           </div>
-
-          <div class="progress">
-            <div class="progress-bar bg-primary" style="width:88%"></div>
-          </div>
+          <div class="progress"><div class="progress-bar bg-primary" style="width:88%"></div></div>
         </div>
       </div>
 
       <!-- Chemistry -->
       <div class="col-md-6">
         <div class="course-card">
-          <div class="d-flex justify-content-between align-items-start mb-2">
+          <div class="d-flex justify-content-between mb-2">
             <h5>Chemistry</h5>
             <span class="credits-badge">3 Credits</span>
           </div>
-
-          <p class="text-soft mb-1">Dr. Omar Ali</p>
-
-          <div class="d-flex justify-content-between text-soft mb-2">
-            <span>Schedule:</span>
-            <span>Mon, Wed 13:00 - 15:00</span>
+          <p class="text-soft">Dr. Omar Ali</p>
+          <div class="d-flex justify-content-between text-soft">
+            <span>Schedule:</span><span>Mon, Wed 13:00 - 15:00</span>
           </div>
-
-          <div class="d-flex justify-content-between align-items-center mb-1">
-            <span class="text-soft">Attendance:</span>
-            <span class="text-success">92%</span>
+          <div class="d-flex justify-content-between">
+            <span class="text-soft">Attendance:</span><span class="text-success">92%</span>
           </div>
-
-          <div class="progress">
-            <div class="progress-bar bg-success" style="width:92%"></div>
-          </div>
+          <div class="progress"><div class="progress-bar bg-success" style="width:92%"></div></div>
         </div>
       </div>
 
       <!-- Computer Science -->
       <div class="col-md-6">
         <div class="course-card">
-          <div class="d-flex justify-content-between align-items-start mb-2">
+          <div class="d-flex justify-content-between mb-2">
             <h5>Computer Science</h5>
             <span class="credits-badge">4 Credits</span>
           </div>
-
-          <p class="text-soft mb-1">Dr. Fatima Mahmoud</p>
-
-          <div class="d-flex justify-content-between text-soft mb-2">
-            <span>Schedule:</span>
-            <span>Tue, Thu 14:00 - 16:00</span>
+          <p class="text-soft">Dr. Fatima Mahmoud</p>
+          <div class="d-flex justify-content-between text-soft">
+            <span>Schedule:</span><span>Tue, Thu 14:00 - 16:00</span>
           </div>
-
-          <div class="d-flex justify-content-between align-items-center mb-1">
-            <span class="text-soft">Attendance:</span>
-            <span class="text-success">90%</span>
+          <div class="d-flex justify-content-between">
+            <span class="text-soft">Attendance:</span><span class="text-success">90%</span>
           </div>
-
-          <div class="progress">
-            <div class="progress-bar bg-success" style="width:90%"></div>
-          </div>
+          <div class="progress"><div class="progress-bar bg-success" style="width:90%"></div></div>
         </div>
       </div>
 

@@ -8,6 +8,7 @@
 <!-- Bootstrap -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
 <style>
 /* ========== GLOBAL ========== */
 body {
@@ -18,49 +19,44 @@ body {
 }
 
 /* ========== SIDEBAR ========== */
-/* Sidebar */
-    .sidebar {
-      background: linear-gradient(180deg, #0c0f2d, #11164a);
-      min-height: 100vh;
-      padding: 20px;
-    }
+.sidebar {
+  background: linear-gradient(180deg, #0c0f2d, #11164a);
+  min-height: 100vh;
+  padding: 20px;
+}
 
-    .brand {
-      font-weight: 600;
-      letter-spacing: 1px;
-    }
+.user-box {
+  background: linear-gradient(135deg, #1f2547, #2a2f5a);
+  border-radius: 14px;
+  padding: 14px;
+  margin: 18px 0 24px;
+}
 
-    .user-box {
-      background: linear-gradient(135deg, #1f2547, #2a2f5a);
-      border-radius: 14px;
-      padding: 14px;
-      margin: 18px 0 24px;
-    }
+.user-box small {
+  color: #aab0ff;
+  font-size: 13px;
+}
 
-    .user-box small {
-      color: #aab0ff;
-      font-size: 13px;
-    }
+.user-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  margin: 4px 0;
+}
 
-    .user-name {
-      font-size: 16px;
-      font-weight: 600;
-      color: #fff;
-      margin: 4px 0;
-    }
+.sidebar .nav-link {
+  color: #bfc4ff;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  padding: 10px 14px;
+}
 
-    .sidebar .nav-link {
-      color: #bfc4ff;
-      margin-bottom: 10px;
-      border-radius: 10px;
-      padding: 10px 14px;
-    }
+.sidebar .nav-link.active,
+.sidebar .nav-link:hover {
+  background: #2b5cff;
+  color: #fff;
+}
 
-    .sidebar .nav-link.active,
-    .sidebar .nav-link:hover {
-      background: #2b5cff;
-      color: #fff;
-    }
 /* ========== STAT CARDS ========== */
 .stat-card {
   border-radius: 18px;
@@ -68,17 +64,9 @@ body {
   background: linear-gradient(135deg, #1e3a8a, #1e40af);
 }
 
-.stat-green {
-  background: linear-gradient(135deg, #064e3b, #065f46);
-}
-
-.stat-purple {
-  background: linear-gradient(135deg, #3b1d5a, #5b2b82);
-}
-
-.stat-orange {
-  background: linear-gradient(135deg, #4a2c2a, #78350f);
-}
+.stat-green { background: linear-gradient(135deg, #064e3b, #065f46); }
+.stat-purple { background: linear-gradient(135deg, #3b1d5a, #5b2b82); }
+.stat-orange { background: linear-gradient(135deg, #4a2c2a, #78350f); }
 
 .stat-card h6 { color: #c7d2fe; }
 .stat-card h2 { color: #fff; }
@@ -91,55 +79,109 @@ body {
   padding: 20px;
 }
 
-/* ========== CLASS CARDS ========== */
-.class-card {
-  background: linear-gradient(135deg, #1f2937, #334155);
-  border-radius: 16px;
-  padding: 18px;
-  margin-bottom: 15px;
+/* ========== TODAY CLASSES ========== */
+.today-card {
+  background: linear-gradient(135deg, #1f2937, #273549);
+  border-radius: 18px;
+  padding: 20px 22px;
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   position: relative;
 }
 
-.class-card::before {
+.today-card::before {
   content: "";
   position: absolute;
   left: 0;
   top: 0;
-  width: 5px;
+  width: 6px;
   height: 100%;
-  border-radius: 16px 0 0 16px;
+  border-radius: 18px 0 0 18px;
   background: #22c55e;
 }
 
-.class-inprogress::before { background: #3b82f6; }
-.class-upcoming::before { background: #9ca3af; }
+.today-inprogress::before { background: #3b82f6; }
+.today-upcoming::before { background: #9ca3af; }
 
-.badge-custom {
-  border-radius: 20px;
+.today-info h6 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.today-info small {
+  color: #c7d2fe;
+  font-size: 13px;
+}
+
+.today-status {
+  text-align: right;
+}
+
+.today-status .status {
+  display: inline-block;
   padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
   font-weight: 500;
 }
 
-/* ========== ACTIVITY ========== */
-.activity-item {
-  display: flex;
-  gap: 12px;
-  background: rgba(255,255,255,0.04);
-  padding: 14px;
-  border-radius: 14px;
-  margin-bottom: 12px;
+.status-completed {
+  background: rgba(34,197,94,0.15);
+  color: #22c55e;
 }
 
-.dot {
-  width: 8px;
-  height: 8px;
+.status-progress {
+  background: rgba(59,130,246,0.15);
+  color: #60a5fa;
+}
+
+.status-upcoming {
+  background: rgba(156,163,175,0.15);
+  color: #d1d5db;
+}
+
+.today-status small {
+  display: block;
+  margin-top: 4px;
+  color: #9ca3af;
+  font-size: 12px;
+}
+
+/* ========== RECENT ACTIVITY (NEW) ========== */
+.activity-card {
+  background: linear-gradient(135deg, #1f2547, #2a2f5a);
+  border-radius: 16px;
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+.activity-dot {
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
-  margin-top: 7px;
 }
 
 .dot-green { background: #22c55e; }
 .dot-blue { background: #3b82f6; }
 .dot-yellow { background: #facc15; }
+
+.activity-text div {
+  font-size: 14px;
+  color: #fff;
+  font-weight: 500;
+}
+
+.activity-text small {
+  color: #9ca3af;
+  font-size: 12px;
+}
 
 /* ========== QUICK STATS ========== */
 .stat-line {
@@ -160,16 +202,17 @@ body {
 <div class="container-fluid">
   <div class="row">
 
-     <!-- Sidebar -->
+    <!-- Sidebar -->
     <div class="col-md-2 sidebar">
       <h5 class="mb-4"><i class="bi bi-eye"></i> FACEMARK</h5>
       <p class="small text-muted">Staff Portal</p>
-<!-- Welcome Box -->
+
       <div class="user-box">
         <small>Welcome,</small>
         <div class="user-name">سَس</div>
-        <small>Staff Portal</small>
+        <small class="custom">Staff Portal</small>
       </div>
+
       <ul class="nav flex-column">
         <li class="nav-item"><a class="nav-link active" href="#"><i class="bi bi-grid"></i> Dashboard</a></li>
         <li class="nav-item"><a class="nav-link" href="manualattendance.html"><i class="bi bi-person-check"></i> Manual Attendance</a></li>
@@ -177,7 +220,6 @@ body {
         <li class="nav-item"><a class="nav-link" href="charts.html"><i class="bi bi-bar-chart"></i> Charts & Reports</a></li>
         <li class="nav-item"><a class="nav-link" href="export.html"><i class="bi bi-download"></i> Export</a></li>
         <li class="nav-item"><a class="nav-link" href="alerts.html"><i class="bi bi-bell"></i> Alerts</a></li>
-        <li class="nav-item mt-5"><a class="nav-link text-danger" href="#"><i class="bi bi-box-arrow-left"></i> Sign Out</a></li>
       </ul>
     </div>
 
@@ -186,69 +228,45 @@ body {
 
       <!-- STATS -->
       <div class="row g-4 mb-4">
-        <div class="col-md-3">
-          <div class="stat-card">
-            <h6>Total Students</h6>
-            <h2>856</h2>
-            <small>Across all courses</small>
-          </div>
-        </div>
-
-        <div class="col-md-3">
-          <div class="stat-card stat-green">
-            <h6>Average Attendance</h6>
-            <h2>87%</h2>
-            <small>This semester</small>
-          </div>
-        </div>
-
-        <div class="col-md-3">
-          <div class="stat-card stat-purple">
-            <h6>Classes Today</h6>
-            <h2>8</h2>
-            <small>4 completed</small>
-          </div>
-        </div>
-
-        <div class="col-md-3">
-          <div class="stat-card stat-orange">
-            <h6>Pending Reviews</h6>
-            <h2>12</h2>
-            <small>Needs attention</small>
-          </div>
-        </div>
+        <div class="col-md-3"><div class="stat-card"><h6>Total Students</h6><h2>856</h2><small>Across all courses</small></div></div>
+        <div class="col-md-3"><div class="stat-card stat-green"><h6>Average Attendance</h6><h2>87%</h2><small>This semester</small></div></div>
+        <div class="col-md-3"><div class="stat-card stat-purple"><h6>Classes Today</h6><h2>8</h2><small>4 completed</small></div></div>
+        <div class="col-md-3"><div class="stat-card stat-orange"><h6>Pending Reviews</h6><h2>12</h2><small>Needs attention</small></div></div>
       </div>
 
       <!-- TODAY CLASSES -->
       <h4 class="mb-3">Today's Classes</h4>
 
-      <div class="class-card">
-        <div class="d-flex justify-content-between">
-          <div>
-            <h6>Mathematics - Section A</h6>
-            <small>08:00 - 10:00 | Room 201</small>
-          </div>
-          <span class="badge bg-success badge-custom">Completed<br>95% attended</span>
+      <div class="today-card">
+        <div class="today-info">
+          <h6>Mathematics - Section A</h6>
+          <small>08:00 - 10:00 | Room 201</small>
+        </div>
+        <div class="today-status">
+          <span class="status status-completed">Completed</span>
+          <small>95% attended</small>
         </div>
       </div>
 
-      <div class="class-card class-inprogress">
-        <div class="d-flex justify-content-between">
-          <div>
-            <h6>Physics - Section B</h6>
-            <small>10:30 - 12:30 | Lab 204</small>
-          </div>
-          <span class="badge bg-primary badge-custom">In Progress</span>
+      <div class="today-card today-inprogress">
+        <div class="today-info">
+          <h6>Physics - Section B</h6>
+          <small>10:30 - 12:30 | Lab 204</small>
+        </div>
+        <div class="today-status">
+          <span class="status status-progress">In Progress</span>
+          <small>Currently active</small>
         </div>
       </div>
 
-      <div class="class-card class-upcoming">
-        <div class="d-flex justify-content-between">
-          <div>
-            <h6>Chemistry - Section A</h6>
-            <small>13:00 - 15:00 | Lab 305</small>
-          </div>
-          <span class="badge bg-secondary badge-custom">Upcoming<br>45 min</span>
+      <div class="today-card today-upcoming">
+        <div class="today-info">
+          <h6>Chemistry - Section A</h6>
+          <small>13:00 - 15:00 | Lab 305</small>
+        </div>
+        <div class="today-status">
+          <span class="status status-upcoming">Upcoming</span>
+          <small>Starts in 45 min</small>
         </div>
       </div>
 
@@ -258,27 +276,27 @@ body {
           <div class="section-card">
             <h5 class="mb-4">Recent Activity</h5>
 
-            <div class="activity-item">
-              <span class="dot dot-green"></span>
-              <div>
+            <div class="activity-card">
+              <span class="activity-dot dot-green"></span>
+              <div class="activity-text">
                 <div>Attendance marked: Math Section A</div>
-                <small class="text-muted">2 hours ago</small>
+                <small>2 hours ago</small>
               </div>
             </div>
 
-            <div class="activity-item">
-              <span class="dot dot-blue"></span>
-              <div>
+            <div class="activity-card">
+              <span class="activity-dot dot-blue"></span>
+              <div class="activity-text">
                 <div>New student enrolled</div>
-                <small class="text-muted">3 hours ago</small>
+                <small>3 hours ago</small>
               </div>
             </div>
 
-            <div class="activity-item">
-              <span class="dot dot-yellow"></span>
-              <div>
+            <div class="activity-card">
+              <span class="activity-dot dot-yellow"></span>
+              <div class="activity-text">
                 <div>Low attendance alert sent</div>
-                <small class="text-muted">5 hours ago</small>
+                <small>5 hours ago</small>
               </div>
             </div>
 
@@ -288,7 +306,6 @@ body {
         <div class="col-md-6">
           <div class="section-card">
             <h5 class="mb-4">Quick Stats</h5>
-
             <div class="stat-line"><span>Active Courses</span><strong>4</strong></div>
             <div class="stat-line"><span>Total Sections</span><strong>8</strong></div>
             <div class="stat-line"><span>Classes This Week</span><strong class="text-success">24</strong></div>

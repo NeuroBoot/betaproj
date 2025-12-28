@@ -5,11 +5,86 @@
   <title>Manual Attendance | FACEMARK</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- Bootstrap (layout فقط) -->
+  <!-- Bootstrap (موجود لكن غير مستخدم في Manual Attendance) -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 
+  <!-- Existing CSS -->
   <link rel="stylesheet" href="css/styleattendance.css">
+
+  <!-- PURE CSS for Manual Attendance ONLY -->
+  <style>
+    /* ===== Manual Attendance – PURE CSS (ONLY) ===== */
+    .manual-card {
+      background: linear-gradient(135deg, #1f2547, #2a2f5a);
+      border-radius: 22px;
+      padding: 26px 28px;
+      margin-bottom: 30px;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .manual-card h4 {
+      margin-bottom: 22px;
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    .manual-card .form-label {
+      color: #c7d2fe;
+      font-size: 13px;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .manual-input {
+      width: 100%;
+      height: 46px;
+      padding: 10px 14px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: #ffffff;
+      font-size: 14px;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+    }
+
+    .manual-input:focus {
+      outline: none;
+      border-color: #4f46e5;
+      background: rgba(255,255,255,0.1);
+    }
+
+    /* Custom arrow for select */
+    select.manual-input {
+      background-image:
+        linear-gradient(45deg, transparent 50%, #c7d2fe 50%),
+        linear-gradient(135deg, #c7d2fe 50%, transparent 50%);
+      background-position:
+        calc(100% - 18px) 19px,
+        calc(100% - 13px) 19px;
+      background-size: 5px 5px, 5px 5px;
+      background-repeat: no-repeat;
+    }
+/* Fix dropdown options color */
+select.manual-input option {
+  background-color: #1f2547;
+  color: #ffffff;
+}
+
+/* Option hover (بعض المتصفحات) */
+select.manual-input option:hover {
+  background-color: #2a2f5a;
+}
+
+    /* Date icon */
+    .manual-input::-webkit-calendar-picker-indicator {
+      filter: invert(1);
+      opacity: 0.7;
+      cursor: pointer;
+    }
+  </style>
 </head>
 
 <body>
@@ -17,19 +92,20 @@
 <div class="container-fluid">
   <div class="row">
 
-     <!-- Sidebar -->
+    <!-- Sidebar (UNCHANGED) -->
     <div class="col-md-2 sidebar">
       <h5 class="mb-4"><i class="bi bi-eye"></i> FACEMARK</h5>
       <p class="small text-muted">Staff Portal</p>
-<!-- Welcome Box -->
+
       <div class="user-box">
         <small>Welcome,</small>
         <div class="user-name">سَس</div>
         <small>Staff Portal</small>
       </div>
+
       <ul class="nav flex-column">
         <li class="nav-item"><a class="nav-link" href="staffdashboard.html"><i class="bi bi-grid"></i> Dashboard</a></li>
-        <li class="nav-item"><a class="nav-link  active" href="#"><i class="bi bi-person-check"></i> Manual Attendance</a></li>
+        <li class="nav-item"><a class="nav-link active" href="#"><i class="bi bi-person-check"></i> Manual Attendance</a></li>
         <li class="nav-item"><a class="nav-link" href="face-capture.html"><i class="bi bi-camera"></i> Face Capture</a></li>
         <li class="nav-item"><a class="nav-link" href="charts.html"><i class="bi bi-bar-chart"></i> Charts & Reports</a></li>
         <li class="nav-item"><a class="nav-link" href="export.html"><i class="bi bi-download"></i> Export</a></li>
@@ -41,45 +117,41 @@
     <!-- Main -->
     <div class="col-md-10 p-4">
 
-      <!-- Filters -->
-      <div class="panel">
-        <h4 class="mb-4">Manual Attendance</h4>
+      <!-- Manual Attendance (PURE CSS ONLY) -->
+      <div class="manual-card">
+        <h4>Manual Attendance</h4>
 
-        <!-- Row 1: Name + ID -->
-        <div class="row g-3 mb-3">
-          <div class="col-md-6">
-            <label class="form-label">Name</label>
-            <input type="text" class="form-control" placeholder="Write the name">
-          </div>
-          <div class="col-md-6">
-            <label class="form-label">Student ID</label>
-            <input type="number" class="form-control" placeholder="Write the ID">
-          </div>
-        </div>
-
-        <!-- Row 2: Course + Date -->
-        <div class="row g-3 mb-4">
-          <div class="col-md-6">
+        <div class="row g-4 align-items-end">
+          <div class="col-md-4">
             <label class="form-label">Course</label>
-            <select class="form-select">
-              <option>Mathematics</option>
+            <select class="manual-input">
+              <option selected>Mathematics</option>
               <option>Physics</option>
               <option>Chemistry</option>
             </select>
           </div>
-          <div class="col-md-6">
-            <label class="form-label">Date</label>
-            <input type="date" class="form-control">
-          </div>
-        </div>
 
-        <!-- Row 3: Button -->
-        <div class="text-end">
-          <button class="load-btn">Load Attendance</button>
+          <div class="col-md-4">
+            <label class="form-label">Section</label>
+            <select class="manual-input">
+              <option selected>Section A</option>
+              <option>Section B</option>
+              <option>Section C</option>
+            </select>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Date</label>
+            <input type="date" class="manual-input">
+          </div>
+
+          <div class="col-md-12">
+            <button class="load-btn">Load Attendance</button>
+          </div>
         </div>
       </div>
 
-      <!-- Table -->
+      <!-- Attendance Table (UNCHANGED) -->
       <div class="panel">
         <div class="attendance-header">
           <h5>Attendance Record</h5>
@@ -102,8 +174,8 @@
               <td>Ahmed Hassan</td>
               <td><span class="status present">Present</span></td>
               <td>08:15 AM</td>
-              <td class="action-cell">
-                <select class="action-select">
+              <td>
+                <select class="manual-input">
                   <option selected>Present</option>
                   <option>Absent</option>
                   <option>Late</option>

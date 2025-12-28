@@ -9,7 +9,58 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 
+  <!-- Existing CSS -->
   <link rel="stylesheet" href="css/stylealert.css">
+
+  <!-- Alert Settings ONLY (NEW) -->
+  <style>
+    /* ===== Alert Settings (Exact Match Only) ===== */
+    .alert-settings-card {
+      background: linear-gradient(135deg, #1f2547, #2a2f5a);
+      border-radius: 22px;
+      padding: 26px 28px;
+      margin-top: 30px;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .alert-settings-card h4 {
+      margin-bottom: 22px;
+      color: #ffffff;
+      font-weight: 600;
+    }
+
+    .alert-setting {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 14px;
+      padding: 16px 18px;
+      margin-bottom: 14px;
+    }
+
+    .alert-setting input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      margin-top: 4px;
+      accent-color: #3b82f6;
+      cursor: pointer;
+    }
+
+    .alert-setting-text strong {
+      display: block;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .alert-setting-text small {
+      display: block;
+      color: #9ca3af;
+      font-size: 13px;
+      margin-top: 2px;
+    }
+  </style>
 </head>
 
 <body>
@@ -17,16 +68,17 @@
 <div class="container-fluid">
   <div class="row">
 
-     <!-- Sidebar -->
+    <!-- Sidebar (UNCHANGED) -->
     <div class="col-md-2 sidebar">
       <h5 class="mb-4"><i class="bi bi-eye"></i> FACEMARK</h5>
       <p class="small text-muted">Staff Portal</p>
-<!-- Welcome Box -->
+
       <div class="user-box">
         <small>Welcome,</small>
         <div class="user-name">سَس</div>
         <small>Staff Portal</small>
       </div>
+
       <ul class="nav flex-column">
         <li class="nav-item"><a class="nav-link" href="staffdashboard.html"><i class="bi bi-grid"></i> Dashboard</a></li>
         <li class="nav-item"><a class="nav-link" href="manualattendance.html"><i class="bi bi-person-check"></i> Manual Attendance</a></li>
@@ -41,7 +93,7 @@
     <!-- Main Content -->
     <div class="col-md-10 p-4">
 
-      <!-- Alerts -->
+      <!-- Alerts (UNCHANGED) -->
       <div class="panel">
         <h3 class="mb-4">Alerts & Notifications</h3>
 
@@ -90,32 +142,32 @@
         </div>
       </div>
 
-      <!-- Alert Settings -->
-      <div class="panel">
-        <h4 class="mb-4">Alert Settings</h4>
+      <!-- Alert Settings (ONLY SECTION CHANGED) -->
+      <div class="alert-settings-card">
+        <h4>Alert Settings</h4>
 
-        <div class="setting-item form-check">
-          <input class="form-check-input" type="checkbox" checked>
-          <label class="form-check-label ms-2">
-            <strong>Low Attendance Warnings</strong><br>
-            <small class="text-muted">Alert when student attendance drops below 75%</small>
-          </label>
+        <div class="alert-setting">
+          <input type="checkbox" checked>
+          <div class="alert-setting-text">
+            <strong>Low Attendance Warnings</strong>
+            <small>Alert when student attendance drops below 75%</small>
+          </div>
         </div>
 
-        <div class="setting-item form-check">
-          <input class="form-check-input" type="checkbox" checked>
-          <label class="form-check-label ms-2">
-            <strong>System Updates</strong><br>
-            <small class="text-muted">Notifications about system improvements and updates</small>
-          </label>
+        <div class="alert-setting">
+          <input type="checkbox" checked>
+          <div class="alert-setting-text">
+            <strong>System Updates</strong>
+            <small>Notifications about system improvements and updates</small>
+          </div>
         </div>
 
-        <div class="setting-item form-check">
-          <input class="form-check-input" type="checkbox" checked>
-          <label class="form-check-label ms-2">
-            <strong>Technical Issues</strong><br>
-            <small class="text-muted">Alert for camera or system malfunctions</small>
-          </label>
+        <div class="alert-setting">
+          <input type="checkbox" checked>
+          <div class="alert-setting-text">
+            <strong>Technical Issues</strong>
+            <small>Alert for camera or system malfunctions</small>
+          </div>
         </div>
       </div>
 

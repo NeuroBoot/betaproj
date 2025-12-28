@@ -5,135 +5,335 @@
   <title>FaceMark | Student Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- Bootstrap -->
+  <!-- Bootstrap (used elsewhere, NOT in Today Schedule) -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Font Awesome -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 
-  <link rel="stylesheet" href="css/studentdashboard.css">
+<style>
+/* ========== GLOBAL ========== */
+body {
+  background: linear-gradient(135deg, #0f1224, #15193a);
+  color: #e5e7eb;
+  min-height: 100vh;
+  font-family: "Segoe UI", sans-serif;
+  display: flex;
+}
+
+/* ========== SIDEBAR  ========== */
+.sidebar {
+  width: 240px;
+  background: linear-gradient(180deg, #0c0f2d, #11164a);
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.user-box {
+  background: linear-gradient(135deg, #1f2547, #2a2f5a);
+  border-radius: 14px;
+  padding: 14px;
+  margin: 18px 0 24px;
+}
+
+.user-box small { color: #aab0ff; font-size: 13px; }
+.user-name { font-size: 16px; font-weight: 600; color: #fff; }
+
+.sidebar .nav-link {
+  color: #bfc4ff;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+
+.sidebar .nav-link.active,
+.sidebar .nav-link:hover {
+  background: #2b5cff;
+  color: #fff;
+}
+
+/* ========== MAIN WRAPPER ========== */
+.main-wrapper {
+  flex: 1;
+  margin: 16px;
+  background: linear-gradient(135deg, #1b2040, #20245a);
+  border-radius: 24px;
+  padding: 24px;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.35);
+}
+
+/* ========== STATS CARDS ========== */
+.stats-card {
+  border-radius: 18px;
+  padding: 20px;
+  background: linear-gradient(135deg, #1e3a8a, #1e40af);
+}
+
+.card-attendance { background: linear-gradient(135deg, #1e3a8a, #1e40af); }
+.card-classes { background: linear-gradient(135deg, #1f255a, #2b2f82); }
+.card-courses { background: linear-gradient(135deg, #3b1d5a, #5b2b82); }
+
+.stats-title { color: #c7d2fe; font-size: 14px; }
+.stats-value { font-size: 28px; font-weight: 700; }
+.stats-sub { font-size: 13px; margin-top: 4px; }
+
+/* ================================================= */
+/* ========== TODAY SCHEDULE (PURE CSS) ========== */
+/* ================================================= */
+
+.today-schedule {
+  background: linear-gradient(135deg, #1f2937, #273549);
+  border-radius: 20px;
+  padding: 22px;
+  margin-bottom: 24px;
+}
+
+.today-schedule h5 {
+  margin-bottom: 18px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+/* Single class row */
+.schedule-row {
+  background: rgba(255,255,255,0.06);
+  border-radius: 14px;
+  padding: 16px 18px;
+  margin-bottom: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+}
+
+/* Left colored line */
+.schedule-row::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 6px;
+  height: 100%;
+  border-radius: 14px 0 0 14px;
+  background: #22c55e;
+}
+
+.schedule-row.in-progress::before { background: #3b82f6; }
+.schedule-row.upcoming::before { background: #9ca3af; }
+
+/* Info */
+.schedule-info strong {
+  display: block;
+  font-size: 14px;
+  color: #ffffff;
+}
+
+.schedule-info span {
+  font-size: 13px;
+  color: #c7d2fe;
+}
+
+/* Right side */
+.schedule-meta {
+  text-align: right;
+}
+
+.schedule-meta .time {
+  font-size: 13px;
+  color: #e5e7eb;
+}
+
+.schedule-meta .status {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Status colors */
+.status-attended {
+  background: rgba(34,197,94,0.15);
+  color: #22c55e;
+}
+
+.status-progress {
+  background: rgba(59,130,246,0.15);
+  color: #60a5fa;
+}
+
+.status-upcoming {
+  background: rgba(156,163,175,0.15);
+  color: #d1d5db;
+}
+
+/* ========== ATTENDANCE HISTORY ========== */
+.attendance-history {
+  background: linear-gradient(135deg, #1f2937, #273549);
+  border-radius: 18px;
+  padding: 20px;
+  margin-top: 24px;
+}
+
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.history-table th,
+.history-table td {
+  padding: 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.history-status {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+}
+
+.history-present {
+  background: rgba(34,197,94,0.15);
+  color: #22c55e;
+}
+
+.history-absent {
+  background: rgba(239,68,68,0.15);
+  color: #ef4444;
+}
+</style>
 </head>
 
 <body>
 
-<!-- SIDEBAR -->
+<!-- SIDEBAR  -->
 <div class="sidebar">
-  <h4 class="mb-4">
-    <i class="fa-solid fa-face-smile text-primary"></i> FaceMark
-    <small class="d-block fs-6 text-muted">Student Portal</small>
-  </h4>
+  <h5 class="mb-4"><i class="bi bi-eye"></i> FACEMARK</h5>
+  <p class="small text-muted">Student Portal</p>
 
-  <p class="text-muted mb-4">Welcome,<br><strong>ss</strong></p>
+  <div class="user-box">
+    <small>Welcome,</small>
+    <div class="user-name">سَس</div>
+    <small>Student Portal</small>
+  </div>
 
-  <a class="active"><i class="fa-solid fa-chart-pie me-2"></i> Dashboard</a>
-  <a><i class="fa-solid fa-book me-2"></i> View Courses</a>
-  <a><i class="fa-solid fa-chart-line me-2"></i> Charts & Reports</a>
-  <a><i class="fa-solid fa-bell me-2"></i> Alerts</a>
-  <a><i class="fa-solid fa-file-export me-2"></i> Export</a>
-  <a><i class="fa-solid fa-triangle-exclamation me-2"></i> Report a Problem</a>
+  <ul class="nav flex-column">
+    <li class="nav-item"><a class="nav-link active" href="#"><i class="bi bi-grid"></i> Dashboard</a></li>
+    <li class="nav-item"><a class="nav-link" href="viewcourse.html"><i class="fa-solid fa-book me-2"></i> View Courses</a></li>
+    <li class="nav-item"><a class="nav-link" href="studentcharts.html"><i class="bi bi-bar-chart"></i> Charts & Reports</a></li>
+    <li class="nav-item"><a class="nav-link" href="alertstudent.html"><i class="bi bi-bell"></i> Alerts</a></li>
+    <li class="nav-item"><a class="nav-link" href="studentexport.html"><i class="bi bi-download"></i> Export</a></li>
+    <li class="nav-item"><a class="nav-link" href="reportstudent.html"><i class="fa-solid fa-triangle-exclamation me-2"></i> Report a Problem</a></li>
+  </ul>
 
   <hr class="text-secondary">
-
-  <a><i class="fa-solid fa-gear me-2"></i> Settings</a>
   <a><i class="fa-solid fa-right-from-bracket me-2"></i> Sign Out</a>
 </div>
 
-<!-- CONTENT -->
-<div class="content">
+<!-- MAIN CONTENT -->
+<div class="main-wrapper">
 
   <!-- TOP STATS -->
- <div class="row g-4 mb-4">
-  <div class="col-md-4">
-    <div class="stats-card card-attendance">
-      <div class="stats-title">Overall Attendance</div>
-      <div class="stats-value">92%</div>
-      <div class="stats-sub text-success-soft">Excellent performance</div>
+  <div class="row g-4 mb-4">
+    <div class="col-md-4">
+      <div class="stats-card card-attendance">
+        <div class="stats-title">Overall Attendance</div>
+        <div class="stats-value">92%</div>
+        <div class="stats-sub text-success">Excellent performance</div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="stats-card card-classes">
+        <div class="stats-title">Classes Attended</div>
+        <div class="stats-value">156/170</div>
+        <div class="stats-sub text-info">This semester</div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="stats-card card-courses">
+        <div class="stats-title">Total Courses</div>
+        <div class="stats-value">4</div>
+        <div class="stats-sub text-muted">Active courses</div>
+      </div>
     </div>
   </div>
 
-  <div class="col-md-4">
-    <div class="stats-card card-classes">
-      <div class="stats-title">Classes Attended</div>
-      <div class="stats-value">156/170</div>
-      <div class="stats-sub text-info-soft">This semester</div>
+  <!-- TODAY SCHEDULE (PURE CSS) -->
+  <div class="today-schedule">
+    <h5>Today's Schedule</h5>
+
+    <div class="schedule-row">
+      <div class="schedule-info">
+        <strong>Mathematics</strong>
+        <span>Dr. Ahmed Hassan</span>
+      </div>
+      <div class="schedule-meta">
+        <div class="time">08:00 - 10:00</div>
+        <div class="status status-attended">Attended</div>
+      </div>
+    </div>
+
+    <div class="schedule-row in-progress">
+      <div class="schedule-info">
+        <strong>Physics</strong>
+        <span>Dr. Sara Mohamed</span>
+      </div>
+      <div class="schedule-meta">
+        <div class="time">10:30 - 12:30</div>
+        <div class="status status-progress">In Progress</div>
+      </div>
+    </div>
+
+    <div class="schedule-row upcoming">
+      <div class="schedule-info">
+        <strong>Chemistry</strong>
+        <span>Dr. Omar Ali</span>
+      </div>
+      <div class="schedule-meta">
+        <div class="time">13:00 - 15:00</div>
+        <div class="status status-upcoming">Upcoming</div>
+      </div>
     </div>
   </div>
 
-  <div class="col-md-4">
-    <div class="stats-card card-courses">
-      <div class="stats-title">Total Courses</div>
-      <div class="stats-value">4</div>
-      <div class="stats-sub text-muted-soft">Active courses</div>
-    </div>
+  <!-- RECENT ATTENDANCE -->
+  <div class="attendance-history">
+    <h5>Recent Attendance History</h5>
+
+    <table class="history-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Course</th>
+          <th>Time</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Nov 26, 2024</td>
+          <td>Mathematics</td>
+          <td>08:15 AM</td>
+          <td><span class="history-status history-present">Present</span></td>
+        </tr>
+        <tr>
+          <td>Nov 25, 2024</td>
+          <td>Physics</td>
+          <td>10:42 AM</td>
+          <td><span class="history-status history-present">Present</span></td>
+        </tr>
+        <tr>
+          <td>Nov 24, 2024</td>
+          <td>Chemistry</td>
+          <td>-</td>
+          <td><span class="history-status history-absent">Absent</span></td>
+        </tr>
+      </tbody>
+    </table>
   </div>
-</div>
-
-  <!-- TODAY SCHEDULE -->
-  <div class="card-dark mb-4">
-    <h5 class="mb-3">Today's Schedule</h5>
-
-    <div class="schedule-item">
-      <strong>Mathematics</strong> – Dr. Ahmed Hassan
-      <span class="float-end badge badge-success">Attended</span>
-      <div class="text-muted">08:00 - 10:00</div>
-    </div>
-
-    <div class="schedule-item">
-      <strong>Physics</strong> – Dr. Sara Mohamed
-      <span class="float-end badge bg-primary">In Progress</span>
-      <div class="text-muted">10:30 - 12:30</div>
-    </div>
-
-    <div class="schedule-item">
-      <strong>Chemistry</strong> – Dr. Omar Ali
-      <span class="float-end badge bg-secondary">Upcoming</span>
-      <div class="text-muted">13:00 - 15:00</div>
-    </div>
-  </div>
-<!-- Recent Attendance History -->
-<div class="attendance-history">
-  <h5>Recent Attendance History</h5>
-
-  <table class="history-table">
-    <thead>
-      <tr>
-        <th>Date</th>
-        <th>Course</th>
-        <th>Time</th>
-        <th>Status</th>
-      </tr>
-    </thead>
-
-    <tbody>
-      <tr>
-        <td>Nov 26, 2024</td>
-        <td>Mathematics</td>
-        <td>08:15 AM</td>
-        <td>
-          <span class="history-status history-present">Present</span>
-        </td>
-      </tr>
-
-      <tr>
-        <td>Nov 25, 2024</td>
-        <td>Physics</td>
-        <td>10:42 AM</td>
-        <td>
-          <span class="history-status history-present">Present</span>
-        </td>
-      </tr>
-
-      <tr>
-        <td>Nov 24, 2024</td>
-        <td>Chemistry</td>
-        <td>-</td>
-        <td>
-          <span class="history-status history-absent">Absent</span>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-
 
 </div>
 
