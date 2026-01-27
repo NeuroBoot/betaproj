@@ -1,0 +1,106 @@
+
+    body {
+      background: linear-gradient(135deg, #0f1224, #15193a);
+      color: #fff;
+      min-height: 100vh;
+      font-family: system-ui;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      background: linear-gradient(180deg, #0c0f2d, #11164a);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .brand {
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+
+    .user-box {
+      background: linear-gradient(135deg, #1f2547, #2a2f5a);
+      border-radius: 14px;
+      padding: 14px;
+      margin: 18px 0 24px;
+    }
+
+    .user-box small {
+      color: #aab0ff;
+      font-size: 13px;
+    }
+
+    .user-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+      margin: 4px 0;
+    }
+
+    .sidebar .nav-link {
+      color: #bfc4ff;
+      margin-bottom: 10px;
+      border-radius: 10px;
+      padding: 10px 14px;
+    }
+
+    .sidebar .nav-link.active,
+    .sidebar .nav-link:hover {
+      background: #2b5cff;
+      color: #fff;
+    }
+
+    /* Panels */
+    .panel {
+      background: linear-gradient(135deg, #1f2547, #2a2f5a);
+      border-radius: 18px;
+      padding: 25px;
+      margin-bottom: 25px;
+    }
+
+    /* Inputs */
+    .form-control,
+    .form-select {
+      background: rgba(255,255,255,0.07);
+      border: none;
+      color: #fff;
+      border-radius: 10px;
+    }
+
+    .form-control::placeholder {
+      color: #aaa;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+      box-shadow: none;
+      outline: 2px solid #2b5cff;
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+    }
+
+    /* Buttons */
+    .export-btn {
+      background: linear-gradient(135deg, #2563eb, #3b82f6);
+      border: none;
+      border-radius: 12px;
+      padding: 10px 24px;
+      color: #fff;
+    }
+
+    /* Quick cards */
+    .quick-card {
+      background: rgba(255,255,255,0.05);
+      border-radius: 14px;
+      padding: 18px;
+      transition: 0.2s;
+      cursor: pointer;
+    }
+
+    .quick-card:hover {
+      background: rgba(255,255,255,0.1);
+    }
+
+    .quick-card small {
+      color: #ccc;
+    }
