@@ -1,0 +1,16 @@
+node_modules/
+dist/
+.env
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.vscode/
+.idea/
+*.mwb
+*.sql
+*.docx
+*.pptx
+*.mp4
+*.txt
+===================================.txt
