@@ -6,25 +6,18 @@
     <title>FaceMark - Login</title>
     <link rel="stylesheet" href="style.css"> 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <style>
-        /* حركة الأيقونة */
-        @keyframes floatIcon {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-8px); }
-        }
-        .smile-icon i {
-            display: inline-block;
-            animation: floatIcon 3s ease-in-out infinite;
-            color: #3060ff; /* لون الأيقونة */
-        }
-    </style>
+    <link rel="stylesheet" href="../Responsive/responsive.css">
 </head>
-<body>
-   
+<body class="dark-mode">
+
+    <a href="../home/home-index.html" class="back-home-btn">
+        <i class="fas fa-arrow-left"></i> Back to Home
+    </a>
+
     <div class="login-container">
         <div class="header">
             <div class="logo-icon smile-icon" style="margin-bottom: 8px;"> 
-                <img src="../images/face.jpeg" alt="FaceMark Logo" class="brand-logo">
+                <img src="../images/face.jpeg" alt="FaceMark Logo" class="brand-logo" style="width: 60px; height: 60px; border-radius: 15px; object-fit: cover;">
             </div>
             <h1>Face<span class="mark-gradient">Mark</span></h1>
             <p>Face Recognition Technology</p>
