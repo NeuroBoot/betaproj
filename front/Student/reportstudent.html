@@ -236,6 +236,54 @@
   </div>
 
 </div>
+<script>
+document.querySelector(".btn-primary").addEventListener("click", function () {
 
+  // Get form values
+  const category = document.querySelectorAll(".form-select")[0].value;
+  const priority = document.querySelectorAll(".form-select")[1].value;
+  const title = document.querySelector("input[type='text']").value;
+  const description = document.querySelector("textarea").value;
+
+  // Validation
+  if (title.trim() === "" || description.trim() === "" || category === "Select a category") {
+    alert("Please fill all required fields!");
+    return;
+  }
+
+  // Get reports container
+  const reportsContainer = document.querySelectorAll(".card-dark")[1];
+
+  // Create report item
+  const reportItem = document.createElement("div");
+  reportItem.classList.add("report-item", "report-warning");
+
+  // Get current date
+  const today = new Date();
+  const formattedDate = today.toLocaleDateString("en-US", {
+    month: "short",
+    day: "2-digit",
+    year: "numeric"
+  });
+
+  // Insert HTML inside new report
+  reportItem.innerHTML = `
+    <span class="status-badge pending">Pending</span>
+    <h6>${title}</h6>
+    <p class="mb-1">Category: ${category}</p>
+    <small class="text-muted">Submitted: ${formattedDate}</small>
+  `;
+
+  // Add new report at top
+  reportsContainer.appendChild(reportItem);
+
+  // Clear form
+  document.querySelector("input[type='text']").value = "";
+  document.querySelector("textarea").value = "";
+  document.querySelectorAll(".form-select")[0].selectedIndex = 0;
+  document.querySelectorAll(".form-select")[1].selectedIndex = 1;
+
+});
+</script>
 </body>
 </html>

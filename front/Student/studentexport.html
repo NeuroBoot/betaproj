@@ -243,6 +243,120 @@
   </div>
 
 </div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
 
+  const downloadBtn = document.querySelector(".btn-primary");
+  const dateInputs = document.querySelectorAll('input[type="date"]');
+  const selects = document.querySelectorAll(".form-select");
+
+  downloadBtn.addEventListener("click", function () {
+
+    const dateFrom = dateInputs[0].value;
+    const dateTo = dateInputs[1].value;
+    const course = selects[0].value;
+    const format = selects[1].value;
+
+    let collectedData = [];
+
+    // LocalStorage
+    for (let i = 0; i < localStorage.length; i++) {
+
+      const key = localStorage.key(i);
+
+      if (key.startsWith("attendance_")) {
+
+        const parts = key.split("_");
+        const storedCourse = parts[1];
+        const storedDate = parts[parts.length - 1];
+
+        const courseMatch =
+          course === "All Courses" || storedCourse === course;
+
+        const dateMatch =
+          (!dateFrom || storedDate >= dateFrom) &&
+          (!dateTo || storedDate <= dateTo);
+
+        if (courseMatch && dateMatch) {
+          const data = JSON.parse(localStorage.getItem(key));
+          collectedData = collectedData.concat(data);
+        }
+      }
+    }
+
+    if (collectedData.length === 0) {
+      alert("No attendance data found");
+      return;
+    }
+
+    // ===== CSV  =====
+    function generateCSV(data) {
+      let csv = "Student ID,Name,Status,Time\n";
+      data.forEach(row => {
+        csv += `${row.id},${row.name},${row.status},${row.time}\n`;
+      });
+      return csv;
+    }
+
+    // ===== PDF  =====
+    function generatePDF(data) {
+      let content = `
+        <html>
+        <body>
+          <h2>Attendance Report</h2>
+          <table border="1" cellspacing="0" cellpadding="5">
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Status</th>
+              <th>Time</th>
+            </tr>
+      `;
+
+      data.forEach(row => {
+        content += `
+          <tr>
+            <td>${row.id}</td>
+            <td>${row.name}</td>
+            <td>${row.status}</td>
+            <td>${row.time}</td>
+          </tr>
+        `;
+      });
+
+      content += `
+          </table>
+        </body>
+        </html>
+      `;
+
+      return new Blob([content], { type: "application/pdf" });
+    }
+
+   
+    if (format.includes("CSV") || format.includes("Excel")) {
+
+      const csvData = generateCSV(collectedData);
+      const blob = new Blob([csvData], { type: "text/csv" });
+
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "my_attendance_report.csv";
+      link.click();
+
+    } else if (format.includes("PDF")) {
+
+      const pdfBlob = generatePDF(collectedData);
+
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(pdfBlob);
+      link.download = "my_attendance_report.pdf";
+      link.click();
+    }
+
+  });
+
+});
+</script>
 </body>
 </html>
