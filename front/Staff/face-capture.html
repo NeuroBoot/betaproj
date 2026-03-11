@@ -10,9 +10,125 @@
 
   <!-- Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-<link rel="stylesheet" href="css/styless.css">
+<!-- <link rel="stylesheet" href="css/styless.css"> -->
   <!-- Custom Style -->
+<style>
   
+    body {
+      background: linear-gradient(135deg, #020617, #1e1b4b);
+      color: #e5e7eb;
+      font-family: "Segoe UI", sans-serif;
+    }
+/* Sidebar */
+    .sidebar {
+      background: linear-gradient(180deg, #0c0f2d, #11164a);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .brand {
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+
+    .user-box {
+      background: linear-gradient(135deg, #1f2547, #2a2f5a);
+      border-radius: 14px;
+      padding: 14px;
+      margin: 18px 0 24px;
+    }
+
+    .user-box small {
+      color: #aab0ff;
+      font-size: 13px;
+    }
+
+    .user-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+      margin: 4px 0;
+    }
+
+    .sidebar .nav-link {
+      color: #bfc4ff;
+      margin-bottom: 10px;
+      border-radius: 10px;
+      padding: 10px 14px;
+    }
+
+    .sidebar .nav-link.active,
+    .sidebar .nav-link:hover {
+      background: #2b5cff;
+      color: #fff;
+    }
+    .card-ui {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 18px;
+      padding: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .camera-box {
+  border: 2px dashed rgba(255,255,255,0.2);
+        position: relative;
+    width: 100%;
+    max-width: 700px; 
+    min-height: 450px;
+    padding: 16px;     
+    margin: auto;    
+    border-radius: 18px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        color: #93c5fd;
+        background: rgba(255,255,255,0.03);
+    }
+#video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 12px;
+  display: none;
+}
+
+/* Placeholder */
+#cameraPlaceholder {
+  color: #aaa;
+  text-align: center;
+}
+    .stat-card {
+      background: rgba(255,255,255,0.05);
+      border-radius: 14px;
+      padding: 18px;
+    }
+
+    .accuracy {
+      color: #22c55e;
+      font-weight: bold;
+    }
+
+    .detected {
+      color: #38bdf8;
+      font-weight: bold;
+    }
+
+    .time {
+      color: #c084fc;
+      font-weight: bold;
+    }
+
+    .recent-item {
+      background: rgba(255,255,255,0.04);
+      border-radius: 14px;
+      padding: 14px 18px;
+      margin-bottom: 10px;
+      
+    }
+</style> 
 </head>
 
 <body>
@@ -76,12 +192,31 @@
 
     <!-- Camera -->
     <div class="card-ui mb-4">
-      <div class="camera-box">
-        <i class="bi bi-camera fs-1 mb-2"></i>
-        <h6>Camera Ready</h6>
-        <small class="text-secondary mb-3">Click "Start Capture" to begin face recognition</small>
-        <button class="btn btn-primary px-4">Start Capture</button>
-      </div>
+      <div class="camera-box text-center">
+
+  <video id="video" autoplay playsinline style="display:none;"></video>
+
+  <div id="cameraPlaceholder">
+    <i class="bi bi-camera fs-1 mb-2"></i>
+    <h6>Camera Ready</h6>
+    <small class="text-secondary mb-3 d-block">
+      Click "Start Capture" to begin face recognition
+    </small>
+  </div>
+<div class="mt-3">
+  <select id="cameraSelect" class="form-select bg-dark text-light border-0">
+    <option value="">Select Camera</option>
+  </select>
+</div>
+  <button id="startBtn" class="btn btn-primary px-4 mt-3">
+    Start Capture
+  </button>
+
+  <button id="stopBtn" class="btn btn-danger px-4 mt-3" style="display:none;">
+    Stop Camera
+  </button>
+
+</div>
     </div>
 
     <!-- Stats -->
@@ -149,6 +284,77 @@
 
   </main>
 </div>
+<script>
+let video = document.getElementById("video");
+let startBtn = document.getElementById("startBtn");
+let stopBtn = document.getElementById("stopBtn");
+let placeholder = document.getElementById("cameraPlaceholder");
+let cameraSelect = document.getElementById("cameraSelect");
 
+let stream = null;
+
+// ===== تحميل الكاميرات المتاحة =====
+async function loadCameras() {
+  try {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const cameras = devices.filter(device => device.kind === "videoinput");
+
+    cameraSelect.innerHTML = "";
+
+    cameras.forEach((camera, index) => {
+      const option = document.createElement("option");
+      option.value = camera.deviceId;
+      option.text = camera.label || `Camera ${index + 1}`;
+      cameraSelect.appendChild(option);
+    });
+
+  } catch (error) {
+    console.error("Error loading cameras:", error);
+  }
+}
+
+// لازم نطلب إذن الأول علشان تظهر أسماء الكاميرات
+navigator.mediaDevices.getUserMedia({ video: true })
+  .then(streamTemp => {
+    streamTemp.getTracks().forEach(track => track.stop());
+    loadCameras();
+  });
+
+// ===== تشغيل الكاميرا المختارة =====
+startBtn.addEventListener("click", async function() {
+  try {
+
+    const selectedCamera = cameraSelect.value;
+
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: selectedCamera ? { deviceId: { exact: selectedCamera } } : true
+    });
+
+    video.srcObject = stream;
+    video.style.display = "block";
+    placeholder.style.display = "none";
+
+    startBtn.style.display = "none";
+    stopBtn.style.display = "inline-block";
+
+  } catch (error) {
+    alert("Camera access denied or not available.");
+    console.error(error);
+  }
+});
+
+// ===== إيقاف الكاميرا =====
+stopBtn.addEventListener("click", function() {
+  if (stream) {
+    stream.getTracks().forEach(track => track.stop());
+  }
+
+  video.style.display = "none";
+  placeholder.style.display = "block";
+
+  startBtn.style.display = "inline-block";
+  stopBtn.style.display = "none";
+});
+</script>
 </body>
 </html>
