@@ -14,17 +14,18 @@
 
   <style>
     body {
-      background: linear-gradient(135deg, #0f1224, #15193a);
-      color: #fff;
-      min-height: 100vh;
-      font-family: system-ui;
+       background: linear-gradient(135deg, #020617, #1e1b4b);
+  color: #e5e7eb;
+  min-height: 100vh;
+  font-family: "Segoe UI", sans-serif;
     }
 
     /* Sidebar */
     .sidebar {
-      background: linear-gradient(180deg, #0c0f2d, #11164a);
-      min-height: 100vh;
-      padding: 20px;
+       background: linear-gradient(135deg, #020617, #1e1b4b);
+  color: #e5e7eb;
+  min-height: 100vh;
+  font-family: "Segoe UI", sans-serif;
     }
 
     .brand {
@@ -33,64 +34,65 @@
     }
 
     .user-box {
-      background: linear-gradient(135deg, #1f2547, lch(28.2% 108.94 304.66));
-      border-radius: 14px;
-      padding: 14px;
-      margin: 18px 0 24px;
+     background: linear-gradient(135deg, #1f2547, #2a2f5a);
+  border-radius: 14px;
+  padding: 14px;
+  margin: 18px 0 24px;
     }
 
     .user-box small {
-      color: #aab0ff;
-      font-size: 13px;
+     color: #aab0ff;
+  font-size: 13px;
     }
 
     .user-name {
       font-size: 16px;
-      font-weight: 600;
-      color: #fff;
-      margin: 4px 0;
+  font-weight: 600;
+  color: #fff;
+  margin: 4px 0;
     }
 
     .sidebar .nav-link {
       color: #bfc4ff;
-      margin-bottom: 10px;
-      border-radius: 10px;
-      padding: 10px 14px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  padding: 10px 14px;
     }
 
     .sidebar .nav-link.active,
     .sidebar .nav-link:hover {
-      background: oklch(61.548% 0.16692 268.415);
-      color: #fff;
+      background: #2b5cff;
+  color: #fff;
     }
     /* Panels */
     .panel {
-      background: linear-gradient(135deg, #1f2547, #2a2f5a);
-      border-radius: 18px;
-      padding: 25px;
-      margin-bottom: 25px;
-    }
+      background: rgba(255, 255, 255, 0.05);
+  border-radius: 18px;
+  padding: 25px;
+  margin-bottom: 25px;
+  border: 1px solid rgba(255,255,255,0.08);
+}
 
     /* Progress bars */
     .progress {
-      height: 26px;
-      background: rgba(255,255,255,0.1);
-      border-radius: 20px;
+     height: 26px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 20px;
     }
 
     .progress-bar {
-      border-radius: 20px;
-      font-weight: 500;
+     border-radius: 20px;
+  font-weight: 500;
     }
 
     /* Metric rows */
     .metric {
-      background: rgba(255,255,255,0.05);
-      border-radius: 12px;
-      padding: 14px 16px;
-      margin-bottom: 12px;
-      display: flex;
-      justify-content: space-between;
+    background: rgba(255,255,255,0.05);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
     }
   </style>
 </head>
@@ -103,7 +105,7 @@
     <!-- Sidebar -->
     <div class="col-md-2 sidebar">
       <h5 class="mb-4"><i class="bi bi-eye"></i> FACEMARK</h5>
-      <p class="small text-muted">Staff Portal</p>
+      <p class="small text-secondary">Staff Portal</p>
 <!-- Welcome Box -->
       <div class="user-box">
         <small>Welcome,</small>

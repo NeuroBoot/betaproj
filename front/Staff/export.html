@@ -9,7 +9,201 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 
-  <link rel="stylesheet" href="css/styleexport.css">
+  <!-- <link rel="stylesheet" href="css/styleexport.css"> -->
+   <style>
+    body {
+        background: linear-gradient(135deg, #020617, #1e1b4b);
+    color: #e5e7eb;
+    min-height: 100vh;
+    font-family: system-ui;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      background: linear-gradient(180deg, #0c0f2d, #11164a);
+  min-height: 100vh;
+  padding: 20px;
+    }
+
+    .brand {
+     font-weight: 600;
+  letter-spacing: 1px;
+    }
+
+    .user-box {
+     background: linear-gradient(135deg, #1f2547, #2a2f5a);
+  border-radius: 14px;
+  padding: 14px;
+  margin: 18px 0 24px;
+    }
+
+    .user-box small {
+      color: #aab0ff;
+  font-size: 13px;
+    }
+
+    .user-name {
+      font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+  margin: 4px 0;
+    }
+
+    .sidebar .nav-link {
+       color: #bfc4ff;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  padding: 10px 14px;
+    }
+
+    .sidebar .nav-link.active,
+    .sidebar .nav-link:hover {
+     background: #2b5cff;
+  color: #fff;
+    }
+
+    /* Panels */
+    .panel {
+      background: rgba(255,255,255,0.05);
+  border-radius: 18px;
+  padding: 25px;
+  margin-bottom: 25px;
+  border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    /* Inputs */
+    .form-control,
+    .form-select {
+      background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: #e5e7eb;
+  border-radius: 10px;
+    }
+   .manual-card {
+     background: rgba(255,255,255,0.05);
+  border-radius: 22px;
+  padding: 26px 28px;
+  margin-bottom: 30px;
+  border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .manual-card h4 {
+      margin-bottom: 22px;
+  font-weight: 600;
+  color: #ffffff;
+    }
+
+    .manual-card .form-label {
+      color: #c7d2fe;
+  font-size: 13px;
+  margin-bottom: 6px;
+  display: block;
+    }
+
+    .manual-input {
+     width: 100%;
+  height: 46px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: #ffffff;
+  font-size: 14px;
+    }
+
+    .manual-input:focus {
+     outline: none;
+  border-color: #2b5cff;
+  background: rgba(255,255,255,0.08);
+    }
+
+    /* Custom arrow for select */
+    select.manual-input {
+      background-image:
+    linear-gradient(45deg, transparent 50%, #c7d2fe 50%),
+    linear-gradient(135deg, #c7d2fe 50%, transparent 50%);
+  background-position:
+    calc(100% - 18px) 19px,
+    calc(100% - 13px) 19px;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+    }
+/* Fix dropdown options color */
+select.manual-input option {
+   background-color: #1f2547;
+  color: #ffffff;
+}
+
+/* Option hover (بعض المتصفحات) */
+select.manual-input option:hover {
+  background-color: #2a2f5a;
+}
+
+    /* Date icon */
+    .manual-input::-webkit-calendar-picker-indicator {
+      filter: invert(1);
+      opacity: 0.7;
+      cursor: pointer;
+    }
+    .form-control::placeholder {
+      color: #9ca3af;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+      box-shadow: none;
+      outline: 2px solid #2b5cff;
+       background: rgba(255,255,255,0.08);
+  color: #fff;
+    }
+
+    /* Buttons */
+    .export-btn {
+      background: linear-gradient(135deg, #2563eb, #3b82f6);
+      border: none;
+      border-radius: 12px;
+      padding: 10px 24px;
+      color: #fff;
+    }
+
+    /* Quick cards */
+    .quick-card {
+       background: rgba(255,255,255,0.04);
+  border-radius: 14px;
+  padding: 18px;
+  transition: 0.2s;
+  cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .quick-card:hover {
+      background: rgba(255,255,255,0.08);
+    }
+
+    .quick-card small {
+       color: #cbd5f5;
+    }
+@media (max-width: 768px) {
+
+  .panel {
+    padding: 18px;
+  }
+
+  .alert-item .d-flex {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .alert-item i.bi-x-lg {
+    align-self: flex-end;
+  }
+
+  .alert-settings-card {
+    padding: 20px;
+  }
+
+}
+</style>
 </head>
 
 <body>
