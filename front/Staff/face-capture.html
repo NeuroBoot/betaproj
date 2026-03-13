@@ -139,8 +139,8 @@
 
    <!-- Sidebar -->
     <div class="col-md-2 sidebar">
-      <h5 class="mb-4"><i class="bi bi-eye"></i> FACEMARK</h5>
-      <p class="small text-muted">Staff Portal</p>
+      <h5 class="mb-4"><img src="face.jpeg"  alt="" width="50px" height="50px"> FACEMARK</h5>
+      <p class="small text-muted " style="color:white !important">Staff Portal</p>
 <!-- Welcome Box -->
       <div class="user-box">
         <small>Welcome,</small>
@@ -211,12 +211,18 @@
   </select>
 </div>
   <button id="startBtn" class="btn btn-primary px-4 mt-3">
-    Start Capture
-  </button>
+  Start Capture
+</button>
 
-  <button id="stopBtn" class="btn btn-danger px-4 mt-3" style="display:none;">
-    Stop Camera
-  </button>
+<button id="stopBtn" class="btn btn-danger px-4 mt-3" style="display:none;">
+  Stop Camera
+</button>
+
+<button id="shotBtn" class="btn btn-success px-4 mt-3" style="display:none;">
+  Take Shot
+</button>
+
+<canvas id="canvas" style="display:none;"></canvas>
 
 </div>
     </div>
@@ -292,7 +298,8 @@ let startBtn = document.getElementById("startBtn");
 let stopBtn = document.getElementById("stopBtn");
 let placeholder = document.getElementById("cameraPlaceholder");
 let cameraSelect = document.getElementById("cameraSelect");
-
+let shotBtn = document.getElementById("shotBtn");
+let canvas = document.getElementById("canvas");
 let stream = null;
 
 // ===== تحميل الكاميرات المتاحة =====
@@ -335,10 +342,9 @@ startBtn.addEventListener("click", async function() {
     video.srcObject = stream;
     video.style.display = "block";
     placeholder.style.display = "none";
-
-    startBtn.style.display = "none";
-    stopBtn.style.display = "inline-block";
-
+startBtn.style.display = "none";
+stopBtn.style.display = "inline-block";
+shotBtn.style.display = "inline-block";
   } catch (error) {
     alert("Camera access denied or not available.");
     console.error(error);
@@ -356,6 +362,24 @@ stopBtn.addEventListener("click", function() {
 
   startBtn.style.display = "inline-block";
   stopBtn.style.display = "none";
+  shotBtn.style.display = "none";
+});
+shotBtn.addEventListener("click", function() {
+
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+  const imageData = canvas.toDataURL("image/png");
+
+  // تحميل الصورة
+  const link = document.createElement("a");
+  link.href = imageData;
+  link.download = "face_capture.png";
+  link.click();
+
 });
 </script>
 </body>
