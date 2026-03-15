@@ -15,15 +15,15 @@
 <style>
   
     body {
-       background: #0f0c29;
-  color: #ffffff;
-  font-family: "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #020617, #1e1b4b);
+      color: #e5e7eb;
+      font-family: "Segoe UI", sans-serif;
     }
 /* Sidebar */
     .sidebar {
-      background: #15132b;
-  min-height: 100vh;
-  padding: 20px;
+      background: linear-gradient(180deg, #0c0f2d, #11164a);
+      min-height: 100vh;
+      padding: 20px;
     }
 
     .brand {
@@ -32,26 +32,26 @@
     }
 
     .user-box {
-      background: #1a1a3a;
-  border-radius: 14px;
-  padding: 14px;
-  margin: 18px 0 24px;
+      background: linear-gradient(135deg, #1f2547, #2a2f5a);
+      border-radius: 14px;
+      padding: 14px;
+      margin: 18px 0 24px;
     }
 
     .user-box small {
-      color: #b0b0b0;
+      color: #aab0ff;
       font-size: 13px;
     }
 
     .user-name {
       font-size: 16px;
       font-weight: 600;
-      color: #ffffff;
+      color: #fff;
       margin: 4px 0;
     }
 
     .sidebar .nav-link {
-        color: #b0b0b0;
+      color: #bfc4ff;
       margin-bottom: 10px;
       border-radius: 10px;
       padding: 10px 14px;
@@ -59,20 +59,18 @@
 
     .sidebar .nav-link.active,
     .sidebar .nav-link:hover {
-       background: #3060ff;
-  color: #ffffff;
+      background: #2b5cff;
+      color: #fff;
     }
     .card-ui {
-    background: #1a1a3a;
-  border-radius: 18px;
-  padding: 24px;
-  border: 1px solid rgba(255,255,255,0.05);
-}
-
-    
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 18px;
+      padding: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
 
     .camera-box {
-  border: 2px dashed rgba(255,255,255,0.15);
+  border: 2px dashed rgba(255,255,255,0.2);
         position: relative;
     width: 100%;
     max-width: 700px; 
@@ -86,8 +84,8 @@
     justify-content: center;
     align-items: center;
     box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-       color: #b0b0b0;
-       background: rgba(255,255,255,0.03);
+        color: #93c5fd;
+        background: rgba(255,255,255,0.03);
     }
 #video {
   width: 100%;
@@ -103,31 +101,31 @@
   text-align: center;
 }
     .stat-card {
-      background: rgba(255,255,255,0.04);
-  border-radius: 14px;
-  padding: 18px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 14px;
+      padding: 18px;
     }
 
     .accuracy {
-      color: #2ecc71;
-  font-weight: bold;
+      color: #22c55e;
+      font-weight: bold;
     }
 
     .detected {
-      color: #3060ff;
-  font-weight: bold;
+      color: #38bdf8;
+      font-weight: bold;
     }
 
     .time {
-    color: #9b59b6;
-  font-weight: bold;
+      color: #c084fc;
+      font-weight: bold;
     }
 
     .recent-item {
-     background: rgba(255,255,255,0.04);
-  border-radius: 14px;
-  padding: 14px 18px;
-  margin-bottom: 10px;
+      background: rgba(255,255,255,0.04);
+      border-radius: 14px;
+      padding: 14px 18px;
+      margin-bottom: 10px;
       
     }
 </style> 
@@ -139,12 +137,12 @@
 
    <!-- Sidebar -->
     <div class="col-md-2 sidebar">
-      <h5 class="mb-4"><img src="face.jpeg"  alt="" width="50px" height="50px"> FACEMARK</h5>
-      <p class="small text-muted " style="color:white !important">Staff Portal</p>
+      <h5 class="mb-4"><i class="bi bi-eye"></i> FACEMARK</h5>
+      <p class="small text-muted">Staff Portal</p>
 <!-- Welcome Box -->
       <div class="user-box">
         <small>Welcome,</small>
-         <div class="user-name">guest1</div>
+        <div class="user-name">سَس</div>
         <small>Staff Portal</small>
       </div>
       <ul class="nav flex-column">
@@ -211,18 +209,12 @@
   </select>
 </div>
   <button id="startBtn" class="btn btn-primary px-4 mt-3">
-  Start Capture
-</button>
+    Start Capture
+  </button>
 
-<button id="stopBtn" class="btn btn-danger px-4 mt-3" style="display:none;">
-  Stop Camera
-</button>
-
-<button id="shotBtn" class="btn btn-success px-4 mt-3" style="display:none;">
-  Take Shot
-</button>
-
-<canvas id="canvas" style="display:none;"></canvas>
+  <button id="stopBtn" class="btn btn-danger px-4 mt-3" style="display:none;">
+    Stop Camera
+  </button>
 
 </div>
     </div>
@@ -298,8 +290,7 @@ let startBtn = document.getElementById("startBtn");
 let stopBtn = document.getElementById("stopBtn");
 let placeholder = document.getElementById("cameraPlaceholder");
 let cameraSelect = document.getElementById("cameraSelect");
-let shotBtn = document.getElementById("shotBtn");
-let canvas = document.getElementById("canvas");
+
 let stream = null;
 
 // ===== تحميل الكاميرات المتاحة =====
@@ -342,9 +333,10 @@ startBtn.addEventListener("click", async function() {
     video.srcObject = stream;
     video.style.display = "block";
     placeholder.style.display = "none";
-startBtn.style.display = "none";
-stopBtn.style.display = "inline-block";
-shotBtn.style.display = "inline-block";
+
+    startBtn.style.display = "none";
+    stopBtn.style.display = "inline-block";
+
   } catch (error) {
     alert("Camera access denied or not available.");
     console.error(error);
@@ -362,24 +354,6 @@ stopBtn.addEventListener("click", function() {
 
   startBtn.style.display = "inline-block";
   stopBtn.style.display = "none";
-  shotBtn.style.display = "none";
-});
-shotBtn.addEventListener("click", function() {
-
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
-
-  const ctx = canvas.getContext("2d");
-  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-  const imageData = canvas.toDataURL("image/png");
-
-  // تحميل الصورة
-  const link = document.createElement("a");
-  link.href = imageData;
-  link.download = "face_capture.png";
-  link.click();
-
 });
 </script>
 </body>
