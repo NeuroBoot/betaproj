@@ -3,7 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
-import { UserAccount } from './users/entities/user.entity';
+import { AttendanceModule } from './attendance/attendance.module';
 
 @Module({
   imports: [
@@ -11,6 +11,7 @@ import { UserAccount } from './users/entities/user.entity';
       isGlobal: true,
       envFilePath: '.env',
     }),
+
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -19,14 +20,18 @@ import { UserAccount } from './users/entities/user.entity';
         host: configService.get<string>('DB_HOST', 'localhost'),
         port: configService.get<number>('DB_PORT', 3306),
         username: configService.get<string>('DB_USERNAME', 'root'),
-        password: configService.get<string>('DB_PASSWORD', 'yourpassword'),
+        password: configService.get<string>('DB_PASSWORD', ''),
         database: configService.get<string>('DB_NAME', 'facemark'),
-        entities: [UserAccount],
-        synchronize: true, // Be careful in production
+
+        autoLoadEntities: true,
+
+        synchronize: true,
       }),
     }),
+
     AuthModule,
     UsersModule,
+    AttendanceModule,
   ],
 })
 export class AppModule {}
