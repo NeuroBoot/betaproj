@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, ManyToMany } from 'typeorm';
 import { Role } from '../../common/enums/role.enum';
+import { Course } from '../../courses/entities/course.entity';
 
 /**
  * Database entity representing a user account in the system.
@@ -30,6 +31,18 @@ export class UserAccount {
   // Flag for soft-deletion of the user record.
   @Column({ default: false })
   isDeleted: boolean;
+
+  // Courses managed by this user (Admin only).
+  @OneToMany(() => Course, (course) => course.admin)
+  managedCourses: Course[];
+
+  // Courses taught by this user (Staff only).
+  @OneToMany(() => Course, (course) => course.instructor)
+  taughtCourses: Course[];
+
+  // Courses enrolled by this user (Student only).
+  @ManyToMany(() => Course, (course) => course.students)
+  enrolledCourses: Course[];
 
   // Automatically recorded timestamp of account creation.
   @CreateDateColumn()

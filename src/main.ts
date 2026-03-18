@@ -3,6 +3,8 @@ import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
+import { TransformInterceptor } from './common/interceptors/transform.interceptor';
+import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import * as rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 
@@ -23,8 +25,12 @@ async function bootstrap() {
     }),
   );
 
-  // Logging Interceptor
+  // Global Interceptors
   app.useGlobalInterceptors(new LoggingInterceptor());
+  app.useGlobalInterceptors(new TransformInterceptor());
+
+  // Global Exception Filter
+  app.useGlobalFilters(new HttpExceptionFilter());
 
   // Validation
   app.useGlobalPipes(new ValidationPipe({
