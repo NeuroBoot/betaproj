@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, ManyToMany, JoinTable } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, ManyToMany, JoinTable, OneToMany } from 'typeorm';
 import { UserAccount } from '../../users/entities/user.entity';
+import { Attendance } from '../../attendance/entities/attendance.entity';
 
 /**
  * Database entity representing a course in the system.
@@ -37,6 +38,10 @@ export class Course {
     inverseJoinColumn: { name: 'userAccountId', referencedColumnName: 'userAccountId' },
   })
   students: UserAccount[];
+
+  // Attendance records for this course.
+  @OneToMany(() => Attendance, (attendance) => attendance.course)
+  attendanceRecords: Attendance[];
 
   @Column({ default: false })
   isDeleted: boolean;

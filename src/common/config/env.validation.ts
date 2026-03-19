@@ -1,5 +1,5 @@
 import { plainToInstance } from 'class-transformer';
-import { IsEnum, IsNumber, IsString, validateSync } from 'class-validator';
+import { IsEnum, IsNumber, IsString, IsBoolean, IsOptional, validateSync } from 'class-validator';
 
 enum Environment {
   Development = 'development',
@@ -28,6 +28,10 @@ class EnvironmentVariables {
 
   @IsString()
   DB_NAME: string;
+
+  @IsOptional()
+  @IsBoolean()
+  DB_SYNCHRONIZE: boolean;
 
   @IsString()
   JWT_SECRET: string;

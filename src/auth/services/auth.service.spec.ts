@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { UnauthorizedException, ConflictException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { UserRepository } from '../../users/repositories/user.repository';
+import { DataSource } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
 import { Role } from '../../common/enums/role.enum';
 
@@ -10,17 +11,31 @@ describe('AuthService', () => {
   let service: AuthService;
   let userRepository: any;
   let jwtService: any;
+  let dataSource: any;
+  let queryRunner: any;
 
   beforeEach(async () => {
     userRepository = {
       findByUsername: jest.fn(),
       findById: jest.fn(),
-      create: jest.fn(),
-      save: jest.fn(),
     };
 
     jwtService = {
       signAsync: jest.fn(),
+    };
+
+    queryRunner = {
+      manager: {
+        getRepository: jest.fn().mockReturnValue({
+          findOne: jest.fn(),
+          create: jest.fn(),
+          save: jest.fn(),
+        }),
+      },
+    };
+
+    dataSource = {
+      transaction: jest.fn().mockImplementation(async (cb) => cb(queryRunner.manager)),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -28,6 +43,7 @@ describe('AuthService', () => {
         AuthService,
         { provide: UserRepository, useValue: userRepository },
         { provide: JwtService, useValue: jwtService },
+        { provide: DataSource, useValue: dataSource },
       ],
     }).compile();
 
@@ -40,19 +56,21 @@ describe('AuthService', () => {
 
   describe('register', () => {
     it('should throw ConflictException if user already exists', async () => {
-      userRepository.findByUsername.mockResolvedValue({ username: 'existing' });
-      const registerDto = { username: 'existing', password: 'password123' };
+      const transactionalRepo = queryRunner.manager.getRepository();
+      transactionalRepo.findOne.mockResolvedValue({ username: 'existing' });
+      const registerDto = { username: 'existing', password: 'password123', role: Role.STUDENT };
       
       await expect(service.register(registerDto as any)).rejects.toThrow(ConflictException);
     });
 
     it('should register a new user successfully', async () => {
-      userRepository.findByUsername.mockResolvedValue(null);
-      userRepository.create.mockReturnValue({ username: 'new', password: 'hashed_password', userType: Role.STUDENT });
-      userRepository.save.mockResolvedValue({ userAccountId: 1, username: 'new', password: 'hashed_password', userType: Role.STUDENT });
+      const transactionalRepo = queryRunner.manager.getRepository();
+      transactionalRepo.findOne.mockResolvedValue(null);
+      transactionalRepo.create.mockReturnValue({ username: 'new', password: 'hashed_password', userType: Role.STUDENT });
+      transactionalRepo.save.mockResolvedValue({ userAccountId: 1, username: 'new', password: 'hashed_password', userType: Role.STUDENT });
       
-      const registerDto = { username: 'new', password: 'password123' };
-      const result = await service.register(registerDto as any);
+      const registerDto = { username: 'new', password: 'password123', role: Role.STUDENT };
+      const result: any = await service.register(registerDto as any);
       
       expect(result).toBeDefined();
       expect(result.username).toBe('new');
@@ -79,6 +97,16 @@ describe('AuthService', () => {
       
       expect(result.access_token).toBe('mock_token');
       expect(result.user.username).toBe('user');
+    });
+
+    it('should throw UnauthorizedException if role does not match', async () => {
+      const hashedPassword = await bcrypt.hash('password123', 10);
+      const mockUser = { userAccountId: 1, username: 'user', password: hashedPassword, userType: Role.STUDENT };
+      userRepository.findByUsername.mockResolvedValue(mockUser);
+      
+      const loginDto = { username: 'user', password: 'password123', role: Role.ADMIN };
+      
+      await expect(service.login(loginDto)).rejects.toThrow(UnauthorizedException);
     });
   });
 });

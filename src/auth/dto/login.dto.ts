@@ -1,5 +1,6 @@
-import { IsString, IsNotEmpty, MinLength } from 'class-validator';
+import { IsString, IsNotEmpty, MinLength, IsEnum, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Role } from '../../common/enums/role.enum';
 
 /**
  * Data Transfer Object for user login request.
@@ -18,4 +19,10 @@ export class LoginDto {
   @IsNotEmpty()
   @MinLength(6)
   password: string;
+
+  // Optional role field to specify the user role during login.
+  @ApiProperty({ example: 'student', enum: Role, description: 'The role of the user logging in' })
+  @IsEnum(Role)
+  @IsOptional()
+  role?: Role;
 }

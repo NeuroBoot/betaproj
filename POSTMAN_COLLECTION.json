@@ -18,11 +18,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{
-  "username": "testuser",
-  "password": "password123",
-  "role": "student"
-}"
+							"raw": "{\n  \"username\": \"testuser\",\n  \"password\": \"password123\",\n  \"role\": \"student\"\n}"
 						},
 						"url": { "raw": "{{baseUrl}}/api/v1/auth/register", "host": ["{{baseUrl}}"], "path": ["api", "v1", "auth", "register"] }
 					}
@@ -36,7 +32,7 @@
 								"exec": [
 									"var jsonData = pm.response.json();",
 									"if (jsonData.access_token) {",
-									"    pm.environment.set("bearerToken", jsonData.access_token);",
+									"    pm.environment.set(\"bearerToken\", jsonData.access_token);",
 									"}"
 								],
 								"type": "text/javascript"
@@ -50,10 +46,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{
-  "username": "testuser",
-  "password": "password123"
-}"
+							"raw": "{\n  \"username\": \"testuser\",\n  \"password\": \"password123\"\n}"
 						},
 						"url": { "raw": "{{baseUrl}}/api/v1/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "v1", "auth", "login"] }
 					}

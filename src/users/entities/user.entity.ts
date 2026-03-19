@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, ManyToMany } from 'typeorm';
 import { Role } from '../../common/enums/role.enum';
 import { Course } from '../../courses/entities/course.entity';
+import { Attendance } from '../../attendance/entities/attendance.entity';
 
 /**
  * Database entity representing a user account in the system.
@@ -43,6 +44,10 @@ export class UserAccount {
   // Courses enrolled by this user (Student only).
   @ManyToMany(() => Course, (course) => course.students)
   enrolledCourses: Course[];
+
+  // Attendance records for this user (Student only).
+  @OneToMany(() => Attendance, (attendance) => attendance.student)
+  attendanceRecords: Attendance[];
 
   // Automatically recorded timestamp of account creation.
   @CreateDateColumn()

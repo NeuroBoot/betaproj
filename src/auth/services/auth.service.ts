@@ -65,7 +65,7 @@ export class AuthService {
    * Returns an access token and user information upon success.
    */
   async login(loginDto: LoginDto) {
-    const { username, password } = loginDto;
+    const { username, password, role } = loginDto;
     
     // Retrieve user by username.
     const user = await this.userRepository.findByUsername(username);
@@ -73,6 +73,11 @@ export class AuthService {
     // Verify user existence and password validity.
     if (!user || !(await bcrypt.compare(password, user.password))) {
       throw new UnauthorizedException('Invalid credentials');
+    }
+
+    // If a role is specified, ensure it matches the user's role.
+    if (role && user.userType !== role) {
+      throw new UnauthorizedException(`User is not a ${role}`);
     }
 
     // Construct the JWT payload.
