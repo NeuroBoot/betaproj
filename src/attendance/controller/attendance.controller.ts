@@ -12,6 +12,8 @@ import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Roles } from '../../auth/decorators/roles.decorator';
 
+import { Role } from '../../common/enums/role.enum';
+
 @Controller('api/v1/attendance')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class AttendanceController {
@@ -24,13 +26,13 @@ export class AttendanceController {
   }
 
   @Post()
-  @Roles('Admin','Staff')
+  @Roles(Role.ADMIN, Role.STAFF)
   create(@Body() dto: CreateAttendanceDto) {
     return this.service.create(dto);
   }
 
   @Get('statistics')
-  @Roles('Admin','Staff')
+  @Roles(Role.ADMIN, Role.STAFF)
   statistics() {
     return this.service.statistics();
   }

@@ -17,7 +17,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
       useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET', 'facemark_super_secret_2026'),
         signOptions: { 
-          expiresIn : configService.get<string>('JWT_EXPIRES_IN', '1d') 
+          expiresIn: (configService.get<string>('JWT_EXPIRES_IN') || '1d') as any,
         },
       }),
     }),
