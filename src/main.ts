@@ -7,8 +7,13 @@ import { TransformInterceptor } from './common/interceptors/transform.intercepto
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import * as rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
+import * as dotenv from 'dotenv';
 
 async function bootstrap() {
+  dotenv.config();
+  console.log('--- Startup Environment Check ---');
+  console.log('DB_SYNCHRONIZE from process.env:', process.env.DB_SYNCHRONIZE);
+  console.log('---------------------------------');
   const app = await NestFactory.create(AppModule);
 
   // Security

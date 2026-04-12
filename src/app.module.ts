@@ -20,16 +20,30 @@ import { validate } from './common/config/env.validation';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        type: 'mysql',
-        host: configService.get<string>('DB_HOST', 'localhost'),
-        port: configService.get<number>('DB_PORT', 3306),
-        username: configService.get<string>('DB_USERNAME', 'root'),
-        password: configService.get<string>('DB_PASSWORD', 'yourpassword'),
-        database: configService.get<string>('DB_NAME', 'facemark'),
-        entities: [UserAccount, Course, Attendance],
-        synchronize: configService.get<boolean>('DB_SYNCHRONIZE', true), // Read from config
-      }),
+      useFactory: (configService: ConfigService) => {
+        const dbSync = configService.get('DB_SYNCHRONIZE');
+        // Robust conversion to boolean
+        const synchronize = dbSync === true || dbSync === 'true';
+        
+        console.log('--- Database Configuration ---');
+        console.log('DB_HOST:', configService.get('DB_HOST'));
+        console.log('DB_NAME:', configService.get('DB_NAME'));
+        console.log('DB_SYNCHRONIZE (raw):', dbSync, typeof dbSync);
+        console.log('DB_SYNCHRONIZE (parsed):', synchronize);
+        console.log('------------------------------');
+
+        return {
+          type: 'mysql',
+          host: configService.get<string>('DB_HOST', 'localhost'),
+          port: configService.get<number>('DB_PORT', 3306),
+          username: configService.get<string>('DB_USERNAME', 'root'),
+          password: configService.get<string>('DB_PASSWORD', ''),
+          database: configService.get<string>('DB_NAME', 'facemark'),
+          entities: [UserAccount, Course, Attendance],
+          synchronize: synchronize,
+          logging: true, // Enable logging to see what TypeORM is doing
+        };
+      },
     }),
     AuthModule,
     UsersModule,

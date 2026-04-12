@@ -1,4 +1,4 @@
-import { plainToInstance } from 'class-transformer';
+import { plainToInstance, Transform } from 'class-transformer';
 import { IsEnum, IsNumber, IsString, IsBoolean, IsOptional, validateSync } from 'class-validator';
 
 enum Environment {
@@ -31,6 +31,7 @@ class EnvironmentVariables {
 
   @IsOptional()
   @IsBoolean()
+  @Transform(({ value }) => value === 'true' || value === true)
   DB_SYNCHRONIZE: boolean;
 
   @IsString()
