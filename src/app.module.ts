@@ -23,7 +23,7 @@ import { validate } from './common/config/env.validation';
       useFactory: (configService: ConfigService) => {
         const dbSync = configService.get('DB_SYNCHRONIZE');
         // Robust conversion to boolean
-        const synchronize = dbSync === true || dbSync === 'true';
+        const synchronize = dbSync === 'true';
         
         console.log('--- Database Configuration ---');
         console.log('DB_HOST:', configService.get('DB_HOST'));
@@ -41,7 +41,7 @@ import { validate } from './common/config/env.validation';
           database: configService.get<string>('DB_NAME', 'facemark'),
           entities: [UserAccount, Course, Attendance],
           synchronize: synchronize,
-          logging: true, // Enable logging to see what TypeORM is doing
+          logging:  ['query', 'schema', 'error'], // Enable logging to see what TypeORM is doing
         };
       },
     }),
