@@ -23,17 +23,22 @@ export class UsersService {
     return user;
   }
 
-  async create(userData: Partial<UserAccount>): Promise<UserAccount> {
+  async create(userData: any): Promise<UserAccount> {
     const existingUser = await this.userRepository.findByUsername(userData.username);
     if (existingUser) {
       throw new ConflictException('Username already exists');
+    }
+
+    // Handle 'role' alias for 'userType' if provided
+    if (userData.role && !userData.userType) {
+      userData.userType = userData.role;
     }
 
     if (userData.password) {
       userData.password = await bcrypt.hash(userData.password, 10);
     }
 
-    const newUser = this.userRepository.create(userData);
+    const newUser: UserAccount = this.userRepository.create(userData as UserAccount);
     return this.userRepository.save(newUser);
   }
 

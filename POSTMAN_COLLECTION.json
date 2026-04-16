@@ -18,7 +18,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"username\": \"testuser\",\n  \"password\": \"password123\",\n  \"role\": \"student\"\n}"
+							"raw": "{\n  \"username\": \"ziad_taha\",\n  \"password\": \"password123\",\n  \"role\": \"admin\"\n}"
 						},
 						"url": { "raw": "{{baseUrl}}/api/v1/auth/register", "host": ["{{baseUrl}}"], "path": ["api", "v1", "auth", "register"] }
 					}
@@ -46,7 +46,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"username\": \"testuser\",\n  \"password\": \"password123\"\n}"
+							"raw": "{\n  \"username\": \"ziad_taha\",\n  \"password\": \"password123\"\n}"
 						},
 						"url": { "raw": "{{baseUrl}}/api/v1/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "v1", "auth", "login"] }
 					}
@@ -58,18 +58,240 @@
 						"method": "GET",
 						"url": { "raw": "{{baseUrl}}/api/v1/auth/profile", "host": ["{{baseUrl}}"], "path": ["api", "v1", "auth", "profile"] }
 					}
+				},
+				{
+					"name": "Refresh Token",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{bearerToken}}", "type": "string" }] },
+						"method": "POST",
+						"url": { "raw": "{{baseUrl}}/api/v1/auth/refresh", "host": ["{{baseUrl}}"], "path": ["api", "v1", "auth", "refresh"] }
+					}
+				},
+				{
+					"name": "Admin Only Test",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{bearerToken}}", "type": "string" }] },
+						"method": "GET",
+						"url": { "raw": "{{baseUrl}}/api/v1/auth/admin-only", "host": ["{{baseUrl}}"], "path": ["api", "v1", "auth", "admin-only"] }
+					}
 				}
 			]
 		},
 		{
-			"name": "Users",
+			"name": "Users (Admin Only)",
 			"item": [
 				{
 					"name": "List Users",
 					"request": {
 						"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{bearerToken}}", "type": "string" }] },
 						"method": "GET",
+						"url": { 
+							"raw": "{{baseUrl}}/api/v1/users?role=student", 
+							"host": ["{{baseUrl}}"], 
+							"path": ["api", "v1", "users"],
+							"query": [
+								{ "key": "role", "value": "student", "description": "Filter by role (admin, staff, student)" }
+							]
+						}
+					}
+				},
+				{
+					"name": "Get User by ID",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{bearerToken}}", "type": "string" }] },
+						"method": "GET",
+						"url": { "raw": "{{baseUrl}}/api/v1/users/1", "host": ["{{baseUrl}}"], "path": ["api", "v1", "users", "1"] }
+					}
+				},
+				{
+					"name": "Create User",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{bearerToken}}", "type": "string" }] },
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"new_staff_member\",\n  \"password\": \"password123\",\n  \"userType\": \"staff\"\n}"
+						},
 						"url": { "raw": "{{baseUrl}}/api/v1/users", "host": ["{{baseUrl}}"], "path": ["api", "v1", "users"] }
+					}
+				},
+				{
+					"name": "Update User",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{bearerToken}}", "type": "string" }] },
+						"method": "PUT",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"updated_user\",\n  \"userType\": \"staff\"\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/api/v1/users/1", "host": ["{{baseUrl}}"], "path": ["api", "v1", "users", "1"] }
+					}
+				},
+				{
+					"name": "Delete User",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{bearerToken}}", "type": "string" }] },
+						"method": "DELETE",
+						"url": { "raw": "{{baseUrl}}/api/v1/users/1", "host": ["{{baseUrl}}"], "path": ["api", "v1", "users", "1"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "Courses",
+			"item": [
+				{
+					"name": "List Courses",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{bearerToken}}", "type": "string" }] },
+						"method": "GET",
+						"url": { "raw": "{{baseUrl}}/api/v1/courses", "host": ["{{baseUrl}}"], "path": ["api", "v1", "courses"] }
+					}
+				},
+				{
+					"name": "Create Course (Admin Only)",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{bearerToken}}", "type": "string" }] },
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Mathematics\",\n  \"code\": \"MATH101\",\n  \"description\": \"Introductory calculus and algebra\",\n  \"sections\": 4,\n  \"instructorId\": 2\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/api/v1/courses", "host": ["{{baseUrl}}"], "path": ["api", "v1", "courses"] }
+					}
+				},
+				{
+					"name": "Get Course Details",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{bearerToken}}", "type": "string" }] },
+						"method": "GET",
+						"url": { "raw": "{{baseUrl}}/api/v1/courses/1", "host": ["{{baseUrl}}"], "path": ["api", "v1", "courses", "1"] }
+					}
+				},
+				{
+					"name": "Update Course (Admin Only)",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{bearerToken}}", "type": "string" }] },
+						"method": "PUT",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"description\": \"Updated description\"\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/api/v1/courses/1", "host": ["{{baseUrl}}"], "path": ["api", "v1", "courses", "1"] }
+					}
+				},
+				{
+					"name": "Delete Course (Admin Only)",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{bearerToken}}", "type": "string" }] },
+						"method": "DELETE",
+						"url": { "raw": "{{baseUrl}}/api/v1/courses/1", "host": ["{{baseUrl}}"], "path": ["api", "v1", "courses", "1"] }
+					}
+				},
+				{
+					"name": "Enroll Student (Admin/Staff Only)",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{bearerToken}}", "type": "string" }] },
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": 3\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/api/v1/courses/1/students", "host": ["{{baseUrl}}"], "path": ["api", "v1", "courses", "1", "students"] }
+					}
+				},
+				{
+					"name": "List Enrolled Students (Admin/Staff Only)",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{bearerToken}}", "type": "string" }] },
+						"method": "GET",
+						"url": { "raw": "{{baseUrl}}/api/v1/courses/1/students", "host": ["{{baseUrl}}"], "path": ["api", "v1", "courses", "1", "students"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "Attendance",
+			"item": [
+				{
+					"name": "List Attendance",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{bearerToken}}", "type": "string" }] },
+						"method": "GET",
+						"url": { "raw": "{{baseUrl}}/api/v1/attendance", "host": ["{{baseUrl}}"], "path": ["api", "v1", "attendance"] }
+					}
+				},
+				{
+					"name": "Create Attendance (Admin/Staff Only)",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{bearerToken}}", "type": "string" }] },
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": 3,\n  \"courseId\": 1,\n  \"staffId\": 2,\n  \"attendanceStatusId\": 1,\n  \"recordDate\": \"2024-03-20T10:00:00Z\"\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/api/v1/attendance", "host": ["{{baseUrl}}"], "path": ["api", "v1", "attendance"] }
+					}
+				},
+				{
+					"name": "Attendance Statistics (Admin/Staff Only)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var template = `",
+									"    <canvas id=\"myChart\" style=\"max-width: 400px; margin: auto;\"></canvas>",
+									"    <script src=\"https://cdn.jsdelivr.net/npm/chart.js\"></script>",
+									"    <script>",
+									"        var response = pm.response.json();",
+									"        var labels = response.data.map(item => item.status);",
+									"        var counts = response.data.map(item => item.count);",
+									"",
+									"        new Chart(\"myChart\", {",
+									"            type: \"pie\",",
+									"            data: {",
+									"                labels: labels,",
+									"                datasets: [{",
+									"                    backgroundColor: [\"#2ecc71\", \"#e74c3c\", \"#f1c40f\", \"#3498db\"],",
+									"                    data: counts",
+									"                }]",
+									"            },",
+									"            options: {",
+									"                title: { display: true, text: \"Attendance Distribution\" }",
+									"            }",
+									"        });",
+									"    </script>",
+									"`;",
+									"",
+									"pm.visualizer.set(template);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{bearerToken}}", "type": "string" }] },
+						"method": "GET",
+						"url": { "raw": "{{baseUrl}}/api/v1/attendance/statistics", "host": ["{{baseUrl}}"], "path": ["api", "v1", "attendance", "statistics"] }
 					}
 				}
 			]

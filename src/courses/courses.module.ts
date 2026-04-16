@@ -13,6 +13,6 @@ import { UsersModule } from '../users/users.module';
   ],
   controllers: [CoursesController],
   providers: [CourseRepository, CoursesService],
-  exports: [CoursesService],
+  exports: [CourseRepository, CoursesService],
 })
 export class CoursesModule {}
