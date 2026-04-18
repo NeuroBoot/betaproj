@@ -9,7 +9,201 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 
-  <link rel="stylesheet" href="css/styleexport.css">
+  <!-- <link rel="stylesheet" href="css/styleexport.css"> -->
+   <style>
+    body {
+        background: linear-gradient(135deg, #020617, #1e1b4b);
+    color: #e5e7eb;
+    min-height: 100vh;
+    font-family: system-ui;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      background: linear-gradient(180deg, #0c0f2d, #11164a);
+  min-height: 100vh;
+  padding: 20px;
+    }
+
+    .brand {
+     font-weight: 600;
+  letter-spacing: 1px;
+    }
+
+    .user-box {
+     background: linear-gradient(135deg, #1f2547, #2a2f5a);
+  border-radius: 14px;
+  padding: 14px;
+  margin: 18px 0 24px;
+    }
+
+    .user-box small {
+      color: #aab0ff;
+  font-size: 13px;
+    }
+
+    .user-name {
+      font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+  margin: 4px 0;
+    }
+
+    .sidebar .nav-link {
+       color: #bfc4ff;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  padding: 10px 14px;
+    }
+
+    .sidebar .nav-link.active,
+    .sidebar .nav-link:hover {
+     background: #2b5cff;
+  color: #fff;
+    }
+
+    /* Panels */
+    .panel {
+      background: rgba(255,255,255,0.05);
+  border-radius: 18px;
+  padding: 25px;
+  margin-bottom: 25px;
+  border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    /* Inputs */
+    .form-control,
+    .form-select {
+      background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: #e5e7eb;
+  border-radius: 10px;
+    }
+   .manual-card {
+     background: rgba(255,255,255,0.05);
+  border-radius: 22px;
+  padding: 26px 28px;
+  margin-bottom: 30px;
+  border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .manual-card h4 {
+      margin-bottom: 22px;
+  font-weight: 600;
+  color: #ffffff;
+    }
+
+    .manual-card .form-label {
+      color: #c7d2fe;
+  font-size: 13px;
+  margin-bottom: 6px;
+  display: block;
+    }
+
+    .manual-input {
+     width: 100%;
+  height: 46px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: #ffffff;
+  font-size: 14px;
+    }
+
+    .manual-input:focus {
+     outline: none;
+  border-color: #2b5cff;
+  background: rgba(255,255,255,0.08);
+    }
+
+    /* Custom arrow for select */
+    select.manual-input {
+      background-image:
+    linear-gradient(45deg, transparent 50%, #c7d2fe 50%),
+    linear-gradient(135deg, #c7d2fe 50%, transparent 50%);
+  background-position:
+    calc(100% - 18px) 19px,
+    calc(100% - 13px) 19px;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+    }
+/* Fix dropdown options color */
+select.manual-input option {
+   background-color: #1f2547;
+  color: #ffffff;
+}
+
+/* Option hover (بعض المتصفحات) */
+select.manual-input option:hover {
+  background-color: #2a2f5a;
+}
+
+    /* Date icon */
+    .manual-input::-webkit-calendar-picker-indicator {
+      filter: invert(1);
+      opacity: 0.7;
+      cursor: pointer;
+    }
+    .form-control::placeholder {
+      color: #9ca3af;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+      box-shadow: none;
+      outline: 2px solid #2b5cff;
+       background: rgba(255,255,255,0.08);
+  color: #fff;
+    }
+
+    /* Buttons */
+    .export-btn {
+      background: linear-gradient(135deg, #2563eb, #3b82f6);
+      border: none;
+      border-radius: 12px;
+      padding: 10px 24px;
+      color: #fff;
+    }
+
+    /* Quick cards */
+    .quick-card {
+       background: rgba(255,255,255,0.04);
+  border-radius: 14px;
+  padding: 18px;
+  transition: 0.2s;
+  cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .quick-card:hover {
+      background: rgba(255,255,255,0.08);
+    }
+
+    .quick-card small {
+       color: #cbd5f5;
+    }
+@media (max-width: 768px) {
+
+  .panel {
+    padding: 18px;
+  }
+
+  .alert-item .d-flex {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .alert-item i.bi-x-lg {
+    align-self: flex-end;
+  }
+
+  .alert-settings-card {
+    padding: 20px;
+  }
+
+}
+</style>
 </head>
 
 <body>
@@ -26,13 +220,12 @@
     <!-- Sidebar -->
     <div class="col-md-2 collapse d-md-block sidebar" id="sidebarMenu">
       <h5 class="brand mb-3">
-        <i class="bi bi-eye"></i> FACEMARK
-      </h5>
-      <small class="text-muted">staff portal</small>
+       <h5 class="mb-4"><img src="face.jpeg"  alt="" width="50px" height="50px"> FACEMARK</h5>
+      <p class="small text-muted " style="color:white !important">Staff Portal</p>
 
       <div class="user-box">
         <small>Welcome,</small>
-        <div class="user-name">سَس</div>
+      <div class="user-name" id="username">Loading...</div>
         <small>Staff Portal</small>
       </div>
 
@@ -67,13 +260,12 @@
             <i class="bi bi-bell"></i> Alerts
           </a>
         </li>
-
-        <li class="nav-item mt-5">
-          <a class="nav-link text-danger" href="#">
-            <i class="bi bi-box-arrow-left"></i> Sign Out
-          </a>
-        </li>
       </ul>
+      <hr class="text-secondary">
+
+<button id="logoutBtn" class="btn btn-danger w-100 mt-2">
+    <i class="bi bi-box-arrow-right"></i> Sign Out
+</button>
     </div>
 
     <!-- Main Content -->
@@ -99,11 +291,7 @@
 
             <div class="col-md-3">
               <label class="form-label">Course</label>
-              <select name="course" class="manual-input">
-                <option>Mathematics</option>
-                <option>Physics</option>
-                <option>Chemistry</option>
-              </select>
+             <select name="course" id="courseSelect" class="manual-input"></select>
             </div>
 
             <div class="col-md-3">
@@ -168,109 +356,227 @@
 
 <!-- JAVASCRIPT POST -->
 <script>
-document.getElementById("exportForm").addEventListener("submit", function(e) {
+const API_BASE_URL = 'http://localhost:3000/api/v1';
 
+// ================= TOKEN =================
+function getToken() {
+  return localStorage.getItem('token');
+}
+
+function authHeaders() {
+  return {
+    'Authorization': `Bearer ${getToken()}`
+  };
+}
+
+function redirectToLogin() {
+  localStorage.clear();
+  window.location.href = "./sign in/index.html";
+}
+
+// ================= USERNAME =================
+const usernameEl = document.getElementById("username");
+
+const savedUsername = localStorage.getItem("username");
+if (savedUsername) {
+  usernameEl.textContent = savedUsername;
+}
+
+// ================= PROFILE (fallback + auth) =================
+async function loadProfile() {
+  const token = getToken();
+  if (!token) return redirectToLogin();
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/auth/profile`, {
+      headers: authHeaders()
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error();
+
+    const user = data.data || data;
+
+    usernameEl.textContent = user.username || savedUsername || "Staff";
+
+  } catch {
+    redirectToLogin();
+  }
+}
+
+// ================= LOAD COURSES =================
+const courseSelect = document.getElementById("courseSelect");
+
+async function loadCourses() {
+  try {
+    const res = await fetch(`${API_BASE_URL}/courses`, {
+      headers: authHeaders()
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error();
+
+    const courses = data.data || data;
+
+    courseSelect.innerHTML = `<option value="">Select Course</option>`;
+
+    courses.forEach(c => {
+      courseSelect.innerHTML += `
+        <option value="${c.id}">
+          ${c.name || c.title}
+        </option>
+      `;
+    });
+
+  } catch (err) {
+    console.error("Courses error:", err);
+  }
+}
+
+// ================= FORMAT =================
+function normalizeFormat(format) {
+  if (format.includes("PDF")) return "pdf";
+  if (format.includes("Excel")) return "xlsx";
+  if (format.includes("CSV")) return "csv";
+  return "csv";
+}
+
+// ================= GENERATE CSV =================
+function generateCSV(data) {
+  let csv = "Student ID,Name,Status,Time,Date\n";
+
+  data.forEach(row => {
+    csv += `${row.studentId || row.id},${row.name},${row.status},${row.time},${row.date || ""}\n`;
+  });
+
+  return csv;
+}
+
+// ================= GENERATE HTML (PDF) =================
+function generatePDFHtml(data, courseName) {
+  let html = `
+    <html>
+    <head><meta charset="UTF-8"></head>
+    <body>
+      <h2>Attendance Report - ${courseName}</h2>
+      <table border="1" cellspacing="0" cellpadding="5">
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Status</th>
+          <th>Time</th>
+          <th>Date</th>
+        </tr>
+  `;
+
+  data.forEach(row => {
+    html += `
+      <tr>
+        <td>${row.studentId || row.id}</td>
+        <td>${row.name}</td>
+        <td>${row.status}</td>
+        <td>${row.time}</td>
+        <td>${row.date || ""}</td>
+      </tr>
+    `;
+  });
+
+  html += `</table></body></html>`;
+
+  return html;
+}
+
+// ================= DOWNLOAD =================
+function downloadBlob(blob, filename) {
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(link.href);
+}
+
+// ================= EXPORT =================
+async function exportFromApi(dateFrom, dateTo, courseId, format) {
+
+  if (!courseId) return alert("Select course");
+
+  try {
+    const params = new URLSearchParams({
+      courseId,
+      dateFrom,
+      dateTo
+    });
+
+    const res = await fetch(`${API_BASE_URL}/attendance?${params}`, {
+      headers: authHeaders()
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error();
+
+    let records = data.data || data;
+
+    // fallback filter لو backend مش بيعمل filtering
+    records = records.filter(r =>
+      (!dateFrom || r.date >= dateFrom) &&
+      (!dateTo || r.date <= dateTo)
+    );
+
+    if (!records.length) {
+      return alert("No data found");
+    }
+
+    const courseName = document.querySelector("#courseSelect option:checked")?.textContent || "Course";
+
+    if (format === "csv" || format === "xlsx") {
+      const csv = generateCSV(records);
+      const blob = new Blob([csv], { type: "text/csv" });
+
+      downloadBlob(blob, `attendance.${format}`);
+
+    } else if (format === "pdf") {
+      const html = generatePDFHtml(records, courseName);
+      const blob = new Blob([html], { type: "text/html" });
+
+      downloadBlob(blob, "attendance.html");
+    }
+
+  } catch (err) {
+    console.error("Export error:", err);
+    alert("Export failed");
+  }
+}
+
+// ================= FORM =================
+document.getElementById("exportForm").addEventListener("submit", async function(e) {
   e.preventDefault();
 
   const dateFrom = this.dateFrom.value;
   const dateTo = this.dateTo.value;
-  const course = this.course.value;
-  const format = this.format.value;
+  const courseId = this.course.value;
+  const format = normalizeFormat(this.format.value);
 
-  let collectedData = [];
-
-  // قراءة كل المفاتيح من LocalStorage
-  for (let i = 0; i < localStorage.length; i++) {
-
-    const key = localStorage.key(i);
-
-    if (key.startsWith("attendance_" + course)) {
-
-      const parts = key.split("_");
-      const date = parts[parts.length - 1];
-
-      if (date >= dateFrom && date <= dateTo) {
-        const data = JSON.parse(localStorage.getItem(key));
-        collectedData = collectedData.concat(data);
-      }
-    }
+  if (!dateFrom || !dateTo || !courseId) {
+    return alert("Complete all fields");
   }
 
-  if (collectedData.length === 0) {
-    alert("No data found for selected range");
-    return;
+  if (dateFrom > dateTo) {
+    return alert("Invalid date range");
   }
 
-  // ===== CSV  =====
-  function generateCSV(data) {
-    let csv = "Student ID,Name,Status,Time\n";
-    data.forEach(row => {
-      csv += `${row.id},${row.name},${row.status},${row.time}\n`;
-    });
-    return csv;
-  }
-
-  // ===== PDF  =====
-  function generatePDF(data) {
-    let content = `
-      <html>
-      <head>
-        <title>Attendance Report</title>
-      </head>
-      <body>
-        <h2>Attendance Report - ${course}</h2>
-        <table border="1" cellspacing="0" cellpadding="5">
-          <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Status</th>
-            <th>Time</th>
-          </tr>
-    `;
-
-    data.forEach(row => {
-      content += `
-        <tr>
-          <td>${row.id}</td>
-          <td>${row.name}</td>
-          <td>${row.status}</td>
-          <td>${row.time}</td>
-        </tr>
-      `;
-    });
-
-    content += `
-        </table>
-      </body>
-      </html>
-    `;
-
-    const blob = new Blob([content], { type: "application/pdf" });
-    return blob;
-  }
-
-  // ===== تنزيل الملف =====
-  if (format.includes("CSV") || format.includes("Excel")) {
-
-    const csvData = generateCSV(collectedData);
-    const blob = new Blob([csvData], { type: "text/csv" });
-
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "attendance_report.csv";
-    link.click();
-
-  } else if (format.includes("PDF")) {
-
-    const pdfBlob = generatePDF(collectedData);
-
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(pdfBlob);
-    link.download = "attendance_report.pdf";
-    link.click();
-  }
-
+  await exportFromApi(dateFrom, dateTo, courseId, format);
 });
+
+// ================= LOGOUT =================
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  localStorage.clear();
+  window.location.href = "./sign in/index.html";
+});
+
+// ================= INIT =================
+loadCourses();
+loadProfile();
+
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
