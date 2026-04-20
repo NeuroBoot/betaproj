@@ -11,14 +11,14 @@ import { UpdateCourseDto } from '../dto/update-course.dto';
 import { UserAccount } from '../../users/entities/user.entity';
 
 @ApiTags('Courses')
-@ApiBearerAuth()
+@ApiBearerAuth('JWT-auth')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('api/v1/courses')
 export class CoursesController {
   constructor(private readonly coursesService: CoursesService) {}
 
   @Get()
-  @ApiOperation({ summary: 'List courses (Staff sees assigned, Students see enrolled, Admin sees all)' })
+  @ApiOperation({ summary: 'List all active courses' })
   async findAll(@CurrentUser() user: UserAccount) {
     return this.coursesService.findAll(user);
   }

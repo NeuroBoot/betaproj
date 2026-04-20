@@ -8,7 +8,7 @@ import { Role } from '../../common/enums/role.enum';
 import { UserAccount } from '../entities/user.entity';
 
 @ApiTags('Users')
-@ApiBearerAuth()
+@ApiBearerAuth('JWT-auth')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(Role.ADMIN)
 @Controller('api/v1/users')

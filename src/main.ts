@@ -49,7 +49,17 @@ async function bootstrap() {
     .setTitle('FaceMark API')
     .setDescription('Student Attendance Management System with AI Facial Recognition')
     .setVersion('1.0')
-    .addBearerAuth()
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'JWT',
+        description: 'Enter JWT token',
+        in: 'header',
+      },
+      'JWT-auth', // This name must match @ApiBearerAuth('JWT-auth')
+    )
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);

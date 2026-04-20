@@ -48,7 +48,7 @@ export class AuthController {
    * Requires a valid Bearer token.
    */
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @Get('profile')
   @ApiOperation({ summary: 'Get current user profile' })
   async getProfile(@CurrentUser() user: any) {
@@ -60,7 +60,7 @@ export class AuthController {
    * Refreshes the JWT token for an active user session.
    */
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Refresh JWT token' })
@@ -74,7 +74,7 @@ export class AuthController {
    */
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @Get('admin-only')
   @ApiOperation({ summary: 'Test endpoint for Admin role only' })
   async adminOnly() {

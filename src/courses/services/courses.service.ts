@@ -43,13 +43,8 @@ export class CoursesService {
   }
 
   async findAll(user: UserAccount): Promise<Course[]> {
-    if (user.userType === Role.ADMIN) {
-      return this.courseRepository.findAllActive();
-    } else if (user.userType === Role.STAFF) {
-      return this.courseRepository.findByInstructor(user.userAccountId);
-    } else {
-      return this.courseRepository.findByStudent(user.userAccountId);
-    }
+    // Business logic update: Everyone can see all active courses
+    return this.courseRepository.findAllActive();
   }
 
   async findOne(id: number, user: UserAccount): Promise<Course> {
