@@ -23,6 +23,12 @@ export class CreateCourseDto {
   @IsOptional()
   sections?: number;
 
+  @ApiProperty({ example: 3, description: 'Credit hours for the course', default: 3 })
+  @IsInt()
+  @Min(0)
+  @IsOptional()
+  credits?: number;
+
   @ApiProperty({ example: 2, description: 'User ID of the instructor (Staff)' })
   @IsInt()
   @IsNotEmpty()

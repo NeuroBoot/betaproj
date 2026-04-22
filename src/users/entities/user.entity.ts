@@ -23,7 +23,7 @@ export class UserAccount {
 
   // The classification of the user (Admin, Staff, or Student).
   @Column({
-    type: 'enum',
+    type: 'simple-enum',
     enum: Role,
     default: Role.STUDENT,
   })

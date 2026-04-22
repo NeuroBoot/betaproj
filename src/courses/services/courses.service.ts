@@ -43,8 +43,19 @@ export class CoursesService {
   }
 
   async findAll(user: UserAccount): Promise<Course[]> {
-    // Business logic update: Everyone can see all active courses
-    return this.courseRepository.findAllActive();
+    if (user.userType === Role.ADMIN) {
+      return this.courseRepository.findAllActive();
+    }
+    
+    if (user.userType === Role.STAFF) {
+      return this.courseRepository.findByInstructor(user.userAccountId);
+    }
+    
+    if (user.userType === Role.STUDENT) {
+      return this.courseRepository.findByStudent(user.userAccountId);
+    }
+    
+    return [];
   }
 
   async findOne(id: number, user: UserAccount): Promise<Course> {
@@ -114,13 +125,18 @@ export class CoursesService {
     await this.courseRepository.save(course);
   }
 
-  async enrollStudent(courseId: number, studentId: number): Promise<Course> {
+  async enrollStudent(courseId: number, studentId: number, user: UserAccount): Promise<Course> {
     const course = await this.courseRepository.findOne({
       where: { courseId, isDeleted: false },
-      relations: ['students'],
+      relations: ['students', 'instructor'],
     });
     if (!course) {
       throw new NotFoundException(`Course with ID ${courseId} not found`);
+    }
+
+    // Permission check: Admin or the course's Instructor
+    if (user.userType === Role.STAFF && course.instructor.userAccountId !== user.userAccountId) {
+      throw new ForbiddenException('You can only enroll students in your own courses');
     }
 
     const student = await this.userRepository.findById(studentId);
@@ -136,14 +152,20 @@ export class CoursesService {
     return this.courseRepository.save(course);
   }
 
-  async getEnrolledStudents(courseId: number): Promise<UserAccount[]> {
+  async getEnrolledStudents(courseId: number, user: UserAccount): Promise<UserAccount[]> {
     const course = await this.courseRepository.findOne({
       where: { courseId, isDeleted: false },
-      relations: ['students'],
+      relations: ['students', 'instructor'],
     });
     if (!course) {
       throw new NotFoundException(`Course with ID ${courseId} not found`);
     }
+
+    // Permission check: Admin or the course's Instructor
+    if (user.userType === Role.STAFF && course.instructor.userAccountId !== user.userAccountId) {
+      throw new ForbiddenException('You can only view students in your own courses');
+    }
+
     return course.students;
   }
 }

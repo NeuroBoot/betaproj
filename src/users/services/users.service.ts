@@ -8,22 +8,29 @@ import { Role } from '../../common/enums/role.enum';
 export class UsersService {
   constructor(private readonly userRepository: UserRepository) {}
 
-  async findAll(role?: Role): Promise<UserAccount[]> {
+  async findAll(role?: Role): Promise<Omit<UserAccount, 'password'>[]> {
+    let users: UserAccount[];
     if (role) {
-      return this.userRepository.find({ where: { userType: role, isDeleted: false } });
+      users = await this.userRepository.find({ where: { userType: role, isDeleted: false } });
+    } else {
+      users = await this.userRepository.find({ where: { isDeleted: false } });
     }
-    return this.userRepository.find({ where: { isDeleted: false } });
+    return users.map(user => {
+      const { password, ...result } = user;
+      return result;
+    });
   }
 
-  async findOne(id: number): Promise<UserAccount> {
+  async findOne(id: number): Promise<Omit<UserAccount, 'password'>> {
     const user = await this.userRepository.findById(id);
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
-    return user;
+    const { password, ...result } = user;
+    return result;
   }
 
-  async create(userData: any): Promise<UserAccount> {
+  async create(userData: any): Promise<Omit<UserAccount, 'password'>> {
     const existingUser = await this.userRepository.findByUsername(userData.username);
     if (existingUser) {
       throw new ConflictException('Username already exists');
@@ -39,11 +46,16 @@ export class UsersService {
     }
 
     const newUser: UserAccount = this.userRepository.create(userData as UserAccount);
-    return this.userRepository.save(newUser);
+    const savedUser = await this.userRepository.save(newUser);
+    const { password, ...result } = savedUser;
+    return result;
   }
 
-  async update(id: number, userData: Partial<UserAccount>): Promise<UserAccount> {
-    const user = await this.findOne(id);
+  async update(id: number, userData: Partial<UserAccount>): Promise<Omit<UserAccount, 'password'>> {
+    const user = await this.userRepository.findById(id);
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
 
     if (userData.username && userData.username !== user.username) {
       const existingUser = await this.userRepository.findByUsername(userData.username);
@@ -57,11 +69,16 @@ export class UsersService {
     }
 
     Object.assign(user, userData);
-    return this.userRepository.save(user);
+    const savedUser = await this.userRepository.save(user);
+    const { password, ...result } = savedUser;
+    return result;
   }
 
   async remove(id: number): Promise<void> {
-    const user = await this.findOne(id);
+    const user = await this.userRepository.findById(id);
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
     user.isDeleted = true;
     await this.userRepository.save(user);
   }

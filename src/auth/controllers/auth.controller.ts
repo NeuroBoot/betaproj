@@ -52,8 +52,8 @@ export class AuthController {
   @Get('profile')
   @ApiOperation({ summary: 'Get current user profile' })
   async getProfile(@CurrentUser() user: any) {
-    // Extract user information from the decoded JWT token.
-    return user;
+    // Extract user information and fetch full relational profile.
+    return this.authService.getProfile(user.sub || user.userId);
   }
 
   /**

@@ -34,7 +34,15 @@ export class CoursesController {
   @Get(':id')
   @ApiOperation({ summary: 'Get course details' })
   async findOne(@Param('id', ParseIntPipe) id: number, @CurrentUser() user: UserAccount) {
-    return this.coursesService.findOne(id, user);
+    const course = await this.coursesService.findOne(id, user);
+    // Transform sections number into array [1, 2, ...n]
+    const sectionList = Array.from({ length: course.sections }, (_, i) => i + 1);
+    return {
+      ...course,
+      data: {
+        sections: sectionList
+      }
+    };
   }
 
   @Put(':id')
@@ -57,14 +65,15 @@ export class CoursesController {
   async enrollStudent(
     @Param('id', ParseIntPipe) courseId: number,
     @Body('studentId', ParseIntPipe) studentId: number,
+    @CurrentUser() user: UserAccount,
   ) {
-    return this.coursesService.enrollStudent(courseId, studentId);
+    return this.coursesService.enrollStudent(courseId, studentId, user);
   }
 
   @Get(':id/students')
   @Roles(Role.ADMIN, Role.STAFF)
   @ApiOperation({ summary: 'List students in course (Admin/Staff only)' })
-  async getEnrolledStudents(@Param('id', ParseIntPipe) id: number) {
-    return this.coursesService.getEnrolledStudents(id);
+  async getEnrolledStudents(@Param('id', ParseIntPipe) id: number, @CurrentUser() user: UserAccount) {
+    return this.coursesService.getEnrolledStudents(id, user);
   }
 }

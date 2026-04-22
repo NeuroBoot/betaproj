@@ -2,6 +2,15 @@
 
 FaceMark is a comprehensive solution for managing student attendance using automated AI facial recognition, role-based access control, and intuitive dashboards for Admins, Staff, and Students.
 
+## 🚀 Updates & Security Patches (Latest)
+
+Recent enhancements have hardened the application logic, resolving critical data isolation and role-based access control (RBAC) vulnerabilities:
+
+- **Strict Data Isolation**: Students can now only view courses they are actively enrolled in, and only their own attendance records. Staff view scopes are isolated to their assigned courses.
+- **Secure Registration**: The public `/api/v1/auth/register` endpoint strictly registers `STUDENT` accounts. Staff and Admin roles are provisioned exclusively through the protected `/api/v1/users` admin endpoint.
+- **Data Pruning**: Password hashes are stripped from all API user data responses.
+- **Operation Guards**: Attendance recording and student course enrollment are strictly checked against instructor assignments, preventing cross-course unauthorized modifications by staff.
+
 ---
 
 ## 🏗 Project Architecture

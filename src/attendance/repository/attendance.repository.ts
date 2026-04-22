@@ -18,7 +18,32 @@ export class AttendanceRepository {
 
   findAll() {
     return this.repo.find({
-      relations: ['student','course']
+      relations: ['student', 'course', 'course.instructor']
+    });
+  }
+
+  findByStudent(studentId: number) {
+    return this.repo.find({
+      where: { student: { userAccountId: studentId } },
+      relations: ['student', 'course', 'course.instructor']
+    });
+  }
+
+  findByStaff(staffId: number) {
+    return this.repo.find({
+      where: { course: { instructor: { userAccountId: staffId } } },
+      relations: ['student', 'course', 'course.instructor']
+    });
+  }
+
+  findByFilter(filter: { courseId: number; section: number; date: string }) {
+    return this.repo.find({
+      where: {
+        course: { courseId: filter.courseId },
+        sectionNumber: filter.section,
+        recordDate: new Date(filter.date)
+      },
+      relations: ['student', 'course']
     });
   }
 
@@ -27,6 +52,27 @@ export class AttendanceRepository {
       .createQueryBuilder('attendance')
       .select('attendance.attendanceStatusId','status')
       .addSelect('COUNT(*)','count')
+      .groupBy('attendance.attendanceStatusId')
+      .getRawMany();
+  }
+
+  statisticsByStaff(staffId: number) {
+    return this.repo
+      .createQueryBuilder('attendance')
+      .leftJoin('attendance.course', 'course')
+      .select('attendance.attendanceStatusId', 'status')
+      .addSelect('COUNT(*)', 'count')
+      .where('course.instructor.userAccountId = :staffId', { staffId })
+      .groupBy('attendance.attendanceStatusId')
+      .getRawMany();
+  }
+
+  statisticsByStudent(studentId: number) {
+    return this.repo
+      .createQueryBuilder('attendance')
+      .select('attendance.attendanceStatusId', 'status')
+      .addSelect('COUNT(*)', 'count')
+      .where('attendance.studentId = :studentId', { studentId })
       .groupBy('attendance.attendanceStatusId')
       .getRawMany();
   }

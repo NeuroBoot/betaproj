@@ -33,4 +33,16 @@ export class Attendance {
 
   @Column()
   attendanceStatusId: number;
+
+  @Column({ nullable: true })
+  room: string; // e.g., 'R3', 'N2'
+
+  @Column({
+    type: 'varchar',
+    default: 'LECTURE'
+  })
+  sessionType: string; // 'LECTURE' or 'SECTION'
+
+  @Column({ nullable: true })
+  sectionNumber: number;
 }

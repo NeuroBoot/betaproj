@@ -21,27 +21,22 @@ import { validate } from './common/config/env.validation';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
-        const dbSync = configService.get('DB_SYNCHRONIZE');
-        // Robust conversion to boolean
-        const synchronize = dbSync === 'true';
+        const syncValue = configService.get('DB_SYNCHRONIZE');
+        const isSync = syncValue === 'true' || syncValue === true;
+        console.log(`[Database] Connection Status: Initializing...`);
+        console.log(`[Database] Synchronize: ${isSync}`);
         
-        console.log('--- Database Configuration ---');
-        console.log('DB_HOST:', configService.get('DB_HOST'));
-        console.log('DB_NAME:', configService.get('DB_NAME'));
-        console.log('DB_SYNCHRONIZE (raw):', dbSync, typeof dbSync);
-        console.log('DB_SYNCHRONIZE (parsed):', synchronize);
-        console.log('------------------------------');
-
         return {
           type: 'mysql',
-          host: configService.get<string>('DB_HOST', 'localhost'),
+          host: configService.get<string>('DB_HOST'),
           port: configService.get<number>('DB_PORT', 3306),
-          username: configService.get<string>('DB_USERNAME', 'root'),
-          password: configService.get<string>('DB_PASSWORD', ''),
-          database: configService.get<string>('DB_NAME', 'facemark'),
+          username: configService.get<string>('DB_USERNAME'),
+          password: configService.get<string>('DB_PASSWORD'),
+          database: configService.get<string>('DB_NAME'),
           entities: [UserAccount, Course, Attendance],
-          synchronize: synchronize,
-          logging:  ['query', 'schema', 'error'], // Enable logging to see what TypeORM is doing
+          synchronize: false,
+          logging: ['error', 'warn'],
+          connectorPackage: 'mysql2',
         };
       },
     }),

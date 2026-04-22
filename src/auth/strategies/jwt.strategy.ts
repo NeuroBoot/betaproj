@@ -25,9 +25,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
    */
   async validate(payload: JwtPayload) {
     // Construct the user object from the token's claims.
+    // We provide both names for compatibility across the codebase.
     return { 
+      userAccountId: payload.sub,
       userId: payload.sub, 
       username: payload.username, 
+      userType: payload.role,
       role: payload.role 
     };
   }

@@ -31,7 +31,7 @@ export class Course {
   instructor: UserAccount;
 
   // Students enrolled in the course.
-  @ManyToMany(() => UserAccount)
+  @ManyToMany(() => UserAccount, (user) => user.enrolledCourses)
   @JoinTable({
     name: 'CourseEnrollment',
     joinColumn: { name: 'courseId', referencedColumnName: 'courseId' },
@@ -42,6 +42,12 @@ export class Course {
   // Attendance records for this course.
   @OneToMany(() => Attendance, (attendance) => attendance.course)
   attendanceRecords: Attendance[];
+
+  @Column({ default: 3 })
+  credits: number;
+
+  @Column({ type: 'text', nullable: true })
+  scheduleJson: string; // Storing schedule as JSON string for simplicity in SQLite
 
   @Column({ default: false })
   isDeleted: boolean;

@@ -66,18 +66,32 @@ export class AuthService {
    */
   async login(loginDto: LoginDto) {
     const { username, password, role } = loginDto;
+    console.log(`[AUTH DEBUG] Attempting login for: ${username}`);
     
     // Retrieve user by username.
     const user = await this.userRepository.findByUsername(username);
 
-    // Verify user existence and password validity.
-    if (!user || !(await bcrypt.compare(password, user.password))) {
+    if (!user) {
+      console.log(`[AUTH DEBUG] User not found: ${username}`);
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    // If a role is specified, ensure it matches the user's role.
-    if (role && user.userType !== role) {
-      throw new UnauthorizedException(`User is not a ${role}`);
+    // Check if the password matches (using Bcrypt).
+    let isMatch = await bcrypt.compare(password, user.password);
+    console.log(`[AUTH DEBUG] Bcrypt match: ${isMatch}`);
+
+    // [Migration Fallback] If Bcrypt fails, check if the password was stored as plain-text (old users).
+    if (!isMatch && password === user.password) {
+      console.log(`[AUTH DEBUG] Plain-text match found! Migrating user...`);
+      isMatch = true;
+      // Automatically hash the plain-text password for future logins.
+      user.password = await bcrypt.hash(password, 10);
+      await this.userRepository.save(user);
+    }
+
+    if (!isMatch) {
+      console.log(`[AUTH DEBUG] Password mismatch for ${username}. Stored: ${user.password.substring(0, 5)}...`);
+      throw new UnauthorizedException('Invalid credentials');
     }
 
     // Construct the JWT payload.
@@ -119,6 +133,20 @@ export class AuthService {
     // Issue new token.
     return {
       access_token: await this.jwtService.signAsync(payload),
+    };
+  }
+
+  async getProfile(userId: number) {
+    const user = await this.userRepository.findOne({
+      where: { userAccountId: userId },
+      relations: ['enrolledCourses', 'managedCourses', 'taughtCourses']
+    });
+    if (!user) throw new UnauthorizedException('User not found');
+    
+    const { password, ...result } = user;
+    return {
+      ...result,
+      totalCredits: user.enrolledCourses?.reduce((sum, c) => sum + (c.credits || 0), 0) || 0
     };
   }
 }

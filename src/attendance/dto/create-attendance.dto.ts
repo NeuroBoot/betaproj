@@ -1,4 +1,4 @@
-import { IsInt, IsDateString } from 'class-validator';
+import { IsInt, IsDateString, IsString } from 'class-validator';
 
 export class CreateAttendanceDto {
 
@@ -16,4 +16,12 @@ export class CreateAttendanceDto {
 
   @IsDateString()
   recordDate: string;
+@IsInt()
+sectionNumber: number;
+
+@IsString()
+room: string;
+
+@IsString()
+sessionType: string; // 'LECTURE' or 'SECTION'
 }

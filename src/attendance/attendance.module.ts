@@ -7,13 +7,15 @@ import { AttendanceRepository } from './repository/attendance.repository';
 import { UsersModule } from '../users/users.module';
 import { CoursesModule } from '../courses/courses.module';
 
+import { StudentController } from '../users/controllers/student.controller';
+
 @Module({
   imports: [
     TypeOrmModule.forFeature([Attendance]),
     UsersModule,
     CoursesModule,
   ],
-  controllers: [AttendanceController],
+  controllers: [AttendanceController, StudentController],
   providers: [AttendanceService, AttendanceRepository],
 })
 export class AttendanceModule {}

@@ -1,0 +1,422 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Attendance System Pro - 10y Dev Refactor",
+    "version": "3.0.0",
+    "description": "Comprehensive API documentation for the Attendance System. 10-Year Expert Refactor ensuring NaN protection, Credit Hour Fixes, and Bulk Save Support."
+  },
+  "servers": [
+    {
+      "url": "/api/v1",
+      "description": "Main API v1"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "JWT-auth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "security": [
+    {
+      "JWT-auth": []
+    }
+  ],
+  "paths": {
+    "/auth/register": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Register a new user",
+        "description": "Creates a new user account in the system.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": { "type": "string", "example": "ziad_taha" },
+                  "password": { "type": "string", "example": "password123" },
+                  "role": { "type": "string", "enum": ["admin", "staff", "student"], "example": "student" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "User successfully created" },
+          "409": { "description": "Username already exists" }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Login and get JWT token",
+        "description": "Authenticates user and returns a JWT access token.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": { "type": "string", "example": "ziad_taha" },
+                  "password": { "type": "string", "example": "password123" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Successfully logged in" },
+          "401": { "description": "Invalid credentials" }
+        }
+      }
+    },
+    "/auth/profile": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "Get full profile with credit hour calculations (NaN protected)",
+        "description": "Retrieves the authenticated user's profile with calculated metrics.",
+        "responses": {
+          "200": { "description": "User profile retrieved successfully" }
+        }
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Refresh JWT token",
+        "description": "Generates a new JWT token for the current session.",
+        "responses": {
+          "200": { "description": "Token refreshed" }
+        }
+      }
+    },
+    "/auth/admin-only": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "Test endpoint for Admin role only",
+        "description": "Verifies RBAC for admin users.",
+        "responses": {
+          "200": { "description": "Admin access confirmed" }
+        }
+      }
+    },
+    "/student/charts": {
+      "get": {
+        "tags": ["Student"],
+        "summary": "Retrieve RECURSIVE TREE for Diagram rendering",
+        "description": "Returns hierarchical JSON data (Course -> Section -> Session) for visual charts.",
+        "responses": {
+          "200": { "description": "Returns hierarchical JSON" }
+        }
+      }
+    },
+    "/student/alerts": {
+      "get": {
+        "tags": ["Student"],
+        "summary": "Get student attendance alerts",
+        "description": "Returns alerts if attendance falls below 75%.",
+        "responses": {
+          "200": { "description": "List of student alerts" }
+        }
+      }
+    },
+    "/alerts": {
+      "get": {
+        "tags": ["Alerts"],
+        "summary": "Get all user alerts",
+        "responses": {
+          "200": { "description": "List of alerts" }
+        }
+      },
+      "delete": {
+        "tags": ["Alerts"],
+        "summary": "Clear all alerts",
+        "responses": {
+          "200": { "description": "All alerts cleared" }
+        }
+      }
+    },
+    "/alerts/{id}": {
+      "delete": {
+        "tags": ["Alerts"],
+        "summary": "Delete specific alert",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Alert deleted" }
+        }
+      }
+    },
+    "/alerts/settings": {
+      "get": {
+        "tags": ["Alerts"],
+        "summary": "Get alert settings",
+        "responses": {
+          "200": { "description": "Alert settings retrieved" }
+        }
+      },
+      "put": {
+        "tags": ["Alerts"],
+        "summary": "Update alert settings",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "type": "object" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Settings updated" }
+        }
+      }
+    },
+    "/users": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "List all users (Admin only)",
+        "parameters": [
+          { "name": "role", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "List of users" }
+        }
+      },
+      "post": {
+        "tags": ["Users"],
+        "summary": "Create new user (Admin only)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "type": "object" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "User created" }
+        }
+      }
+    },
+    "/users/{id}": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "Get user details by ID (Admin only)",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "User details" }
+        }
+      },
+      "put": {
+        "tags": ["Users"],
+        "summary": "Update user (Admin only)",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "type": "object" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "User updated" }
+        }
+      },
+      "delete": {
+        "tags": ["Users"],
+        "summary": "Soft-delete user (Admin only)",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "User deleted" }
+        }
+      }
+    },
+    "/courses": {
+      "get": {
+        "tags": ["Courses"],
+        "summary": "List all active courses",
+        "responses": {
+          "200": { "description": "List of courses" }
+        }
+      },
+      "post": {
+        "tags": ["Courses"],
+        "summary": "Create course (Admin only)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "code": { "type": "string" },
+                  "sections": { "type": "integer" },
+                  "credits": { "type": "integer" },
+                  "instructorId": { "type": "integer" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Course created" }
+        }
+      }
+    },
+    "/courses/{id}": {
+      "get": {
+        "tags": ["Courses"],
+        "summary": "Get course details with section mapping",
+        "description": "Returns course details including 'data.sections' array for dropdowns.",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "Course details" }
+        }
+      },
+      "put": {
+        "tags": ["Courses"],
+        "summary": "Update course details (Admin only)",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "type": "object" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Course updated" }
+        }
+      },
+      "delete": {
+        "tags": ["Courses"],
+        "summary": "Delete course (Admin only)",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "Course deleted" }
+        }
+      }
+    },
+    "/courses/{id}/students": {
+      "post": {
+        "tags": ["Courses"],
+        "summary": "Enroll student in course (Admin/Staff only)",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "studentId": { "type": "integer" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Student enrolled" }
+        }
+      },
+      "get": {
+        "tags": ["Courses"],
+        "summary": "List students in course (Admin/Staff only)",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "List of enrolled students" }
+        }
+      }
+    },
+    "/attendance": {
+      "get": {
+        "tags": ["Attendance"],
+        "summary": "List attendance records",
+        "description": "Filter attendance by courseId, section, and date.",
+        "parameters": [
+          { "name": "courseId", "in": "query", "schema": { "type": "integer" } },
+          { "name": "section", "in": "query", "schema": { "type": "integer" } },
+          { "name": "date", "in": "query", "schema": { "type": "string", "format": "date" } }
+        ],
+        "responses": {
+          "200": { "description": "List of attendance records" }
+        }
+      },
+      "post": {
+        "tags": ["Attendance"],
+        "summary": "Create or Bulk Save Attendance",
+        "description": "Supports single record save or BULK attendance save. For bulk, provide 'attendance' array.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "courseId": { "type": "integer" },
+                  "studentId": { "type": "integer", "description": "Required for single save" },
+                  "recordDate": { "type": "string", "format": "date-time" },
+                  "attendanceStatusId": { "type": "integer" },
+                  "room": { "type": "string" },
+                  "sessionType": { "type": "string", "default": "LECTURE" },
+                  "sectionNumber": { "type": "integer" },
+                  "attendance": {
+                    "type": "array",
+                    "description": "Required for bulk save",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "studentId": { "type": "integer" },
+                        "status": { "type": "string", "example": "Present" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Attendance saved" }
+        }
+      }
+    },
+    "/attendance/statistics": {
+      "get": {
+        "tags": ["Attendance"],
+        "summary": "Get attendance statistics (Credit Fix)",
+        "description": "Returns calculated statistics ensuring no NaN values for all roles.",
+        "responses": {
+          "200": { "description": "Attendance statistics" }
+        }
+      }
+    }
+  }
+}
