@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Manual Attendance | FACEMARK</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+  <!-- Existing CSS -->
+  <link rel="stylesheet" href="css/styleattendance.css">
+
+  <style>
+    /* ===== COLORS ONLY – NOTHING REMOVED ===== */
+
+    body {
+      background: #0f0c29;
+  color: #ffffff;
+       min-height: 100vh;
+  font-family: "Segoe UI", sans-serif;
+    }
+
+    /* ===== Manual Card ===== */
+    .manual-card {
+    background: #1a1a3a;
+  border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 22px;
+      padding: 26px 28px;
+      margin-bottom: 30px;
+    
+    }
+
+    .manual-card h4 {
+      margin-bottom: 22px;
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    .manual-card .form-label {
+      color: #b0b0b0;
+      font-size: 13px;
+      margin-bottom: 6px;
+      display: block;
+    }
+.attendance-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table-wrapper {
+  max-height: 350px;
+  overflow-y: auto;
+}
+    .manual-input {
+      width: 100%;
+      height: 46px;
+      padding: 10px 14px;
+      border-radius: 14px;
+     
+       background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: #ffffff;
+      font-size: 14px;
+      appearance: none;
+    }
+
+    .manual-input:focus {
+      outline: none;
+     border-color: #3060ff;
+  background: rgba(255,255,255,0.06);
+    }
+
+    /* Select arrow */
+    select.manual-input {
+      background-image:
+        linear-gradient(45deg, transparent 50%, #cbd5e1 50%),
+        linear-gradient(135deg, #cbd5e1 50%, transparent 50%);
+      background-position:
+        calc(100% - 18px) 19px,
+        calc(100% - 13px) 19px;
+      background-size: 5px 5px, 5px 5px;
+      background-repeat: no-repeat;
+    }
+.table-wrapper {
+  overflow-x: auto;
+}
+.attendance-table {
+  min-width: 700px;
+}
+@media (max-width: 768px) {
+
+  .attendance-header {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .manual-card {
+    padding: 20px;
+  }
+
+  .panel {
+    padding: 18px;
+  }
+
+}
+    select.manual-input option {
+      background-color: #1e293b;
+      color: #ffffff;
+    }
+
+    select.manual-input option:hover {
+      background-color: #312e81;
+    }
+
+    .manual-input::-webkit-calendar-picker-indicator {
+      filter: invert(1);
+      opacity: 0.7;
+      cursor: pointer;
+    }
+
+    /* ===== Buttons ===== */
+    .load-btn,
+    .save-btn {
+      background: #3060ff;
+  color: #fff;
+      border: none;
+      padding: 10px 22px;
+      border-radius: 14px;
+      font-weight: 500;
+    }
+
+    .load-btn:hover,
+    .save-btn:hover {
+       background: #244ce0;
+    }
+
+    /* ===== Panel & Table (UNCHANGED STRUCTURE) ===== */
+    .panel {
+      background: #1a1a3a;
+  border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 20px;
+      padding: 22px;
+    }
+
+    .attendance-header h5 {
+      color: #ffffff;
+    }
+
+    .search-input {
+       background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: #fff;
+      border-radius: 12px;
+      padding: 8px 14px;
+    }
+
+    .attendance-table th {
+      color: #b0b0b0;
+    }
+
+    .attendance-table td {
+      color: #ffffff;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container-fluid">
+  <div class="row">
+<!-- Mobile Toggle -->
+<button class="btn btn-dark d-md-none m-3" type="button" 
+        data-bs-toggle="collapse" 
+        data-bs-target="#sidebarMenu">
+  <i class="bi bi-list"></i>
+</button>
+    <!-- Sidebar -->
+   <div class="col-md-2 collapse d-md-block sidebar" id="sidebarMenu">
+      <h5 class="mb-4"><img src="face.jpeg"  alt="" width="50px" height="50px"> FACEMARK</h5>
+      <p class="small text-muted " style="color:white !important">Staff Portal</p>
+
+      <div class="user-box">
+        <small>Welcome,</small>
+         <div class="user-name">guest1</div>
+        <small>Staff Portal</small>
+      </div>
+
+      <ul class="nav flex-column">
+        <li class="nav-item"><a class="nav-link" href="staffdashboard.html"><i class="bi bi-grid"></i> Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link active" href="#"><i class="bi bi-person-check"></i> Manual Attendance</a></li>
+        <li class="nav-item"><a class="nav-link" href="face-capture.html"><i class="bi bi-camera"></i> Face Capture</a></li>
+        <li class="nav-item"><a class="nav-link" href="charts.html"><i class="bi bi-bar-chart"></i> Charts & Reports</a></li>
+        <li class="nav-item"><a class="nav-link" href="export.html"><i class="bi bi-download"></i> Export</a></li>
+        <li class="nav-item"><a class="nav-link" href="alerts.html"><i class="bi bi-bell"></i> Alerts</a></li>
+      </ul>
+      <hr class="text-secondary">
+
+<button id="logoutBtn" class="btn btn-danger w-100 mt-2">
+    <i class="bi bi-box-arrow-right"></i> Sign Out
+</button>
+    </div>
+
+    <!-- Main -->
+    <div class="col-12 col-md-10 p-3 p-md-4">
+
+      <!-- Manual Attendance -->
+      <div class="manual-card">
+        <h4>Manual Attendance</h4>
+
+        <div class="row g-4 align-items-end">
+          <div class="col-md-4">
+            <label class="form-label">Course</label>
+            <select class="manual-input" id="courseSelect"></select>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Section</label>
+            <select class="manual-input"></select>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Date</label>
+            <input type="date" class="manual-input">
+          </div>
+
+          <div class="col-md-12">
+            <button class="load-btn">Load Attendance</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Attendance Table -->
+      <div class="panel">
+        <div class="attendance-header">
+          <h5>Attendance Record</h5>
+          <input class="search-input" placeholder="Search by ID...">
+        </div>
+<div class="table-wrapper">
+  <table class="attendance-table">
+          <thead>
+            <tr>
+              <th>Student ID</th>
+              <th>Name</th>
+              <th>Status</th>
+              <th>Time</th>
+              <th style="text-align:right">Action</th>
+            </tr>
+          </thead>
+         <tbody></tbody>
+         </table>
+</div>
+
+        <button class="save-btn">Save Attendance</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+const API_BASE_URL = 'http://localhost:3000/api/v1';
+
+document.addEventListener("DOMContentLoaded", function () {
+
+  const logoutBtn = document.getElementById('logoutBtn');
+  const loadBtn = document.querySelector(".load-btn");
+  const saveBtn = document.querySelector(".save-btn");
+  const tbody = document.querySelector(".attendance-table tbody");
+  const searchInput = document.querySelector(".search-input");
+  const usernameEl = document.querySelector(".user-name");
+
+  const courseSelect = document.getElementById("courseSelect");
+  const sectionSelect = document.querySelectorAll(".manual-input")[1];
+  const dateInput = document.querySelector('input[type="date"]');
+
+  let loadedAttendance = [];
+
+  // ================= USERNAME FROM LOGIN =================
+  const savedUsername = localStorage.getItem("username");
+  if (savedUsername) {
+    usernameEl.textContent = savedUsername;
+  }
+
+  // ================= TOKEN =================
+  function getToken() {
+    return localStorage.getItem('token');
+  }
+
+  function authHeaders() {
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${getToken()}`
+    };
+  }
+
+  function redirectToLogin() {
+    localStorage.clear();
+    window.location.href = "./sign in/index.html";
+  }
+
+  // ================= PROFILE (Fallback + Auth Check) =================
+  async function loadProfile() {
+    const token = getToken();
+    if (!token) return redirectToLogin();
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/auth/profile`, {
+        headers: authHeaders()
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error();
+
+      const user = data.data || data;
+
+      // fallback update
+      usernameEl.textContent = user.username || savedUsername || "Staff";
+
+      if ((user.role || "").toLowerCase() !== "staff") {
+        alert("Staff only");
+        redirectToLogin();
+      }
+
+    } catch {
+      redirectToLogin();
+    }
+  }
+
+  // ================= LOAD COURSES =================
+  async function loadCourses() {
+    try {
+      const res = await fetch(`${API_BASE_URL}/courses`, {
+        headers: authHeaders()
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error();
+
+      const courses = data.data || data;
+
+      courseSelect.innerHTML = `<option value="">Select Course</option>`;
+
+      courses.forEach(c => {
+        courseSelect.innerHTML += `
+          <option value="${c.id}">
+            ${c.name || c.title}
+          </option>
+        `;
+      });
+
+    } catch (err) {
+      console.error("Courses error:", err);
+    }
+  }
+
+  // ================= LOAD SECTIONS =================
+  async function loadSections(courseId) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/courses/${courseId}`, {
+        headers: authHeaders()
+      });
+
+      const data = await res.json();
+      const sections = data.data?.sections || [];
+
+      sectionSelect.innerHTML = "";
+
+      sections.forEach(sec => {
+        sectionSelect.innerHTML += `
+          <option value="${sec}">Section ${sec}</option>
+        `;
+      });
+
+    } catch (err) {
+      console.error("Sections error:", err);
+    }
+  }
+
+  // ================= LOAD STUDENTS =================
+  async function loadStudents(courseId) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/courses/${courseId}/students`, {
+        headers: authHeaders()
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error();
+
+      return data.data || [];
+
+    } catch (err) {
+      console.error("Students error:", err);
+      return [];
+    }
+  }
+
+  // ================= RENDER =================
+  function renderAttendanceRows(students) {
+    tbody.innerHTML = "";
+
+    if (!students.length) {
+      tbody.innerHTML = `<tr><td colspan="5">No data</td></tr>`;
+      return;
+    }
+
+    students.forEach(s => {
+      const row = document.createElement("tr");
+
+      row.innerHTML = `
+        <td>${s.studentId}</td>
+        <td>${s.name}</td>
+        <td><span class="status">${s.status}</span></td>
+        <td>${s.time}</td>
+        <td>
+          <select class="manual-input status-select">
+            <option ${s.status === "Present" ? "selected" : ""}>Present</option>
+            <option ${s.status === "Absent" ? "selected" : ""}>Absent</option>
+            <option ${s.status === "Late" ? "selected" : ""}>Late</option>
+          </select>
+        </td>
+      `;
+
+      tbody.appendChild(row);
+    });
+  }
+
+  // ================= LOAD ATTENDANCE =================
+  async function loadAttendance() {
+    if (!courseSelect.value || !sectionSelect.value || !dateInput.value) {
+      return alert("Select course, section & date");
+    }
+
+    const students = await loadStudents(courseSelect.value);
+
+    let oldAttendance = [];
+
+    try {
+      const res = await fetch(
+        `${API_BASE_URL}/attendance?courseId=${courseSelect.value}&section=${sectionSelect.value}&date=${dateInput.value}`,
+        { headers: authHeaders() }
+      );
+
+      const data = await res.json();
+      oldAttendance = data.data || [];
+
+    } catch {
+      console.log("No old attendance");
+    }
+
+    const merged = students.map(s => {
+      const record = oldAttendance.find(a =>
+        String(a.studentId) === String(s.id)
+      );
+
+      return {
+        studentId: s.id,
+        name: s.name,
+        status: record?.status || "Absent",
+        time: record?.time || "--"
+      };
+    });
+
+    loadedAttendance = merged;
+    renderAttendanceRows(merged);
+  }
+
+  // ================= SAVE =================
+  async function saveAttendance() {
+
+    if (!courseSelect.value || !sectionSelect.value || !dateInput.value) {
+      return alert("Complete all fields");
+    }
+
+    const rows = tbody.querySelectorAll("tr");
+
+    const attendance = [];
+
+    rows.forEach(row => {
+      const cells = row.children;
+
+      attendance.push({
+        studentId: cells[0].textContent,
+        status: row.querySelector("select").value,
+        time: cells[3].textContent
+      });
+    });
+
+    saveBtn.disabled = true;
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/attendance`, {
+        method: "POST",
+        headers: authHeaders(),
+        body: JSON.stringify({
+          courseId: courseSelect.value,
+          section: sectionSelect.value,
+          date: dateInput.value,
+          attendance
+        })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) throw new Error();
+
+      alert("Saved successfully");
+
+    } catch (err) {
+      console.error("Save error:", err);
+      alert("Save failed");
+    } finally {
+      saveBtn.disabled = false;
+    }
+  }
+
+  // ================= EVENTS =================
+  courseSelect.addEventListener("change", () => {
+    if (courseSelect.value) {
+      loadSections(courseSelect.value);
+    }
+  });
+
+  loadBtn.addEventListener("click", loadAttendance);
+  saveBtn.addEventListener("click", saveAttendance);
+
+  tbody.addEventListener("change", (e) => {
+    if (e.target.classList.contains("status-select")) {
+      const row = e.target.closest("tr");
+
+      const statusSpan = row.children[2].querySelector("span");
+      const timeCell = row.children[3];
+
+      statusSpan.textContent = e.target.value;
+
+      if (e.target.value !== "Absent") {
+        timeCell.textContent = new Date().toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+      } else {
+        timeCell.textContent = "--";
+      }
+    }
+  });
+
+  searchInput.addEventListener("keyup", function () {
+    const val = this.value.toLowerCase();
+
+    tbody.querySelectorAll("tr").forEach(row => {
+      row.style.display =
+        row.children[0].textContent.toLowerCase().includes(val)
+        ? "" : "none";
+    });
+  });
+
+  logoutBtn.addEventListener("click", () => {
+    localStorage.clear();
+    window.location.href = "./sign in/index.html";
+  });
+
+  // ================= INIT =================
+  loadProfile();
+  loadCourses();
+
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
