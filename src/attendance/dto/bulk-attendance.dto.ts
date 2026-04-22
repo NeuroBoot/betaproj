@@ -1,29 +1,30 @@
-import { IsInt, IsString, IsArray, ValidateNested, IsOptional } from 'class-validator';
+import { IsInt, IsString, IsArray, ValidateNested, IsOptional, IsNotEmpty } from 'class-validator';
 import { Type } from 'class-transformer';
 
 class IndividualAttendanceDto {
-  @IsString()
+  @IsNotEmpty({ message: 'Individual studentId is required' })
   studentId: string;
 
-  @IsString()
+  @IsNotEmpty({ message: 'Individual status is required' })
+  @IsString({ message: 'status must be a string' })
   status: string; // Present, Absent, Late
 
   @IsOptional()
-  @IsString()
+  @IsString({ message: 'time must be a string' })
   time?: string;
 }
 
 export class BulkAttendanceDto {
-  @IsString()
+  @IsNotEmpty({ message: 'courseId is required' })
   courseId: string;
 
-  @IsString()
+  @IsNotEmpty({ message: 'section is required' })
   section: string;
 
-  @IsString()
+  @IsNotEmpty({ message: 'date is required' })
   date: string;
 
-  @IsArray()
+  @IsArray({ message: 'attendance must be an array' })
   @ValidateNested({ each: true })
   @Type(() => IndividualAttendanceDto)
   attendance: IndividualAttendanceDto[];

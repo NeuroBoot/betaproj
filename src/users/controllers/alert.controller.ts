@@ -1,41 +1,42 @@
-import { Controller, Get, Delete, Put, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Delete, Put, Body, Param, UseGuards, ParseIntPipe } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import { UserAccount } from '../entities/user.entity';
+import { AlertService } from '../services/alert.service';
 
 @ApiTags('Alerts')
 @ApiBearerAuth('JWT-auth')
 @Controller('api/v1/alerts')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class AlertController {
+  constructor(private readonly alertService: AlertService) {}
   
   @Get()
   @ApiOperation({ summary: 'Get all user alerts' })
   async findAll(@CurrentUser() user: UserAccount) {
-    // Mock for now, linked to logic
-    return [
-      { id: 1, title: 'Low Attendance', message: 'You missed 3 sections in Math', type: 'danger', createdAt: new Date() },
-      { id: 2, title: 'System Update', message: 'The server will be down at midnight', type: 'info', createdAt: new Date() }
-    ];
+    return this.alertService.findAll(user);
   }
 
   @Delete()
   @ApiOperation({ summary: 'Clear all alerts' })
-  async clearAll() {
-    return { success: true };
+  async clearAll(@CurrentUser() user: UserAccount) {
+    await this.alertService.clearAll(user);
+    return { success: true, message: 'All alerts cleared successfully' };
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete specific alert' })
-  async remove(@Param('id') id: string) {
-    return { success: true };
+  async remove(@Param('id', ParseIntPipe) id: number, @CurrentUser() user: UserAccount) {
+    await this.alertService.remove(id, user);
+    return { success: true, message: `Alert ${id} deleted successfully` };
   }
 
   @Get('settings')
   @ApiOperation({ summary: 'Get alert settings' })
   async getSettings() {
+    // These could be moved to a UserSettings entity if needed
     return {
       lowAttendanceWarnings: true,
       systemUpdates: true,
@@ -46,6 +47,6 @@ export class AlertController {
   @Put('settings')
   @ApiOperation({ summary: 'Update alert settings' })
   async updateSettings(@Body() payload: any) {
-    return { success: true, data: payload };
+    return { success: true, message: 'Settings updated successfully', data: payload };
   }
 }

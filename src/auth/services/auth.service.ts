@@ -146,7 +146,7 @@ export class AuthService {
     const { password, ...result } = user;
     return {
       ...result,
-      totalCredits: user.enrolledCourses?.reduce((sum, c) => sum + (c.credits || 0), 0) || 0
+      totalCredits: (user.enrolledCourses || []).reduce((sum, c) => sum + (Number(c.credits) || 0), 0)
     };
   }
 }

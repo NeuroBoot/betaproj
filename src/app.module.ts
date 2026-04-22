@@ -34,7 +34,7 @@ import { validate } from './common/config/env.validation';
           password: configService.get<string>('DB_PASSWORD'),
           database: configService.get<string>('DB_NAME'),
           entities: [UserAccount, Course, Attendance],
-          synchronize: false,
+          synchronize: isSync,
           logging: ['error', 'warn'],
           connectorPackage: 'mysql2',
         };

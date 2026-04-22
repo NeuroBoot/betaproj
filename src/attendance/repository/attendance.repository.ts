@@ -16,6 +16,11 @@ export class AttendanceRepository {
     return this.repo.save(record);
   }
 
+  saveMany(records: Partial<Attendance>[]) {
+    const entities = this.repo.create(records);
+    return this.repo.save(entities);
+  }
+
   findAll() {
     return this.repo.find({
       relations: ['student', 'course', 'course.instructor']

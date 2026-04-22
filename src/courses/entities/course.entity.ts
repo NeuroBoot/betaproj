@@ -5,7 +5,7 @@ import { Attendance } from '../../attendance/entities/attendance.entity';
 /**
  * Database entity representing a course in the system.
  */
-@Entity('Course')
+@Entity('courses')
 export class Course {
   @PrimaryGeneratedColumn()
   courseId: number;
@@ -33,7 +33,7 @@ export class Course {
   // Students enrolled in the course.
   @ManyToMany(() => UserAccount, (user) => user.enrolledCourses)
   @JoinTable({
-    name: 'CourseEnrollment',
+    name: 'course_enrollments',
     joinColumn: { name: 'courseId', referencedColumnName: 'courseId' },
     inverseJoinColumn: { name: 'userAccountId', referencedColumnName: 'userAccountId' },
   })

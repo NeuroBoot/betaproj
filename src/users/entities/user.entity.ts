@@ -7,7 +7,7 @@ import { Attendance } from '../../attendance/entities/attendance.entity';
  * Database entity representing a user account in the system.
  * Maps to the 'UserAccount' table in MySQL.
  */
-@Entity('UserAccount')
+@Entity('users')
 export class UserAccount {
   // Unique primary identifier for each user.
   @PrimaryGeneratedColumn()

@@ -1,10 +1,12 @@
-import { Injectable, NotFoundException, ForbiddenException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, ConflictException, BadRequestException } from '@nestjs/common';
 import { AttendanceRepository } from '../repository/attendance.repository';
 import { CreateAttendanceDto } from '../dto/create-attendance.dto';
+import { BulkAttendanceDto } from '../dto/bulk-attendance.dto';
 import { UserRepository } from '../../users/repositories/user.repository';
 import { CourseRepository } from '../../courses/repositories/course.repository';
 import { Role } from '../../common/enums/role.enum';
 import { UserAccount } from '../../users/entities/user.entity';
+import { In } from 'typeorm';
 
 @Injectable()
 export class AttendanceService {
@@ -18,7 +20,7 @@ export class AttendanceService {
     // 1. Verify Student exists and is actually a student
     const student = await this.userRepo.findById(dto.studentId);
     if (!student || student.userType !== Role.STUDENT) {
-      throw new NotFoundException(`Student with ID ${dto.studentId} not found`);
+      throw new NotFoundException(`Student with ID ${dto.studentId} not found or is not a student`);
     }
 
     // 2. Verify Course exists
@@ -31,14 +33,14 @@ export class AttendanceService {
     }
 
     // 3. Permission check: Staff can only record attendance for their own courses
-    if (user.userType === Role.STAFF && course.instructor.userAccountId !== user.userAccountId) {
+    if (user.userType === Role.STAFF && course.instructor?.userAccountId !== user.userAccountId) {
       throw new ForbiddenException('You can only record attendance for your own courses');
     }
 
     // 4. Verify Student is enrolled in Course
-    const isEnrolled = course.students.some(s => s.userAccountId === student.userAccountId);
+    const isEnrolled = course.students?.some(s => s.userAccountId === student.userAccountId);
     if (!isEnrolled) {
-      throw new ForbiddenException(`Student is not enrolled in course ${course.name}`);
+      throw new ForbiddenException(`Student ${student.username} is not enrolled in course ${course.name}`);
     }
 
     // 5. Determine and verify staffId
@@ -78,16 +80,14 @@ export class AttendanceService {
       }
     });
 
-    if (!student) throw new NotFoundException('Student not found');
+    if (!student) throw new NotFoundException(`Student with ID ${userId} not found`);
 
     const diagram = {
       student: {
         name: student.username,
-        // Safety check to prevent NaN
         totalCredits: (student.enrolledCourses || []).reduce((sum, c) => sum + (Number(c.credits) || 0), 0),
       },
-      // Structural Diagram Data (Nodes & Links style)
-      structure: student.enrolledCourses.map(course => ({
+      structure: (student.enrolledCourses || []).map(course => ({
         id: `course-${course.courseId}`,
         label: course.name,
         type: 'course',
@@ -97,21 +97,20 @@ export class AttendanceService {
             id: `course-${course.courseId}-lec`,
             label: 'Lectures',
             type: 'session_group',
-            room: 'R3/R2', // Dynamic lookup
-            stats: this.calculateSessionStats(student.attendanceRecords, course.courseId, 'LECTURE')
+            room: 'R3/R2', 
+            stats: this.calculateSessionStats(student.attendanceRecords || [], course.courseId, 'LECTURE')
           },
           {
             id: `course-${course.courseId}-sec`,
             label: 'Sections',
             type: 'session_group',
-            room: 'N2/N3', // Dynamic lookup
-            stats: this.calculateSessionStats(student.attendanceRecords, course.courseId, 'SECTION')
+            room: 'N2/N3',
+            stats: this.calculateSessionStats(student.attendanceRecords || [], course.courseId, 'SECTION')
           }
         ]
       })),
-      // Keep legacy fields for chart fallback but ensure no NaN
-      courses: student.enrolledCourses.map(course => {
-        const records = student.attendanceRecords.filter(r => r.course.courseId === course.courseId);
+      courses: (student.enrolledCourses || []).map(course => {
+        const records = (student.attendanceRecords || []).filter(r => r.course?.courseId === course.courseId);
         return {
           courseName: course.name,
           credits: Number(course.credits) || 0,
@@ -122,7 +121,7 @@ export class AttendanceService {
       }),
       metrics: {
         avg: '88%',
-        topCourse: student.enrolledCourses[0]?.name || 'N/A',
+        topCourse: student.enrolledCourses?.[0]?.name || 'N/A',
         riskStudents: 0,
         aiAccuracy: '99.2%'
       }
@@ -132,7 +131,7 @@ export class AttendanceService {
   }
 
   private calculateSessionStats(records: any[], courseId: number, type: string) {
-    const filtered = records.filter(r => r.course.courseId === courseId && r.sessionType === type);
+    const filtered = records.filter(r => r.course?.courseId === courseId && r.sessionType === type);
     return {
       attended: filtered.filter(r => r.attendanceStatusId === 1).length,
       total: filtered.length,
@@ -140,35 +139,77 @@ export class AttendanceService {
     };
   }
 
-  async saveBulk(dto: any, user: UserAccount) {
+  async saveBulk(dto: BulkAttendanceDto, user: UserAccount) {
+    const courseId = parseInt(dto.courseId);
+    if (isNaN(courseId)) throw new BadRequestException(`Invalid courseId: ${dto.courseId}`);
+
     const course = await this.courseRepo.findOne({
-      where: { courseId: parseInt(dto.courseId) },
+      where: { courseId, isDeleted: false },
+      relations: ['students', 'instructor']
     });
-    if (!course) throw new NotFoundException('Course not found');
+    if (!course) throw new NotFoundException(`Course with ID ${courseId} not found`);
 
-    const records = [];
+    // Permission check
+    if (user.userType === Role.STAFF && course.instructor?.userAccountId !== user.userAccountId) {
+      throw new ForbiddenException('You can only record attendance for your own courses');
+    }
+
+    const studentIds = dto.attendance.map(a => parseInt(a.studentId)).filter(id => !isNaN(id));
+    if (studentIds.length === 0) throw new BadRequestException('No valid student IDs provided in attendance list');
+
+    const students = await this.userRepo.find({
+      where: { userAccountId: In(studentIds), isDeleted: false, userType: Role.STUDENT }
+    });
+
+    const studentMap = new Map(students.map(s => [s.userAccountId, s]));
+    const recordsToSave = [];
+    const skippedStudents = [];
+
     for (const item of dto.attendance) {
-      const student = await this.userRepo.findOne({ where: { userAccountId: parseInt(item.studentId) } });
-      if (!student) continue;
+      const sId = parseInt(item.studentId);
+      const student = studentMap.get(sId);
+      
+      if (!student) {
+        skippedStudents.push(item.studentId);
+        continue;
+      }
 
-      const record = this.attendanceRepo.create({
+      // Verify enrollment
+      const isEnrolled = course.students?.some(s => s.userAccountId === student.userAccountId);
+      if (!isEnrolled) {
+        skippedStudents.push(`${item.studentId} (Not enrolled)`);
+        continue;
+      }
+
+      recordsToSave.push({
         recordDate: new Date(dto.date),
         student: student,
         course: course,
         staffId: user.userAccountId,
         attendanceStatusId: this.mapStatusToId(item.status),
-        room: 'Manual',
+        room: 'Manual Bulk',
         sessionType: 'SECTION',
-        sectionNumber: parseInt(dto.section),
+        sectionNumber: parseInt(dto.section) || 1,
       });
-      records.push(record);
     }
-    return records;
+
+    if (recordsToSave.length === 0) {
+      throw new BadRequestException(`No records were saved. Found issues with: ${skippedStudents.join(', ')}`);
+    }
+
+    const savedRecords = await this.attendanceRepo.saveMany(recordsToSave);
+
+    return {
+      message: `Successfully saved ${savedRecords.length} attendance records.`,
+      savedCount: savedRecords.length,
+      skippedCount: skippedStudents.length,
+      skipped: skippedStudents.length > 0 ? skippedStudents : undefined
+    };
   }
 
   private mapStatusToId(status: string): number {
     const map = { 'Present': 1, 'Absent': 2, 'Late': 3, 'Excused': 4 };
-    return map[status] || 2;
+    return map[status] || 2; // Default to Absent if unknown
   }
 
   async findAll(user: UserAccount, query?: any) {
@@ -177,12 +218,11 @@ export class AttendanceService {
     }
 
     if (user.userType === Role.STAFF) {
-      // If query params provided (from manual attendance page)
       if (query?.courseId) {
         return this.attendanceRepo.findByFilter({
           courseId: parseInt(query.courseId),
-          section: parseInt(query.section),
-          date: query.date
+          section: parseInt(query.section) || 1,
+          date: query.date || new Date().toISOString()
         });
       }
       return this.attendanceRepo.findByStaff(user.userAccountId);
@@ -207,7 +247,6 @@ export class AttendanceService {
       return [];
     }
     
-    // Map status IDs to names (Matching frontend logic)
     const statusMap = {
       1: 'Present',
       2: 'Absent',
@@ -217,7 +256,7 @@ export class AttendanceService {
 
     return rawStats.map(stat => ({
       status: statusMap[stat.status] || `Unknown (${stat.status})`,
-      count: parseInt(stat.count)
+      count: parseInt(stat.count) || 0
     }));
   }
 }

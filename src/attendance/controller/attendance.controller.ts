@@ -6,10 +6,11 @@ import {
   Query,
   UseGuards
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 
 import { AttendanceService } from '../services/attendance.service';
 import { CreateAttendanceDto } from '../dto/create-attendance.dto';
+import { BulkAttendanceDto } from '../dto/bulk-attendance.dto';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Roles } from '../../auth/decorators/roles.decorator';
@@ -35,11 +36,13 @@ export class AttendanceController {
   @Post()
   @Roles(Role.ADMIN, Role.STAFF)
   @ApiOperation({ summary: 'Create/Bulk-save attendance record' })
+  @ApiBody({ description: 'Can accept either a single CreateAttendanceDto or a BulkAttendanceDto' })
   create(@Body() dto: any, @CurrentUser() user: UserAccount) {
+    // Determine if it is a bulk save operation
     if (dto.attendance && Array.isArray(dto.attendance)) {
-      return this.service.saveBulk(dto, user);
+      return this.service.saveBulk(dto as BulkAttendanceDto, user);
     }
-    return this.service.create(dto, user);
+    return this.service.create(dto as CreateAttendanceDto, user);
   }
 
   @Get('statistics')
