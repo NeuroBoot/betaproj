@@ -5,105 +5,84 @@
   <title>FaceMark | Student Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
+  <!-- Bootstrap (used elsewhere, NOT in Today Schedule) -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 
 <style>
+/* ========== GLOBAL ========== */
 body {
-  background: #0f0c29;
-  color: #ffffff;
+  background: linear-gradient(135deg, #0f1224, #15193a);
+  color: #e5e7eb;
   min-height: 100vh;
   font-family: "Segoe UI", sans-serif;
   display: flex;
 }
 
+/* ========== SIDEBAR  ========== */
 .sidebar {
   width: 240px;
-  background: #15132b;
+  background: linear-gradient(180deg, #0c0f2d, #11164a);
   min-height: 100vh;
   padding: 20px;
 }
 
 .user-box {
-  background: #1a1a3a;
+  background: linear-gradient(135deg, #1f2547, #2a2f5a);
   border-radius: 14px;
   padding: 14px;
   margin: 18px 0 24px;
 }
 
-.user-box small {
-  color: #b0b0b0;
-  font-size: 13px;
-}
-
-.user-name {
-  font-size: 16px;
-  font-weight: 600;
-  color: #ffffff;
-}
+.user-box small { color: #aab0ff; font-size: 13px; }
+.user-name { font-size: 16px; font-weight: 600; color: #fff; }
 
 .sidebar .nav-link {
-  color: #b0b0b0;
+  color: #bfc4ff;
   margin-bottom: 10px;
   border-radius: 10px;
   padding: 10px 14px;
-  text-decoration: none;
 }
 
 .sidebar .nav-link.active,
 .sidebar .nav-link:hover {
-  background: #3060ff;
-  color: #ffffff;
+  background: #2b5cff;
+  color: #fff;
 }
 
+/* ========== MAIN WRAPPER ========== */
 .main-wrapper {
   flex: 1;
   margin: 16px;
-  background: #1a1a3a;
+  background: linear-gradient(135deg, #1b2040, #20245a);
   border-radius: 24px;
   padding: 24px;
-  border: 1px solid rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.35);
 }
 
+/* ========== STATS CARDS ========== */
 .stats-card {
   border-radius: 18px;
   padding: 20px;
   background: linear-gradient(135deg, #1e3a8a, #1e40af);
 }
 
-.card-attendance {
-  background: rgba(48,96,255,0.389);
-  border-left: 4px solid #3060ff;
-}
+.card-attendance { background: linear-gradient(135deg, #1e3a8a, #1e40af); }
+.card-classes { background: linear-gradient(135deg, #1f255a, #2b2f82); }
+.card-courses { background: linear-gradient(135deg, #3b1d5a, #5b2b82); }
 
-.card-classes {
-  background: rgba(46,204,112,0.377);
-  border-left: 4px solid #2ecc71;
-}
+.stats-title { color: #c7d2fe; font-size: 14px; }
+.stats-value { font-size: 28px; font-weight: 700; }
+.stats-sub { font-size: 13px; margin-top: 4px; }
 
-.card-courses {
-  background: rgba(156,89,182,0.436);
-  border-left: 4px solid #9b59b6;
-}
-
-.stats-title {
-  color: #b0b0b0;
-  font-size: 14px;
-}
-
-.stats-value {
-  font-size: 28px;
-  font-weight: 700;
-}
-
-.stats-sub {
-  font-size: 13px;
-  margin-top: 4px;
-}
+/* ================================================= */
+/* ========== TODAY SCHEDULE (PURE CSS) ========== */
+/* ================================================= */
 
 .today-schedule {
-  background: #1a1a3a;
+  background: linear-gradient(135deg, #1f2937, #273549);
   border-radius: 20px;
   padding: 22px;
   margin-bottom: 24px;
@@ -115,8 +94,9 @@ body {
   color: #ffffff;
 }
 
+/* Single class row */
 .schedule-row {
-  background: rgba(255,255,255,0.04);
+  background: rgba(255,255,255,0.06);
   border-radius: 14px;
   padding: 16px 18px;
   margin-bottom: 14px;
@@ -126,6 +106,7 @@ body {
   position: relative;
 }
 
+/* Left colored line */
 .schedule-row::before {
   content: "";
   position: absolute;
@@ -134,12 +115,13 @@ body {
   width: 6px;
   height: 100%;
   border-radius: 14px 0 0 14px;
-  background: #2ecc71;
+  background: #22c55e;
 }
 
-.schedule-row.in-progress::before { background: #3060ff; }
-.schedule-row.upcoming::before { background: #9b59b6; }
+.schedule-row.in-progress::before { background: #3b82f6; }
+.schedule-row.upcoming::before { background: #9ca3af; }
 
+/* Info */
 .schedule-info strong {
   display: block;
   font-size: 14px;
@@ -148,16 +130,17 @@ body {
 
 .schedule-info span {
   font-size: 13px;
-  color: #b0b0b0;
+  color: #c7d2fe;
 }
 
+/* Right side */
 .schedule-meta {
   text-align: right;
 }
 
 .schedule-meta .time {
   font-size: 13px;
-  color: #ffff;
+  color: #e5e7eb;
 }
 
 .schedule-meta .status {
@@ -169,23 +152,25 @@ body {
   font-weight: 500;
 }
 
+/* Status colors */
 .status-attended {
-  background: rgba(46,204,112,0.15);
-  color: #2ecc71;
+  background: rgba(34,197,94,0.15);
+  color: #22c55e;
 }
 
 .status-progress {
-  background: rgba(48,96,255,0.15);
-  color: #3060ff;
+  background: rgba(59,130,246,0.15);
+  color: #60a5fa;
 }
 
 .status-upcoming {
-  background: rgba(156,89,182,0.15);
-  color: #9b59b6;
+  background: rgba(156,163,175,0.15);
+  color: #d1d5db;
 }
 
+/* ========== ATTENDANCE HISTORY ========== */
 .attendance-history {
-  background: #1a1a3a;
+  background: linear-gradient(135deg, #1f2937, #273549);
   border-radius: 18px;
   padding: 20px;
   margin-top: 24px;
@@ -199,7 +184,7 @@ body {
 .history-table th,
 .history-table td {
   padding: 12px;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 
 .history-status {
@@ -209,35 +194,28 @@ body {
 }
 
 .history-present {
-  background: rgba(46,204,112,0.15);
-  color: #2ecc71;
+  background: rgba(34,197,94,0.15);
+  color: #22c55e;
 }
 
 .history-absent {
-  background: rgba(230,125,34,0.15);
-  color: #e67e22;
-}
-
-.logout-link {
-  color: #fff;
-  cursor: pointer;
-  text-decoration: none;
+  background: rgba(239,68,68,0.15);
+  color: #ef4444;
 }
 </style>
 </head>
 
 <body>
 
+<!-- SIDEBAR  -->
 <div class="sidebar">
-  <h5 class="mb-4">
-    <img src="face.jpeg" alt="" width="50" height="50"> FACEMARK
-  </h5>
-  <p class="small text-muted" style="color:white !important">Student Portal</p>
+  <h5 class="mb-4"><i class="bi bi-eye"></i> FACEMARK</h5>
+  <p class="small text-muted">Student Portal</p>
 
   <div class="user-box">
     <small>Welcome,</small>
-    <div class="user-name" id="username">Loading...</div>
-    <small id="userRoleLabel">Student Portal</small>
+    <div class="user-name">سَس</div>
+    <small>Student Portal</small>
   </div>
 
   <ul class="nav flex-column">
@@ -250,18 +228,18 @@ body {
   </ul>
 
   <hr class="text-secondary">
-  <button id="logoutBtn" class="btn btn-danger w-100 mt-2">
-    <i class="bi bi-box-arrow-right"></i> Sign Out
-</button>
+  <a><i class="fa-solid fa-right-from-bracket me-2"></i> Sign Out</a>
 </div>
 
+<!-- MAIN CONTENT -->
 <div class="main-wrapper">
 
+  <!-- TOP STATS -->
   <div class="row g-4 mb-4">
     <div class="col-md-4">
       <div class="stats-card card-attendance">
         <div class="stats-title">Overall Attendance</div>
-        <div class="stats-value" id="overallAttendance">92%</div>
+        <div class="stats-value">92%</div>
         <div class="stats-sub text-success">Excellent performance</div>
       </div>
     </div>
@@ -269,7 +247,7 @@ body {
     <div class="col-md-4">
       <div class="stats-card card-classes">
         <div class="stats-title">Classes Attended</div>
-        <div class="stats-value" id="classesAttended">156/170</div>
+        <div class="stats-value">156/170</div>
         <div class="stats-sub text-info">This semester</div>
       </div>
     </div>
@@ -277,16 +255,51 @@ body {
     <div class="col-md-4">
       <div class="stats-card card-courses">
         <div class="stats-title">Total Courses</div>
-        <div class="stats-value" id="totalCourses">4</div>
-        <div class="stats-sub text-muted" style="color:white !important">Active courses</div>
+        <div class="stats-value">4</div>
+        <div class="stats-sub text-muted">Active courses</div>
       </div>
     </div>
   </div>
 
-  <div class="today-schedule" id="todaySchedule">
-  <h5>Today's Schedule</h5>
-</div>
+  <!-- TODAY SCHEDULE (PURE CSS) -->
+  <div class="today-schedule">
+    <h5>Today's Schedule</h5>
 
+    <div class="schedule-row">
+      <div class="schedule-info">
+        <strong>Mathematics</strong>
+        <span>Dr. Ahmed Hassan</span>
+      </div>
+      <div class="schedule-meta">
+        <div class="time">08:00 - 10:00</div>
+        <div class="status status-attended">Attended</div>
+      </div>
+    </div>
+
+    <div class="schedule-row in-progress">
+      <div class="schedule-info">
+        <strong>Physics</strong>
+        <span>Dr. Sara Mohamed</span>
+      </div>
+      <div class="schedule-meta">
+        <div class="time">10:30 - 12:30</div>
+        <div class="status status-progress">In Progress</div>
+      </div>
+    </div>
+
+    <div class="schedule-row upcoming">
+      <div class="schedule-info">
+        <strong>Chemistry</strong>
+        <span>Dr. Omar Ali</span>
+      </div>
+      <div class="schedule-meta">
+        <div class="time">13:00 - 15:00</div>
+        <div class="status status-upcoming">Upcoming</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RECENT ATTENDANCE -->
   <div class="attendance-history">
     <h5>Recent Attendance History</h5>
 
@@ -300,242 +313,29 @@ body {
         </tr>
       </thead>
       <tbody>
+        <tr>
+          <td>Nov 26, 2024</td>
+          <td>Mathematics</td>
+          <td>08:15 AM</td>
+          <td><span class="history-status history-present">Present</span></td>
+        </tr>
+        <tr>
+          <td>Nov 25, 2024</td>
+          <td>Physics</td>
+          <td>10:42 AM</td>
+          <td><span class="history-status history-present">Present</span></td>
+        </tr>
+        <tr>
+          <td>Nov 24, 2024</td>
+          <td>Chemistry</td>
+          <td>-</td>
+          <td><span class="history-status history-absent">Absent</span></td>
+        </tr>
       </tbody>
     </table>
   </div>
 
 </div>
 
-<script>
-const API_BASE_URL = 'http://localhost:3000/api/v1';
-
-/* ================= TOKEN ================= */
-function getToken() {
-  return localStorage.getItem('token');
-}
-
-function authHeaders() {
-  return {
-    'Authorization': `Bearer ${getToken()}`,
-    'Content-Type': 'application/json'
-  };
-}
-
-function redirectToLogin() {
-  localStorage.clear();
-  window.location.href = './sign in/index.html';
-}
-
-/* ================= PROFILE ================= */
-async function loadProfile() {
-  const token = getToken();
-  if (!token) return redirectToLogin();
-
-  try {
-    const res = await fetch(`${API_BASE_URL}/auth/profile`, {
-      headers: authHeaders()
-    });
-
-    const data = await res.json();
-    if (!res.ok) throw new Error();
-
-    const user = data.data || data;
-
-    document.getElementById("username").textContent =
-      user.username || "Student";
-
-    const role = (user.role || "").toLowerCase();
-
-    document.getElementById("userRoleLabel").textContent =
-      role.charAt(0).toUpperCase() + role.slice(1) + " Portal";
-
-    if (role !== "student") {
-      alert("Students only");
-      redirectToLogin();
-    }
-
-  } catch {
-    redirectToLogin();
-  }
-}
-
-/* ================= STATS ================= */
-async function loadStats() {
-  try {
-    const res = await fetch(`${API_BASE_URL}/attendance/statistics`, {
-      headers: authHeaders()
-    });
-
-    const data = await res.json();
-    const stats = data.data || data;
-
-    document.getElementById("overallAttendance").textContent =
-      (stats.attendanceRate || 0) + "%";
-
-    document.getElementById("classesAttended").textContent =
-      `${stats.attended || 0}/${stats.total || 0}`;
-
-  } catch {
-    console.log("Stats fallback");
-  }
-}
-
-/* ================= COURSES ================= */
-async function loadCourses() {
-  try {
-    const res = await fetch(`${API_BASE_URL}/courses`, {
-      headers: authHeaders()
-    });
-
-    const data = await res.json();
-    const courses = data.data || data;
-
-    document.getElementById("totalCourses").textContent =
-      courses.length || 0;
-
-  } catch {
-    console.log("Courses error");
-  }
-}
-
-/* ================= TODAY SCHEDULE ================= */
-async function loadSchedule() {
-
-  const container = document.getElementById("todaySchedule");
-
-  // 🔥 Loading state
-  container.innerHTML = `
-    <h5>Today's Schedule</h5>
-    <p>Loading...</p>
-  `;
-
-  try {
-    const res = await fetch(`${API_BASE_URL}/attendance`, {
-      headers: authHeaders()
-    });
-
-    const data = await res.json();
-    const records = data.data || data;
-
-    console.log("Attendance:", records);
-
-    const today = new Date().toDateString();
-
-    const todayData = records.filter(r => {
-      return new Date(r.date).toDateString() === today;
-    });
-
-    container.innerHTML = `<h5>Today's Schedule</h5>`;
-
-    if (todayData.length === 0) {
-      container.innerHTML += "<p>No classes today</p>";
-      return;
-    }
-
-    todayData.forEach(r => {
-
-      const status = (r.status || "").toLowerCase();
-
-      let statusClass = "status-upcoming";
-      let rowClass = "upcoming";
-
-      if (status === "present") {
-        statusClass = "status-attended";
-        rowClass = "";
-      } else if (status === "in-progress") {
-        statusClass = "status-progress";
-        rowClass = "in-progress";
-      }
-
-      container.innerHTML += `
-        <div class="schedule-row ${rowClass}">
-          <div class="schedule-info">
-            <strong>${r.course || "Course"}</strong>
-            <span>${r.instructor || "Instructor"}</span>
-          </div>
-          <div class="schedule-meta">
-            <div class="time">${r.time || "-"}</div>
-            <div class="status ${statusClass}">
-              ${r.status || "Upcoming"}
-            </div>
-          </div>
-        </div>
-      `;
-    });
-
-  } catch (error) {
-    console.error("Schedule error:", error);
-    container.innerHTML = `
-      <h5>Today's Schedule</h5>
-      <p style="color:red;">Failed to load schedule</p>
-    `;
-  }
-}
-
-/* ================= HISTORY ================= */
-async function loadHistory() {
-  try {
-    const res = await fetch(`${API_BASE_URL}/attendance`, {
-      headers: authHeaders()
-    });
-
-    const data = await res.json();
-    const records = data.data || data;
-
-    const tbody = document.querySelector(".history-table tbody");
-    tbody.innerHTML = "";
-
-    if (!records.length) {
-      tbody.innerHTML = `<tr><td colspan="4">No data</td></tr>`;
-      return;
-    }
-
-    records.slice(0, 5).forEach(r => {
-
-      const statusClass =
-        (r.status || "").toLowerCase() === "present"
-          ? "history-present"
-          : "history-absent";
-
-      tbody.innerHTML += `
-        <tr>
-          <td>${formatDate(r.date)}</td>
-          <td>${r.course || "-"}</td>
-          <td>${r.time || "-"}</td>
-          <td>
-            <span class="history-status ${statusClass}">
-              ${r.status || "-"}
-            </span>
-          </td>
-        </tr>
-      `;
-    });
-
-  } catch (error) {
-    console.error("History error:", error);
-  }
-}
-
-/* ================= HELPERS ================= */
-function formatDate(dateStr) {
-  if (!dateStr) return "-";
-  return new Date(dateStr).toDateString();
-}
-
-/* ================= LOGOUT ================= */
-document.getElementById("logoutBtn").addEventListener("click", () => {
-  localStorage.clear();
-  window.location.href = './sign in/index.html';
-});
-
-/* ================= INIT ================= */
-document.addEventListener("DOMContentLoaded", () => {
-  loadProfile();
-  loadStats();
-  loadCourses();
-  loadSchedule();
-  loadHistory();
-});
-</script>
 </body>
 </html>

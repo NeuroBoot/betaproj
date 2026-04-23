@@ -13,129 +13,117 @@
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
- <style>
+  <style>
+    /* ===== GLOBAL ===== */
+    body {
+      margin: 0;
+      display: flex;
+      background: linear-gradient(135deg, #0f1224, #15193a);
+      color: #fff;
+      min-height: 100vh;
+      font-family: system-ui;
+    }
 
-/* ===== GLOBAL ===== */
-body {
-  margin: 0;
-  display: flex;
-  background: #0f0c29;
-  color: #ffffff;
-  min-height: 100vh;
-  font-family: system-ui;
-}
+    /* ===== SIDEBAR (UNCHANGED) ===== */
+    .sidebar {
+      width: 240px;
+      background: linear-gradient(180deg, #0c0f2d, #11164a);
+      min-height: 100vh;
+      padding: 20px;
+      flex-shrink: 0;
+    }
 
-/* ===== SIDEBAR ===== */
-.sidebar {
-  width: 240px;
-  background: #15132b;
-  min-height: 100vh;
-  padding: 20px;
-  flex-shrink: 0;
-  border-right: 1px solid rgba(255,255,255,0.05);
-}
+    .user-box {
+      background: linear-gradient(135deg, #1f2547, #2a2f5a);
+      border-radius: 14px;
+      padding: 14px;
+      margin: 18px 0 24px;
+    }
 
-.user-box {
-  background: #1a1a3a;
-  border-radius: 14px;
-  padding: 14px;
-  margin: 18px 0 24px;
-}
+    .user-box small { color: #aab0ff; font-size: 13px; }
+    .user-name { font-size: 16px; font-weight: 600; }
 
-.user-box small { color: #b0b0b0; font-size: 13px; }
+    .sidebar .nav-link {
+      color: #bfc4ff;
+      margin-bottom: 10px;
+      border-radius: 10px;
+      padding: 10px 14px;
+    }
 
-.user-name { 
-  font-size: 16px; 
-  font-weight: 600; 
-  color: #ffffff;
-}
+    .sidebar .nav-link.active,
+    .sidebar .nav-link:hover {
+      background: #2b5cff;
+      color: #fff;
+    }
 
-.sidebar .nav-link {
-  color: #b0b0b0;
-  margin-bottom: 10px;
-  border-radius: 10px;
-  padding: 10px 14px;
-}
+    /* ===== CONTENT ===== */
+    .content {
+      flex: 1;
+      padding: 30px;
+    }
 
-.sidebar .nav-link.active,
-.sidebar .nav-link:hover {
-  background: #3060ff;
-  color: #ffffff;
-  box-shadow: 0 4px 12px rgba(48,96,255,0.2);
-}
+    /* ===== PANELS ===== */
+    .panel {
+      background: linear-gradient(135deg, #1f2547, #2a2f5a);
+      border-radius: 18px;
+      padding: 25px;
+      margin-bottom: 25px;
+    }
 
-/* ===== CONTENT ===== */
-.content {
-  flex: 1;
-  padding: 30px;
-}
+    /* ===== METRICS ===== */
+    .metric {
+      background: rgba(255,255,255,0.05);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+    }
 
-/* ===== PANELS ===== */
-.panel {
-  background: #1a1a3a;
-  border-radius: 18px;
-  padding: 25px;
-  margin-bottom: 25px;
-  border: 1px solid rgba(255,255,255,0.05);
-}
+    /* ===== WEEKLY OVERVIEW (NO BOOTSTRAP) ===== */
+    .week-item {
+      background: rgba(255,255,255,0.08);
+      border-radius: 14px;
+      padding: 14px 18px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
 
-/* ===== METRICS ===== */
-.metric {
-  background: rgba(255,255,255,0.04);
-  border-radius: 12px;
-  padding: 14px 16px;
-  margin-bottom: 12px;
-  display: flex;
-  justify-content: space-between;
-}
+    .week-item span {
+      font-size: 14px;
+    }
 
-/* ===== WEEKLY OVERVIEW ===== */
-.week-item {
-  background: rgba(255,255,255,0.04);
-  border-radius: 14px;
-  padding: 14px 18px;
-  margin-bottom: 12px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
+    .status {
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+    }
 
-.week-item span {
-  font-size: 14px;
-}
+    .present {
+      background: rgba(34,197,94,0.2);
+      color: #22c55e;
+    }
 
-/* ===== STATUS ===== */
-.status {
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 13px;
-  font-weight: 500;
-}
-
-.present {
-  background: rgba(46,204,113,0.15);
-  color: #2ecc71;
-}
-
-.absent {
-  background: rgba(231,76,60,0.15);
-  color: #e74c3c;
-}
-
-</style>
-
+    .absent {
+      background: rgba(239,68,68,0.2);
+      color: #ef4444;
+    }
+  </style>
 </head>
 
 <body>
 
 <!-- SIDEBAR -->
 <div class="sidebar">
-   <h5 class="mb-4"><img src="face.jpeg"  alt="" width="50px" height="50px"> FACEMARK</h5>
-      <p class="small text-muted " style="color:white !important">Student Portal</p>
+  <h5 class="mb-4"><i class="bi bi-eye"></i> FACEMARK</h5>
+  <p class="small text-muted">Student Portal</p>
 
   <div class="user-box">
     <small>Welcome,</small>
-    <div class="user-name" id="username">Loading...</div>
+    <div class="user-name">سَس</div>
     <small>Student Portal</small>
   </div>
 
@@ -149,9 +137,7 @@ body {
   </ul>
 
   <hr class="text-secondary">
-  <button id="logoutBtn" class="btn btn-danger w-100 mt-2">
-    <i class="bi bi-box-arrow-right"></i> Sign Out
-</button>
+  <a><i class="bi bi-box-arrow-right"></i> Sign Out</a>
 </div>
 
 <!-- CONTENT -->
@@ -160,251 +146,97 @@ body {
   <!-- CHART -->
   <div class="panel">
     <h3>Charts & Reports</h3>
-    <h6 class="text-muted mb-3 "style="color:white !important">Monthly Attendance Histogram</h6>
+    <h6 class="text-muted mb-3">Monthly Attendance Histogram</h6>
     <canvas id="attendanceChart" height="100"></canvas>
   </div>
 
   <!-- COURSE WISE -->
   <div class="panel">
-  <h5 class="mb-4">Course-wise Attendance</h5>
-  <div id="courseWiseContainer">
+    <h5 class="mb-4">Course-wise Attendance</h5>
+
     <div class="metric"><span>Mathematics</span><strong>92%</strong></div>
     <div class="metric"><span>Physics</span><strong>85%</strong></div>
     <div class="metric"><span>Chemistry</span><strong>88%</strong></div>
     <div class="metric"><span>Computer Science</span><strong>90%</strong></div>
   </div>
-</div>
 
   <!-- BOTTOM -->
   <div class="row">
     <div class="col-md-6">
       <div class="panel">
-  <h5 class="mb-3">Performance Metrics</h5>
-  <div id="performanceMetricsContainer">
-    <div class="metric"><span>Average Attendance</span><strong>87%</strong></div>
-    <div class="metric"><span>Top Course</span><strong class="text-success">Mathematics</strong></div>
-    <div class="metric"><span>Students at Risk</span><strong class="text-danger">24</strong></div>
-    <div class="metric" style="background:#1e3a8a;"><span>Recognition Accuracy</span><strong>98.5%</strong></div>
-  </div>
-</div>
+        <h5 class="mb-3">Performance Metrics</h5>
+        <div class="metric"><span>Average Attendance</span><strong>87%</strong></div>
+        <div class="metric"><span>Top Course</span><strong class="text-success">Mathematics</strong></div>
+        <div class="metric"><span>Students at Risk</span><strong class="text-danger">24</strong></div>
+        <div class="metric" style="background:#1e3a8a;"><span>Recognition Accuracy</span><strong>98.5%</strong></div>
+      </div>
     </div>
 
     <div class="col-md-6">
-     <div class="panel">
-  <h5 class="mb-3">Weekly Attendance</h5>
-  <div id="weeklyAttendanceContainer">
-    <div class="week-item">
-      <span>Monday</span>
-      <span class="status present">Present</span>
-    </div>
+      <div class="panel">
+        <h5 class="mb-3">Weekly Attendance</h5>
 
-    <div class="week-item">
-      <span>Tuesday</span>
-      <span class="status present">Present</span>
-    </div>
+        <div class="week-item">
+          <span>Monday</span>
+          <span class="status present">Present</span>
+        </div>
 
-    <div class="week-item">
-      <span>Wednesday</span>
-      <span class="status absent">Absent</span>
-    </div>
+        <div class="week-item">
+          <span>Tuesday</span>
+          <span class="status present">Present</span>
+        </div>
 
-    <div class="week-item">
-      <span>Thursday</span>
-      <span class="status present">Present</span>
-    </div>
+        <div class="week-item">
+          <span>Wednesday</span>
+          <span class="status absent">Absent</span>
+        </div>
 
-    <div class="week-item">
-      <span>Friday</span>
-      <span class="status present">Present</span>
+        <div class="week-item">
+          <span>Thursday</span>
+          <span class="status present">Present</span>
+        </div>
+
+        <div class="week-item">
+          <span>Friday</span>
+          <span class="status present">Present</span>
+        </div>
+
+      </div>
     </div>
   </div>
-</div>
-    </div>
-  </div>
 
 </div>
+
 <script>
-const API_BASE_URL = 'http://localhost:3000/api/v1';
-let attendanceChartInstance = null;
-
-function getToken() {
-  return localStorage.getItem('token');
-}
-
-function authHeaders() {
-  return {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${getToken()}`
-  };
-}
-
-function redirectToLogin() {
-  localStorage.clear();
-  window.location.href = "./sign in/index.html";
-}
-
-/* ================= PROFILE ================= */
-async function loadProfile() {
-  try {
-    const res = await fetch(`${API_BASE_URL}/auth/profile`, {
-      headers: authHeaders()
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) throw new Error();
-
-    document.getElementById("username").textContent =
-      data.username || data.user?.username || "Student";
-
-  } catch {
-    alert("Session expired");
-    redirectToLogin();
-  }
-}
-
-/* ================= CHART ================= */
-function renderChart(labels = [], values = []) {
-  const ctx = document.getElementById('attendanceChart').getContext('2d');
-
-  if (attendanceChartInstance) {
-    attendanceChartInstance.destroy();
-  }
-
-  attendanceChartInstance = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [{
-        label: 'Attendance %',
-        data: values,
-        backgroundColor: '#10b981',
-        borderRadius: 8
-      }]
-    },
-    options: {
-      responsive: true,
-      scales: {
-        y: { beginAtZero: true, max: 100, ticks: { color: '#ccc' }},
-        x: { ticks: { color: '#ccc' }}
+const ctx = document.getElementById('attendanceChart');
+new Chart(ctx, {
+  type: 'bar',
+  data: {
+    labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+    datasets: [{
+      label: 'Attendance %',
+      data: [82, 85, 88, 86, 90, 92, 91, 89, 87, 88, 90, 93],
+      backgroundColor: '#3b82f6',
+      borderRadius: 8
+    }]
+  },
+  options: {
+    scales: {
+      y: {
+        beginAtZero: true,
+        max: 100,
+        ticks: { color: '#ccc' }
       },
-      plugins: {
-        legend: { labels: { color: '#fff' }}
+      x: {
+        ticks: { color: '#ccc' }
       }
+    },
+    plugins: {
+      legend: { labels: { color: '#fff' } }
     }
-  });
-}
-
-/* ================= COURSE WISE ================= */
-function renderCourseWise(courses) {
-  const container = document.getElementById('courseWiseContainer');
-  container.innerHTML = '';
-
-  if (!courses?.length) {
-    container.innerHTML = `<div class="metric">No data</div>`;
-    return;
   }
-
-  courses.forEach(c => {
-    container.innerHTML += `
-      <div class="metric">
-        <span>${c.name}</span>
-        <strong>${c.percentage}%</strong>
-      </div>
-    `;
-  });
-}
-
-/* ================= METRICS ================= */
-function renderMetrics(m) {
-  const container = document.getElementById('performanceMetricsContainer');
-
-  container.innerHTML = `
-    <div class="metric">
-      <span>Average Attendance</span>
-      <strong>${m.avg}%</strong>
-    </div>
-
-    <div class="metric">
-      <span>Top Course</span>
-      <strong class="text-success">${m.top}</strong>
-    </div>
-
-    <div class="metric">
-      <span>Students at Risk</span>
-      <strong class="text-danger">${m.risk}</strong>
-    </div>
-
-    <div class="metric" style="background:#1e3a8a;">
-      <span>Recognition Accuracy</span>
-      <strong>${m.ai}%</strong>
-    </div>
-  `;
-}
-
-/* ================= WEEKLY ================= */
-function renderWeekly(data) {
-  const container = document.getElementById('weeklyAttendanceContainer');
-  container.innerHTML = '';
-
-  data.forEach(d => {
-    const statusClass = d.status === 'Present' ? 'present' : 'absent';
-
-    container.innerHTML += `
-      <div class="week-item">
-        <span>${d.day}</span>
-        <span class="status ${statusClass}">${d.status}</span>
-      </div>
-    `;
-  });
-}
-
-/* ================= LOAD DATA ================= */
-async function loadCharts() {
-  try {
-    const res = await fetch(`${API_BASE_URL}/student/charts`, {
-      headers: authHeaders()
-    });
-
-    const data = await res.json();
-    if (!res.ok) throw new Error();
-
-    // 🔥 لازم الباك يرجع بالشكل ده
-    renderChart(
-      data.monthly.labels,
-      data.monthly.values
-    );
-
-    renderCourseWise(data.courses);
-
-    renderMetrics({
-      avg: data.metrics.avg,
-      top: data.metrics.topCourse,
-      risk: data.metrics.riskStudents,
-      ai: data.metrics.aiAccuracy
-    });
-
-    renderWeekly(data.weekly);
-
-  } catch (err) {
-    console.error(err);
-
-    // fallback clean
-    renderChart([], []);
-    renderCourseWise([]);
-    renderWeekly([]);
-  }
-}
-
-/* ================= LOGOUT ================= */
-document.getElementById('logoutBtn').addEventListener('click', () => {
-  localStorage.clear();
-  window.location.href = "./sign in/index.html";
 });
-
-/* ================= INIT ================= */
-loadProfile();
-loadCharts();
 </script>
+
 </body>
 </html>

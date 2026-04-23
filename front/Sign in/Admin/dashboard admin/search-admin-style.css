@@ -257,3 +257,107 @@ select {
     margin-top: 20px; 
     font-style: italic; 
 }
+/* تنسيق منطقة النتائج والجدول */
+.results-container {
+    margin-top: 20px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.search-results-table {
+    width: 100%;
+    border-collapse: collapse;
+    color: #fff;
+    text-align: left;
+}
+
+.search-results-table th {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 15px;
+    font-size: 0.9rem;
+    color: #a0a0a0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.search-results-table td {
+    padding: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    vertical-align: middle;
+}
+
+/* تنسيق خلية المستخدم */
+.user-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-icon {
+    font-size: 1.8rem;
+    color: #4e73df;
+}
+
+.user-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.user-name {
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.user-email {
+    font-size: 0.8rem;
+    color: #888;
+}
+
+/* الأوسمة (Tags) */
+.id-tag {
+    background: rgba(78, 115, 223, 0.1);
+    color: #4e73df;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-family: monospace;
+    font-size: 0.85rem;
+}
+
+.role-label {
+    background: rgba(28, 200, 138, 0.1);
+    color: #1cc88a;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    text-transform: capitalize;
+}
+
+/* أزرار التحكم */
+.action-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-action {
+    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    width: 35px;
+    height: 35px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-action.view:hover { background: #4e73df; }
+.btn-action.delete:hover { background: #e74a3b; }
+
+.results-count {
+    font-size: 0.85rem;
+    color: #1cc88a;
+    margin-left: 10px;
+}

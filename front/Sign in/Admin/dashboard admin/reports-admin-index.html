@@ -10,8 +10,8 @@
 </head>
 <body class="dark-mode">
     <button class="mobile-menu-btn" onclick="toggleSidebar()">
-    <i class="fas fa-bars"></i>
-</button>
+        <i class="fas fa-bars"></i>
+    </button>
     <div class="dashboard-container">
         <aside class="sidebar">
             <div class="brand">
@@ -42,7 +42,7 @@
                 <a href="../../index.html" id="signOutBtn" class="sign-out-link" onclick="logout()">
                     <i class="fas fa-sign-out-alt"></i> 
                     <span>Sign Out</span>
-                    </a>           
+                </a>           
             </div>
         </aside>
 
@@ -51,14 +51,13 @@
                 <div class="reports-section-card">
                     <h2 class="section-title">Generate Reports</h2>
                     <div class="generate-cards-grid">
-                        
                         <div class="report-gen-card attendance">
                             <div class="report-card-header">
                                 <i class="fas fa-file-invoice icon-box"></i>
                                 <h3>Attendance Report</h3>
                             </div>
                             <p>Comprehensive attendance statistics for all students.</p>
-                            <button class="btn-gen blue">Generate</button>
+                            <button class="btn-gen blue" onclick="openReportModal('attendance')">Generate</button>
                         </div>
 
                         <div class="report-gen-card performance">
@@ -67,7 +66,7 @@
                                 <h3>Performance Report</h3>
                             </div>
                             <p>Student performance analytics and insights.</p>
-                            <button class="btn-gen green">Generate</button>
+                            <button class="btn-gen green" onclick="openReportModal('performance')">Generate</button>
                         </div>
 
                         <div class="report-gen-card system">
@@ -76,51 +75,54 @@
                                 <h3>System Report</h3>
                             </div>
                             <p>System usage and accuracy metrics dashboard.</p>
-                            <button class="btn-gen purple">Generate</button>
+                            <button class="btn-gen purple" onclick="openReportModal('system')">Generate</button>
                         </div>
-
                     </div>
                 </div>
 
                 <div class="reports-section-card">
                     <h3 class="section-subtitle">Recent Reports</h3>
-                    <div class="recent-reports-list">
-                        <div class="report-item">
-                            <div class="report-main-info">
-                                <i class="fas fa-file-alt"></i>
-                                <div>
-                                    <h4>Monthly Attendance Summary - November 2024</h4>
-                                    <span>Dec 1, 2024 • 2.4 MB</span>
-                                </div>
-                            </div>
-                            <button class="btn-download">Download</button>
-                        </div>
-                        <div class="report-item">
-                            <div class="report-main-info">
-                                <i class="fas fa-file-alt"></i>
-                                <div>
-                                    <h4>Semester Performance Report - Fall 2024</h4>
-                                    <span>Nov 25, 2024 • 3.8 MB</span>
-                                </div>
-                            </div>
-                            <button class="btn-download">Download</button>
-                        </div>
-                        <div class="report-item">
-                            <div class="report-main-info">
-                                <i class="fas fa-file-alt"></i>
-                                <div>
-                                    <h4>System Accuracy Report - Q4 2024</h4>
-                                    <span>Nov 20, 2024 • 1.2 MB</span>
-                                </div>
-                            </div>
-                            <button class="btn-download">Download</button>
-                        </div>
+                    <div id="recentReportsContainer" class="recent-reports-list">
+                        <p style="text-align: center; color: var(--text-dim);">Checking for recent reports...</p>
                     </div>
                 </div>
             </div>
         </main>
     </div>
-    
+
+    <div id="reportConfigModal" class="modal-overlay" style="display: none;">
+        <div class="details-popup-large">
+            <div class="popup-header">
+                <h3>Configure Report Settings</h3>
+                <span class="close-popup" onclick="closeReportModal()">&times;</span>
+            </div>
+            <div class="popup-body">
+                <div class="filters-grid" style="display: grid; grid-template-columns: 1fr; gap: 20px;">
+                    <div class="input-group">
+                        <label>Select Course</label>
+                        <select class="custom-select" id="reportCourseSelect">
+                            <option value="all">All Courses</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>From Date</label>
+                        <input type="date" class="custom-date" id="reportFromDate">
+                    </div>
+                    <div class="input-group">
+                        <label>To Date</label>
+                        <input type="date" class="custom-date" id="reportToDate">
+                    </div>
+                </div>
+                <div class="popup-footer" style="display: flex; justify-content: center; gap: 15px; margin-top: 25px;">
+                    <button id="downloadBtn" class="btn-gen blue" onclick="downloadReport()" style="padding: 10px 30px; border: none; border-radius: 8px; cursor: pointer; color: white;">
+                        <i class="fas fa-file-download"></i> Download Report
+                    </button>
+                    <button class="btn-gen" onclick="closeReportModal()" style="background: #444; padding: 10px 30px; border: none; border-radius: 8px; cursor: pointer; color: white;">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="reports-admin-script.js"></script>
 </body>
 </html>

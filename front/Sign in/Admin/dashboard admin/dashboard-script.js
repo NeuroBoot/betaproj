@@ -1,10 +1,109 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // 1. عرض اسم المستخدم
-    const userNameDisplay = document.getElementById('userNameDisplay');
-    const loggedUser = localStorage.getItem('loggedUser');
-    if (loggedUser && userNameDisplay) userNameDisplay.textContent = loggedUser;
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log("🚀 Dashboard Initializing...");
 
-    // 2. Resizable Sidebar
+    const API_BASE_URL = 'http://localhost:3000/api/v1'; 
+    let token = localStorage.getItem('token'); 
+
+    // 1. تنظيف التوكن
+    if (token) {
+        token = token.replace(/['"]+/g, '').trim(); 
+    }
+
+    // 2. عرض اسم المستخدم بجانب الترحيب
+    const userNameDisplay = document.getElementById('userNameDisplay');
+    const savedName = localStorage.getItem('username'); 
+    if (savedName && userNameDisplay) {
+        userNameDisplay.textContent = savedName;
+    }
+
+    async function fetchDashboardData() {
+        if (!token) {
+            console.error("❌ No token found. Please login again.");
+            return;
+        }
+
+        console.log("📡 Attempting to fetch data from server...");
+
+        try {
+            const headers = { 
+                'Authorization': `Bearer ${token}`, 
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            };
+
+            // --- جلب بيانات المستخدمين لتحديث عداد الطلاب والموظفين ---
+            const usersRes = await fetch(`${API_BASE_URL}/users`, { method: 'GET', headers });
+            const usersResult = await usersRes.json();
+
+            if (usersResult.success && Array.isArray(usersResult.data)) {
+                const allUsers = usersResult.data;
+                const students = allUsers.filter(u => String(u.userType).toLowerCase() === 'student');
+                const staff = allUsers.filter(u => String(u.userType).toLowerCase() === 'staff');
+
+                if (document.getElementById('totalStudentsCount')) 
+                    document.getElementById('totalStudentsCount').textContent = students.length;
+                
+                if (document.getElementById('totalStaffCount')) 
+                    document.getElementById('totalStaffCount').textContent = staff.length;
+            }
+
+            // --- جلب بيانات الكورسات لتحديث العداد ---
+            const coursesRes = await fetch(`${API_BASE_URL}/courses`, { method: 'GET', headers });
+            const coursesResult = await coursesRes.json();
+            if (coursesResult.success && Array.isArray(coursesResult.data)) {
+                if (document.getElementById('activeCoursesCount'))
+                    document.getElementById('activeCoursesCount').textContent = coursesResult.data.length;
+            }
+
+            // --- جلب إحصائيات الحضور لتحديث الشارت ---
+            const statsRes = await fetch(`${API_BASE_URL}/attendance/statistics`, { method: 'GET', headers });
+            const statsResult = await statsRes.json();
+            
+            // تحديث الشارت لو فيه داتا (لو فاضية مصفوفة [] زي ما طلع في بوست مان هيفضل أصفار)
+            if (statsResult.success && Array.isArray(statsResult.data) && statsResult.data.length > 0) {
+                updateAttendanceChart(statsResult.data);
+            }
+
+            console.log("✅ All Dashboard data updated successfully");
+
+        } catch (error) {
+            console.error("🚨 Connection Error:", error);
+        }
+    }
+
+    fetchDashboardData();
+    initLayoutFunctions();
+});
+
+// وظيفة تحديث الشارت ببيانات حقيقية من السيرفر
+function updateAttendanceChart(apiData) {
+    const chartCanvas = document.getElementById('attendanceChart');
+    if (!chartCanvas) return;
+
+    // افتراضاً إن الـ API بيرجع مصفوفة فيها قسم (label) ونسبة (value)
+    const labels = apiData.map(item => item.label || item.departmentName);
+    const values = apiData.map(item => item.value || item.attendancePercentage);
+
+    // تدمير الشارت القديم لو موجود وبناء واحد جديد بالبيانات الحقيقية
+    const existingChart = Chart.getChart(chartCanvas);
+    if (existingChart) existingChart.destroy();
+
+    new Chart(chartCanvas.getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Attendance Rate %',
+                data: values,
+                backgroundColor: '#10b981',
+                borderRadius: 5
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+    });
+}
+
+function initLayoutFunctions() {
     const sidebar = document.getElementById("resizableSidebar");
     const resizer = document.getElementById("sidebarResizer");
     if (resizer && sidebar) {
@@ -12,7 +111,6 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             document.addEventListener("mousemove", resize);
             document.addEventListener("mouseup", stopResize);
-            document.body.style.cursor = "col-resize";
         });
         function resize(e) {
             let newWidth = e.clientX;
@@ -21,73 +119,29 @@ document.addEventListener('DOMContentLoaded', () => {
         function stopResize() {
             document.removeEventListener("mousemove", resize);
             document.removeEventListener("mouseup", stopResize);
-            document.body.style.cursor = "default";
         }
     }
 
-    // 3. برمجة الرسم البياني بتأثيرات الـ Hover والتكبير
+    // شارت افتراضي (سيعمل حتى يتم استبداله ببيانات الـ API)
     const chartCanvas = document.getElementById('attendanceChart');
-    if (chartCanvas) {
-        const ctx = chartCanvas.getContext('2d');
-        new Chart(ctx, {
+    if (chartCanvas && !Chart.getChart(chartCanvas)) {
+        new Chart(chartCanvas.getContext('2d'), {
             type: 'bar',
             data: {
-                labels: ['Engineering', 'Science', 'Arts', 'Business', 'Medicine'],
+                labels: ['Eng', 'Sci', 'Arts', 'Bus', 'Med'],
                 datasets: [{
-                    label: 'Attendance Rate',
-                    data: [95, 90, 85, 92, 96], 
+                    label: 'Attendance Rate %',
+                    data: [0, 0, 0, 0, 0], // يبدأ بأصفار
                     backgroundColor: '#10b981', 
-                    hoverBackgroundColor: '#34d399', // لون أفتح عند الوقوف بالماوس
-                    borderRadius: 8,
-                    barPercentage: 0.6 // تعريض العمود
+                    borderRadius: 5
                 }]
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        enabled: true,
-                        backgroundColor: '#1a1a3a',
-                        titleColor: '#fff',
-                        bodyColor: '#10b981',
-                        padding: 12,
-                        displayColors: false,
-                        callbacks: {
-                            label: function(context) {
-                                return ` Attendance: ${context.raw}%`;
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        max: 100,
-                        grid: { color: 'rgba(255, 255, 255, 0.05)', drawBorder: false },
-                        ticks: { color: '#b0b0b0' }
-                    },
-                    x: {
-                        grid: { display: false },
-                        ticks: { color: '#b0b0b0' }
-                    }
-                }
-            }
+            options: { responsive: true, maintainAspectRatio: false }
         });
     }
-});
-function toggleSidebar() {
-    const sidebar = document.querySelector('.sidebar');
-    sidebar.classList.toggle('active');
 }
 
-// إغلاق السايد بار لو ضغطنا في أي مكان في المحتوى الرئيسي (اختياري)
-document.querySelector('.main-content').addEventListener('click', () => {
-    const sidebar = document.querySelector('.sidebar');
-    if (sidebar.classList.contains('active')) {
-        sidebar.classList.remove('active');
-    }
-});
-
-function logout() { localStorage.removeItem('loggedUser'); }
+function logout() { 
+    localStorage.clear();
+    window.location.href = "../../index.html"; 
+}

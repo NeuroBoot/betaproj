@@ -297,3 +297,34 @@ body {
     from { transform: scale(0.95); opacity: 0; }
     to { transform: scale(1); opacity: 1; }
 }
+.popup-footer {
+    display: flex;
+    justify-content: center; /* بيخلي الأزرار في نص المودال */
+    gap: 15px;              /* بيسيب مسافة بين الزرارين */
+    margin-top: 25px;       /* بيبعدهم عن الجدول */
+    padding-bottom: 10px;
+}
+
+.btn-save-attendance {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.3s;
+}
+
+.btn-save-attendance:hover {
+    background-color: #2980b9;
+}
+
+.btn-cancel-attendance {
+    background-color: #444;
+    color: white;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 8px;
+    cursor: pointer;
+}

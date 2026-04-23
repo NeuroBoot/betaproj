@@ -1,60 +1,104 @@
-document.getElementById('loginForm').addEventListener('submit', async function(e) {
+document.getElementById('loginForm').addEventListener('submit', async function (e) {
     e.preventDefault();
 
-    // 1. جلب القيم
-    const usernameInput = String(document.getElementById('username').value).trim();
-    const passwordInput = String(document.getElementById('password').value).trim();
+    // 1. تجميع البيانات من الفورم
+    const usernameInput = document.getElementById('username').value.trim();
+    const passwordInput = document.getElementById('password').value.trim();
     const roleRadio = document.querySelector('input[name="role"]:checked');
-    const selectedRole = roleRadio ? String(roleRadio.value) : null;
+    const selectedRole = roleRadio ? roleRadio.value.toLowerCase().trim() : null;
 
-    // 2. التحقق من ملء الحقول فقط
     if (!usernameInput || !passwordInput || !selectedRole) {
-        showStatus("Please fill in all fields and select a role.", "error");
+        showStatus("Please enter your credentials and select a role.", "error");
         return;
     }
 
     try {
-        // رسالة ترحيبية بالاسم اللي كتبه المستخدم أياً كان
-        showStatus(`Welcome, ${usernameInput}! Redirecting as ${selectedRole}...`, "success");
+        // 2. طلب تسجيل الدخول (Login)
+        const res = await fetch('http://localhost:3000/api/v1/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: usernameInput, password: passwordInput })
+        });
 
-        // 3. تخزين البيانات في المتصفح (عشان تظهر في الداشبورد)
-        localStorage.setItem('loggedUser', usernameInput);
-        localStorage.setItem('userRole', selectedRole);
+        const loginResponse = await res.json();
+        
+        if (!res.ok) {
+            throw new Error(loginResponse.message || 'Incorrect username or password.');
+        }
 
-        // 4. التوجيه بناءً على الاختيار (Role-Based Redirect)
-        setTimeout(() => {
-            if (selectedRole === "Admin") {
-                window.location.href = "Admin/dashboard admin/dashboard-index.html";
-            } else if (selectedRole === "Student") {
-                window.location.href = "../student/studentdashboard.html";
-            } else if (selectedRole === "Staff") {
-                window.location.href = "../staff/staffdashboard.html";
+        // استخراج الـ Token 
+        const token = loginResponse.data?.access_token || loginResponse.access_token || loginResponse.data?.token || loginResponse.token;
+        // 3. التحقق من الـ Role (بشكل مرن لتجنب تعليق الصفحة)
+        let actualRoleFromDB = selectedRole; // افتراضياً هنمشي باللي اختاره اليوزر لو البروفايل علق
+
+        try {
+            const profileRes = await fetch('http://localhost:3000/api/v1/auth/profile', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            
+            if (profileRes.ok) {
+                const profileData = await profileRes.json();
+                const userData = profileData.data || profileData;
+                // بنجرب نقرأ role أو userType لضمان التوافق مع الباك
+                actualRoleFromDB = (userData.role || userData.userType || selectedRole).toString().toLowerCase().trim();
+            } else {
+                console.warn("Profile check skipped, using selected role for redirection.");
             }
-        }, 500);
+        } catch (profileErr) {
+            console.error("Profile endpoint error:", profileErr);
+            // لو السيرفر وقع في خطوة البروفايل بنكمل باللي اليوزر اختاره عشان ميعطلش
+        }
 
-    } catch (error) {
-        showStatus("An error occurred. Please try again.", "error");
+        // 4. التأكد النهائي من الصلاحية
+        if (actualRoleFromDB !== selectedRole) {
+            showStatus(`Access Denied! Your account is registered as ${actualRoleFromDB}.`, "error");
+            return; 
+        }
+
+        // 5. حفظ البيانات والتحويل (Success)
+        
+        localStorage.setItem('token', token);
+        localStorage.setItem('username', usernameInput); // بنخزن الاسم اللي اليوزر كتبه
+        localStorage.setItem('userRole', actualRoleFromDB);
+        showStatus(`Welcome back, ${usernameInput}! Redirecting...`, "success");
+
+        setTimeout(() => {
+            const paths = {
+                'admin': "Admin/dashboard admin/dashboard-index.html",
+                'staff': "../staff/staffdashboard.html",
+                'student': "../student/studentdashboard.html"
+            };
+            
+            // تحويل المستخدم بناءً على الـ Role المختارة
+            window.location.href = paths[selectedRole] || "index.html";
+        }, 1500);
+
+    } catch (err) {
+        // معالجة أخطاء الاتصال بالسيرفر (Failed to fetch)
+        const friendlyMsg = err.message.includes('Failed to fetch') 
+            ? "Server is offline. Please check your backend terminal." 
+            : err.message;
+            
+        showStatus(friendlyMsg, "error");
     }
 });
 
-// دالة إظهار الرسائل (النسخة الشيك)
-function showStatus(message, type) {
-    let oldMsg = document.querySelector('.status-msg');
-    if (oldMsg) oldMsg.remove();
-
-    const msgDiv = document.createElement('div');
-    msgDiv.className = `status-msg ${type}`;
-    msgDiv.innerHTML = `<span>${message}</span>`;
+// دالة إظهار التنبيهات بشكل احترافي
+function showStatus(msg, type) {
+    let div = document.getElementById('status-msg');
+    if (!div) {
+        div = document.createElement('div');
+        div.id = 'status-msg';
+        document.body.appendChild(div);
+    }
     
-    Object.assign(msgDiv.style, {
-        position: 'fixed', top: '20px', right: '20px', padding: '12px 25px',
-        borderRadius: '12px', backdropFilter: 'blur(15px)',
-        backgroundColor: type === 'success' ? 'rgba(36, 184, 147, 0.2)' : 'rgba(255, 76, 76, 0.2)',
-        color: type === 'success' ? '#24b893' : '#ff4c4c',
-        border: `1px solid ${type === 'success' ? '#24b893' : '#ff4c4c'}`,
-        zIndex: '9999', transition: 'all 0.4s'
-    });
-
-    document.body.appendChild(msgDiv);
-    setTimeout(() => msgDiv.remove(), 3500);
+    div.textContent = msg;
+    div.style.cssText = `
+        position: fixed; top: 20px; right: 20px; padding: 15px 25px; 
+        border-radius: 8px; color: white; z-index: 10000; font-weight: bold; 
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: all 0.5s;
+        background-color: ${type === 'success' ? '#28a745' : '#dc3545'};
+    `;
+    
+    setTimeout(() => div.remove(), 4000);
 }
