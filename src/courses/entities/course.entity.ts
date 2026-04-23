@@ -46,6 +46,12 @@ export class Course {
   @Column({ default: 3 })
   credits: number;
 
+  @Column({ nullable: true })
+  schedule: string;
+
+  @Column({ nullable: true })
+  room: string;
+
   @Column({ type: 'text', nullable: true })
   scheduleJson: string; // Storing schedule as JSON string for simplicity in SQLite
 

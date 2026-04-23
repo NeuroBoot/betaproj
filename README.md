@@ -75,5 +75,5 @@ Recent enhancements have hardened the application logic, resolving critical data
 
 ---
 
-**Documentation Version**: 1.1.0 (March 2026)
+**Documentation Version**: 1.2.0 (April 2026)
 **Contact**: Senior Development Team

@@ -29,6 +29,16 @@ export class CreateCourseDto {
   @IsOptional()
   credits?: number;
 
+  @ApiProperty({ example: 'Mon/Wed 10:00-12:00', description: 'Course schedule', required: false })
+  @IsString()
+  @IsOptional()
+  schedule?: string;
+
+  @ApiProperty({ example: 'Room 302', description: 'Course room', required: false })
+  @IsString()
+  @IsOptional()
+  room?: string;
+
   @ApiProperty({ example: 2, description: 'User ID of the instructor (Staff)' })
   @IsInt()
   @IsNotEmpty()

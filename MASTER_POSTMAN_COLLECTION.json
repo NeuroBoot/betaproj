@@ -216,7 +216,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"Computer Science\",\n  \"code\": \"CS101\",\n  \"sections\": 4,\n  \"credits\": 3,\n  \"instructorId\": 2\n}"
+							"raw": "{\n  \"name\": \"Computer Science\",\n  \"code\": \"CS101\",\n  \"sections\": 4,\n  \"credits\": 3,\n  \"schedule\": \"Mon/Wed 10:00-12:00\",\n  \"room\": \"Room 302\",\n  \"instructorId\": 2\n}"
 						},
 						"url": "{{base_url}}/courses"
 					}

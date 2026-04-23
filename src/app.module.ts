@@ -6,9 +6,11 @@ import { UsersModule } from './users/users.module';
 import { CoursesModule } from './courses/courses.module';
 import { AttendanceModule } from './attendance/attendance.module';
 import { UserAccount } from './users/entities/user.entity';
+import { Alert } from './users/entities/alert.entity';
 import { Course } from './courses/entities/course.entity';
 import { Attendance } from './attendance/entities/attendance.entity';
 import { validate } from './common/config/env.validation';
+
 
 @Module({
   imports: [
@@ -33,7 +35,7 @@ import { validate } from './common/config/env.validation';
           username: configService.get<string>('DB_USERNAME'),
           password: configService.get<string>('DB_PASSWORD'),
           database: configService.get<string>('DB_NAME'),
-          entities: [UserAccount, Course, Attendance],
+          entities: [UserAccount, Course, Attendance, Alert],
           synchronize: isSync,
           logging: ['error', 'warn'],
           connectorPackage: 'mysql2',
