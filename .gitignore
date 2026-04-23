@@ -15,3 +15,7 @@ yarn-error.log*
 *.txt
 BACKEND_HANDOVER.md
 ===================================.txt
+
+# UI Folders
+front/
+betaproj/
