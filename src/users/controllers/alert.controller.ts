@@ -1,10 +1,12 @@
-import { Controller, Get, Delete, Put, Body, Param, UseGuards, ParseIntPipe } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { Controller, Get, Delete, Put, Post, Body, Param, Query, UseGuards, ParseIntPipe, DefaultValuePipe } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
+import { Roles } from '../../auth/decorators/roles.decorator';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import { UserAccount } from '../entities/user.entity';
 import { AlertService } from '../services/alert.service';
+import { Role } from '../../common/enums/role.enum';
 
 @ApiTags('Alerts')
 @ApiBearerAuth('JWT-auth')
@@ -33,6 +35,58 @@ export class AlertController {
     return { success: true, message: `Alert ${id} deleted successfully` };
   }
 
+  @Post('check-low-attendance/:courseId')
+  @Roles(Role.ADMIN, Role.STAFF)
+  @ApiOperation({ summary: 'Trigger low attendance check for a course' })
+  @ApiQuery({ name: 'threshold', required: false })
+  async checkLowAttendance(
+    @Param('courseId', ParseIntPipe) courseId: number,
+    @Query('threshold', new DefaultValuePipe(75), ParseIntPipe) threshold: number
+  ) {
+    return this.alertService.checkLowAttendance(courseId, threshold);
+  }
+
+  @Get('report/:courseId')
+  @Roles(Role.ADMIN, Role.STAFF)
+  @ApiOperation({ summary: 'Get low attendance report for a course' })
+  @ApiQuery({ name: 'threshold', required: false })
+  async getReport(
+    @Param('courseId', ParseIntPipe) courseId: number,
+    @Query('threshold', new DefaultValuePipe(75), ParseIntPipe) threshold: number
+  ) {
+    return this.alertService.getLowAttendanceReport(courseId, threshold);
+  }
+
+  @Post('batch')
+  @Roles(Role.ADMIN, Role.STAFF)
+  @ApiOperation({ summary: 'Send alerts to multiple users' })
+  async sendBatch(
+    @Body() payload: { userIds: number[], message: string, title?: string, type?: string }
+  ) {
+    return this.alertService.sendBatchAlerts(
+      payload.userIds,
+      payload.message,
+      payload.type,
+      payload.title
+    );
+  }
+
+  @Post('send/:userId')
+  @Roles(Role.ADMIN, Role.STAFF)
+  @ApiOperation({ summary: 'Send a targeted alert to a specific student' })
+  async sendToUser(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Body() payload: { message: string, title?: string, type?: string, metadata?: any }
+  ) {
+    return this.alertService.sendAlert(
+      userId,
+      payload.message,
+      payload.type || 'info',
+      payload.title || 'Notification',
+      payload.metadata
+    );
+  }
+
   @Get('settings')
   @ApiOperation({ summary: 'Get alert settings' })
   async getSettings() {
@@ -50,3 +104,4 @@ export class AlertController {
     return { success: true, message: 'Settings updated successfully', data: payload };
   }
 }
+

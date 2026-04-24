@@ -1,9 +1,11 @@
 import { Injectable, NotFoundException, ForbiddenException, ConflictException, BadRequestException } from '@nestjs/common';
 import { AttendanceRepository } from '../repository/attendance.repository';
 import { CreateAttendanceDto } from '../dto/create-attendance.dto';
+import { UpdateAttendanceDto } from '../dto/update-attendance.dto';
 import { BulkAttendanceDto } from '../dto/bulk-attendance.dto';
 import { UserRepository } from '../../users/repositories/user.repository';
 import { CourseRepository } from '../../courses/repositories/course.repository';
+import { AlertService } from '../../users/services/alert.service';
 import { Role } from '../../common/enums/role.enum';
 import { UserAccount } from '../../users/entities/user.entity';
 import { In } from 'typeorm';
@@ -14,6 +16,7 @@ export class AttendanceService {
     private readonly attendanceRepo: AttendanceRepository,
     private readonly userRepo: UserRepository,
     private readonly courseRepo: CourseRepository,
+    private readonly alertService: AlertService,
   ) {}
 
   async create(dto: CreateAttendanceDto, user: UserAccount) {
@@ -57,8 +60,8 @@ export class AttendanceService {
     }
 
     // 6. Create and save record
-    return this.attendanceRepo.create({
-      recordDate: new Date(dto.recordDate),
+    const result = await this.attendanceRepo.create({
+      recordDate: this.normalizeDate(dto.recordDate),
       student: student,
       course: course,
       staffId: effectiveStaffId,
@@ -66,7 +69,18 @@ export class AttendanceService {
       room: dto.room,
       sessionType: dto.sessionType,
       sectionNumber: dto.sectionNumber,
+      faceConfidence: dto.faceConfidence,
+      checkInTime: dto.checkInTime,
     });
+
+    // 7. Automatic Alert Check (Asynchronous)
+    if (dto.attendanceStatusId !== 1) { // Only check if not Present to optimize
+       this.alertService.checkStudentLowAttendance(student.userAccountId, course.courseId).catch(err => {
+         console.error(`[Alert Error] Failed to check low attendance for student ${student.userAccountId}:`, err);
+       });
+    }
+
+    return result;
   }
 
   async getStudentDiagram(userId: number) {
@@ -164,6 +178,7 @@ export class AttendanceService {
     const studentMap = new Map(students.map(s => [s.userAccountId, s]));
     const recordsToSave = [];
     const skippedStudents = [];
+    const processedStudentIds = new Set<number>();
 
     for (const item of dto.attendance) {
       const sId = parseInt(item.studentId);
@@ -182,7 +197,7 @@ export class AttendanceService {
       }
 
       recordsToSave.push({
-        recordDate: new Date(dto.date),
+        recordDate: this.normalizeDate(dto.date),
         student: student,
         course: course,
         staffId: user.userAccountId,
@@ -191,6 +206,7 @@ export class AttendanceService {
         sessionType: 'SECTION',
         sectionNumber: parseInt(dto.section) || 1,
       });
+      processedStudentIds.add(student.userAccountId);
     }
 
     if (recordsToSave.length === 0) {
@@ -198,6 +214,11 @@ export class AttendanceService {
     }
 
     const savedRecords = await this.attendanceRepo.saveMany(recordsToSave);
+
+    // Automatic Alert Check for affected students
+    processedStudentIds.forEach(sId => {
+      this.alertService.checkStudentLowAttendance(sId, course.courseId).catch(() => {});
+    });
 
     return {
       message: `Successfully saved ${savedRecords.length} attendance records.`,
@@ -210,6 +231,18 @@ export class AttendanceService {
   private mapStatusToId(status: string): number {
     const map = { 'Present': 1, 'Absent': 2, 'Late': 3, 'Excused': 4 };
     return map[status] || 2; // Default to Absent if unknown
+  }
+
+  async findAllPaginated(page: number, limit: number, filters: any, user: UserAccount) {
+    let courseIds: number[] = [];
+    
+    if (user.userType === Role.STAFF) {
+      const staffCourses = await this.courseRepo.findByInstructor(user.userAccountId);
+      courseIds = staffCourses.map(c => c.courseId);
+      if (courseIds.length === 0) return { data: [], total: 0, page, limit, totalPages: 0 };
+    }
+    
+    return this.attendanceRepo.findAllWithFilters(page, limit, filters, courseIds);
   }
 
   async findAll(user: UserAccount, query?: any) {
@@ -235,28 +268,129 @@ export class AttendanceService {
     return [];
   }
 
-  async statistics(user: UserAccount) {
-    let rawStats;
+  async getStudentAttendance(studentId: number, courseId?: number) {
+    return this.attendanceRepo.findByStudent(studentId, courseId);
+  }
+
+  async getStudentTracking(studentId: number, courseId: number) {
+    const student = await this.userRepo.findById(studentId);
+    if (!student) throw new NotFoundException('Student not found');
+
+    const course = await this.courseRepo.findById(courseId);
+    if (!course) throw new NotFoundException('Course not found');
+
+    const records = await this.attendanceRepo.findByStudent(studentId, courseId);
+    if (records.length === 0) {
+      return { student: student.username, course: course.name, status: 'No records', riskLevel: 'N/A' };
+    }
+
+    // 1. Calculate Rate
+    const presentCount = records.filter(r => r.attendanceStatusId === 1 || r.attendanceStatusId === 3).length;
+    const rate = (presentCount / records.length) * 100;
+
+    // 2. Calculate Consecutive Absences (Current Streak)
+    let consecutiveAbsences = 0;
+    for (const record of records) { // Records are DESC by date
+      if (record.attendanceStatusId === 2) {
+        consecutiveAbsences++;
+      } else {
+        break;
+      }
+    }
+
+    // 3. Trend Analysis (Compare last 3 sessions vs previous 3)
+    let trend = 'Stable';
+    if (records.length >= 6) {
+      const recent = records.slice(0, 3).filter(r => r.attendanceStatusId === 1).length;
+      const older = records.slice(3, 6).filter(r => r.attendanceStatusId === 1).length;
+      if (recent > older) trend = 'Improving';
+      if (recent < older) trend = 'Declining';
+    }
+
+    // 4. Risk Level Logic
+    let riskLevel = 'Low';
+    if (rate < 75 || consecutiveAbsences >= 2) riskLevel = 'Medium';
+    if (rate < 60 || consecutiveAbsences >= 3) riskLevel = 'High';
+
+    return {
+      student: { id: studentId, name: student.username },
+      course: { id: courseId, name: course.name },
+      metrics: {
+        attendanceRate: rate.toFixed(1) + '%',
+        totalSessions: records.length,
+        consecutiveAbsences,
+        trend,
+        riskLevel,
+      },
+      summary: `Student has attended ${presentCount}/${records.length} sessions. Currently on a ${consecutiveAbsences} session absence streak.`
+    };
+  }
+
+  async getCourseAttendance(courseId: number, section?: number, date?: string) {
+    return this.attendanceRepo.findByFilter({
+      courseId,
+      section: section || 1,
+      date: date || new Date().toISOString()
+    });
+  }
+
+  async isStaffAuthorizedForCourse(staffId: number, courseId: number): Promise<boolean> {
+    const course = await this.courseRepo.findById(courseId);
+    return course?.instructor?.userAccountId === staffId;
+  }
+
+  async statistics(user: UserAccount, courseId?: number) {
     if (user.userType === Role.ADMIN) {
-      rawStats = await this.attendanceRepo.statistics();
+      return this.attendanceRepo.getDetailedStatistics(courseId);
     } else if (user.userType === Role.STAFF) {
-      rawStats = await this.attendanceRepo.statisticsByStaff(user.userAccountId);
+      // If courseId is provided, check if staff is authorized
+      if (courseId) {
+        const isAuthorized = await this.isStaffAuthorizedForCourse(user.userAccountId, courseId);
+        if (!isAuthorized) throw new ForbiddenException('You are not authorized for this course');
+        return this.attendanceRepo.getDetailedStatistics(courseId);
+      }
+      return this.attendanceRepo.statisticsByStaff(user.userAccountId);
     } else if (user.userType === Role.STUDENT) {
-      rawStats = await this.attendanceRepo.statisticsByStudent(user.userAccountId);
-    } else {
-      return [];
+      return this.attendanceRepo.statisticsByStudent(user.userAccountId);
     }
     
-    const statusMap = {
-      1: 'Present',
-      2: 'Absent',
-      3: 'Late',
-      4: 'Excused'
-    };
+    return [];
+  }
 
-    return rawStats.map(stat => ({
-      status: statusMap[stat.status] || `Unknown (${stat.status})`,
-      count: parseInt(stat.count) || 0
-    }));
+  async update(recordId: number, dto: UpdateAttendanceDto, userId: number, userRole: string) {
+    const record = await this.attendanceRepo.findOneById(recordId);
+    if (!record) {
+      throw new NotFoundException(`Attendance record with ID ${recordId} not found`);
+    }
+    
+    // Only admin or the staff who created can update
+    if (userRole !== Role.ADMIN && record.staffId !== userId) {
+      throw new ForbiddenException('You are not authorized to update this record');
+    }
+    
+    const updateData: any = { ...dto };
+    if (dto.recordDate) {
+      updateData.recordDate = this.normalizeDate(dto.recordDate);
+    }
+    
+    return this.attendanceRepo.update(recordId, updateData);
+  }
+
+  async delete(recordId: number, userRole: string) {
+    const record = await this.attendanceRepo.findOneById(recordId);
+    if (!record) {
+      throw new NotFoundException(`Attendance record with ID ${recordId} not found`);
+    }
+    
+    // Only admin can delete
+    if (userRole !== Role.ADMIN) {
+      throw new ForbiddenException('Only administrators can delete attendance records');
+    }
+    
+    return this.attendanceRepo.delete(recordId);
+  }
+
+  private normalizeDate(dateString: string): Date {
+    return new Date(dateString + 'T00:00:00Z');
   }
 }

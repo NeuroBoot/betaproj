@@ -17,5 +17,6 @@ import { StudentController } from '../users/controllers/student.controller';
   ],
   controllers: [AttendanceController, StudentController],
   providers: [AttendanceService, AttendanceRepository],
+  exports: [AttendanceService, AttendanceRepository],
 })
 export class AttendanceModule {}

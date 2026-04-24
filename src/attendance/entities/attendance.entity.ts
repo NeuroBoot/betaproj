@@ -3,7 +3,9 @@ import {
   PrimaryGeneratedColumn,
   Column,
   ManyToOne,
-  JoinColumn
+  JoinColumn,
+  CreateDateColumn,
+  UpdateDateColumn
 } from 'typeorm';
 
 import { UserAccount } from '../../users/entities/user.entity';
@@ -15,7 +17,7 @@ export class Attendance {
   @PrimaryGeneratedColumn()
   recordId: number;
 
-  @Column()
+  @Column({ type: 'date' })
   recordDate: Date;
 
   // relation with UserAccount (Student)
@@ -45,4 +47,16 @@ export class Attendance {
 
   @Column({ nullable: true })
   sectionNumber: number;
+
+  @Column({ type: 'float', nullable: true })
+  faceConfidence: number;
+
+  @Column({ type: 'time', nullable: true })
+  checkInTime: string;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

@@ -13,9 +13,14 @@ yarn-error.log*
 *.pptx
 *.mp4
 *.txt
-BACKEND_HANDOVER.md
-===================================.txt
 
 # UI Folders
 front/
 betaproj/
+
+# Development/Backups
+/w
+/w/
+src.zip
+BACKEND_HANDOVER.md
+session_audit_summary.txt

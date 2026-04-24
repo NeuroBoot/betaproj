@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Between, In } from 'typeorm';
 import { Attendance } from '../entities/attendance.entity';
 
 @Injectable()
@@ -27,10 +27,53 @@ export class AttendanceRepository {
     });
   }
 
-  findByStudent(studentId: number) {
+  async findAllWithFilters(
+    page: number, 
+    limit: number, 
+    filters: { courseId?: number; section?: number; date?: string }, 
+    courseIds?: number[]
+  ): Promise<{ data: Attendance[]; total: number; page: number; limit: number; totalPages: number }> {
+    const skip = (page - 1) * limit;
+    const where: any = {};
+    
+    if (courseIds && courseIds.length > 0) {
+      where.courseId = In(courseIds);
+    }
+    if (filters.courseId) {
+      where.courseId = filters.courseId;
+    }
+    if (filters.section) {
+      where.sectionNumber = filters.section;
+    }
+    if (filters.date) {
+      const date = new Date(filters.date);
+      const startOfDay = new Date(date);
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date(date);
+      endOfDay.setHours(23, 59, 59, 999);
+      where.recordDate = Between(startOfDay, endOfDay);
+    }
+    
+    const [data, total] = await this.repo.findAndCount({
+      where,
+      relations: ['student', 'course'],
+      skip,
+      take: limit,
+      order: { recordDate: 'DESC' }
+    });
+    
+    return { data, total, page, limit, totalPages: Math.ceil(total / limit) };
+  }
+
+  findByStudent(studentId: number, courseId?: number) {
+    const where: any = { student: { userAccountId: studentId } };
+    if (courseId) {
+      where.course = { courseId };
+    }
     return this.repo.find({
-      where: { student: { userAccountId: studentId } },
-      relations: ['student', 'course', 'course.instructor']
+      where,
+      relations: ['student', 'course', 'course.instructor'],
+      order: { recordDate: 'DESC' }
     });
   }
 
@@ -59,6 +102,52 @@ export class AttendanceRepository {
       .addSelect('COUNT(*)','count')
       .groupBy('attendance.attendanceStatusId')
       .getRawMany();
+  }
+
+  async getDetailedStatistics(courseId?: number) {
+    let queryBuilder = this.repo
+      .createQueryBuilder('attendance')
+      .select('attendance.attendanceStatusId', 'status')
+      .addSelect('COUNT(*)', 'count');
+    
+    if (courseId) {
+      queryBuilder = queryBuilder.where('attendance.courseId = :courseId', { courseId });
+    }
+    
+    const rawStats = await queryBuilder
+      .groupBy('attendance.attendanceStatusId')
+      .getRawMany();
+    
+    const totalRecords = rawStats.reduce((sum, stat) => sum + parseInt(stat.count), 0);
+    const statusMap: Record<number, string> = { 1: 'Present', 2: 'Absent', 3: 'Late', 4: 'Excused' };
+    
+    return {
+      total: totalRecords,
+      breakdown: rawStats.map(stat => ({
+        statusId: parseInt(stat.status),
+        statusName: statusMap[parseInt(stat.status)] || 'Unknown',
+        count: parseInt(stat.count),
+        percentage: totalRecords > 0 ? ((parseInt(stat.count) / totalRecords) * 100).toFixed(2) : '0'
+      }))
+    };
+  }
+
+  async findOneById(recordId: number) {
+    return this.repo.findOne({
+      where: { recordId },
+      relations: ['student', 'course']
+    });
+  }
+
+  async update(recordId: number, data: any) {
+    await this.repo.update(recordId, data);
+    return this.findOneById(recordId);
+  }
+
+  async delete(recordId: number) {
+    const record = await this.findOneById(recordId);
+    if (!record) return null;
+    return this.repo.remove(record);
   }
 
   statisticsByStaff(staffId: number) {

@@ -21,6 +21,9 @@ export class Alert {
   @ManyToOne(() => UserAccount)
   user: UserAccount;
 
+  @Column({ type: 'json', nullable: true })
+  metadata: any;
+
   @CreateDateColumn()
   createdAt: Date;
 }

@@ -1,7 +1,7 @@
 {
 	"info": {
 		"name": "Attendance Master Collection",
-		"description": "Every endpoint required by the frontend, fully documented with headers and bulk support. 10y Dev Refactor.",
+		"description": "Every endpoint required by the frontend, fully documented with headers, bulk support, and advanced analytics. 10y Dev Refactor.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -104,6 +104,62 @@
 						"method": "DELETE",
 						"header": [{ "key": "Authorization", "value": "Bearer {{jwt_token}}" }],
 						"url": "{{base_url}}/alerts/1"
+					}
+				},
+				{
+					"name": "Check Low Attendance (Staff/Admin)",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Authorization", "value": "Bearer {{jwt_token}}" }],
+						"url": {
+							"raw": "{{base_url}}/alerts/check-low-attendance/1?threshold=75",
+							"host": ["{{base_url}}"],
+							"path": ["alerts", "check-low-attendance", "1"],
+							"query": [{ "key": "threshold", "value": "75" }]
+						}
+					}
+				},
+				{
+					"name": "Get Low Attendance Report (Staff/Admin)",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{jwt_token}}" }],
+						"url": {
+							"raw": "{{base_url}}/alerts/report/1?threshold=75",
+							"host": ["{{base_url}}"],
+							"path": ["alerts", "report", "1"],
+							"query": [{ "key": "threshold", "value": "75" }]
+						}
+					}
+				},
+				{
+					"name": "Send Batch Alerts (Staff/Admin)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{jwt_token}}" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userIds\": [1, 3, 5],\n  \"message\": \"Please review your attendance records.\",\n  \"title\": \"Attendance Follow-up\",\n  \"type\": \"warning\"\n}"
+						},
+						"url": "{{base_url}}/alerts/batch"
+					}
+				},
+				{
+					"name": "Send Targeted Alert (Admin)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{jwt_token}}" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"message\": \"You missed 3 sessions in a row. Please see the advisor.\",\n  \"title\": \"Urgent Follow-up\",\n  \"type\": \"danger\",\n  \"metadata\": { \"consecutiveAbsences\": 3 }\n}"
+						},
+						"url": "{{base_url}}/alerts/send/1"
 					}
 				},
 				{
@@ -281,18 +337,62 @@
 			"name": "6. Attendance Tracking",
 			"item": [
 				{
-					"name": "List Attendance",
+					"name": "List Attendance (Paginated/Filtered)",
 					"request": {
 						"method": "GET",
 						"header": [{ "key": "Authorization", "value": "Bearer {{jwt_token}}" }],
 						"url": {
-							"raw": "{{base_url}}/attendance?courseId=1&section=1",
+							"raw": "{{base_url}}/attendance?courseId=1&section=1&page=1&limit=50",
 							"host": ["{{base_url}}"],
 							"path": ["attendance"],
 							"query": [
 								{ "key": "courseId", "value": "1" },
-								{ "key": "section", "value": "1" }
+								{ "key": "section", "value": "1" },
+								{ "key": "page", "value": "1" },
+								{ "key": "limit", "value": "50" }
 							]
+						}
+					}
+				},
+				{
+					"name": "Get My Attendance (Student)",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{jwt_token}}" }],
+						"url": {
+							"raw": "{{base_url}}/attendance/my?courseId=1",
+							"host": ["{{base_url}}"],
+							"path": ["attendance", "my"],
+							"query": [{ "key": "courseId", "value": "1", "disabled": true }]
+						}
+					}
+				},
+				{
+					"name": "Get Attendance by Course (Staff/Admin)",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{jwt_token}}" }],
+						"url": {
+							"raw": "{{base_url}}/attendance/course/1?section=1&date=2026-04-21",
+							"host": ["{{base_url}}"],
+							"path": ["attendance", "course", "1"],
+							"query": [
+								{ "key": "section", "value": "1" },
+								{ "key": "date", "value": "2026-04-21" }
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Attendance by Student ID (Staff/Admin)",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{jwt_token}}" }],
+						"url": {
+							"raw": "{{base_url}}/attendance/student/3?courseId=1",
+							"host": ["{{base_url}}"],
+							"path": ["attendance", "student", "3"],
+							"query": [{ "key": "courseId", "value": "1" }]
 						}
 					}
 				},
@@ -321,17 +421,45 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"studentId\": 3,\n  \"courseId\": 1,\n  \"staffId\": 2,\n  \"recordDate\": \"2026-04-21T10:00:00Z\",\n  \"attendanceStatusId\": 1,\n  \"room\": \"R3\",\n  \"sessionType\": \"LECTURE\",\n  \"sectionNumber\": 1\n}"
+							"raw": "{\n  \"studentId\": 3,\n  \"courseId\": 1,\n  \"staffId\": 2,\n  \"recordDate\": \"2026-04-21T10:00:00Z\",\n  \"attendanceStatusId\": 1,\n  \"room\": \"R3\",\n  \"sessionType\": \"LECTURE\",\n  \"sectionNumber\": 1,\n  \"faceConfidence\": 0.98,\n  \"checkInTime\": \"09:45:00\"\n}"
 						},
 						"url": "{{base_url}}/attendance"
 					}
 				},
 				{
-					"name": "Get Attendance Statistics (Credit Fix)",
+					"name": "Update Attendance Record",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{jwt_token}}" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"attendanceStatusId\": 3,\n  \"room\": \"R2\",\n  \"faceConfidence\": 0.95\n}"
+						},
+						"url": "{{base_url}}/attendance/1"
+					}
+				},
+				{
+					"name": "Delete Attendance Record (Admin)",
+					"request": {
+						"method": "DELETE",
+						"header": [{ "key": "Authorization", "value": "Bearer {{jwt_token}}" }],
+						"url": "{{base_url}}/attendance/1"
+					}
+				},
+				{
+					"name": "Get Attendance Statistics (Enhanced)",
 					"request": {
 						"method": "GET",
 						"header": [{ "key": "Authorization", "value": "Bearer {{jwt_token}}" }],
-						"url": "{{base_url}}/attendance/statistics"
+						"url": {
+							"raw": "{{base_url}}/attendance/statistics?courseId=1",
+							"host": ["{{base_url}}"],
+							"path": ["attendance", "statistics"],
+							"query": [{ "key": "courseId", "value": "1", "disabled": true }]
+						}
 					}
 				}
 			]

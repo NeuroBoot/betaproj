@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
 import { Course } from '../entities/course.entity';
+import { UserAccount } from '../../users/entities/user.entity';
 
 /**
  * Data Access Layer for Course entity.
@@ -41,5 +42,29 @@ export class CourseRepository extends Repository<Course> {
       .where('student.userAccountId = :studentId', { studentId })
       .andWhere('course.isDeleted = :isDeleted', { isDeleted: false })
       .getMany();
+  }
+
+  async getEnrolledStudents(courseId: number): Promise<UserAccount[]> {
+    const course = await this.findOne({
+      where: { courseId, isDeleted: false },
+      relations: ['students'],
+    });
+    
+    if (!course) {
+      return [];
+    }
+    
+    return course.students || [];
+  }
+
+  async isStudentEnrolled(courseId: number, studentId: number): Promise<boolean> {
+    const result = await this.createQueryBuilder('course')
+      .leftJoin('course.students', 'student')
+      .where('course.courseId = :courseId', { courseId })
+      .andWhere('student.userAccountId = :studentId', { studentId })
+      .andWhere('course.isDeleted = :isDeleted', { isDeleted: false })
+      .getOne();
+    
+    return !!result;
   }
 }
