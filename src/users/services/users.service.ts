@@ -31,9 +31,31 @@ export class UsersService {
   }
 
   async create(userData: any): Promise<Omit<UserAccount, 'password'>> {
-    const existingUser = await this.userRepository.findByUsername(userData.username);
+    const existingUser = await this.userRepository.findByUsernameAll(userData.username);
+    
     if (existingUser) {
-      throw new ConflictException('Username already exists');
+      if (!existingUser.isDeleted) {
+        throw new ConflictException('Username already exists');
+      }
+      
+      // Restore deleted user
+      if (userData.password) {
+        userData.password = await bcrypt.hash(userData.password, 10);
+      }
+      
+      // Handle 'role' alias for 'userType' if provided
+      if (userData.role && !userData.userType) {
+        userData.userType = userData.role;
+      }
+
+      Object.assign(existingUser, {
+        ...userData,
+        isDeleted: false,
+      });
+      
+      const savedUser = await this.userRepository.save(existingUser);
+      const { password, ...result } = savedUser;
+      return result;
     }
 
     // Handle 'role' alias for 'userType' if provided
@@ -51,6 +73,23 @@ export class UsersService {
     return result;
   }
 
+  async findOneByUsername(username: string): Promise<Omit<UserAccount, 'password'>> {
+    const user = await this.userRepository.findByUsername(username);
+    if (!user) {
+      throw new NotFoundException(`User with username ${username} not found`);
+    }
+    const { password, ...result } = user;
+    return result;
+  }
+
+  async updateByUsername(username: string, userData: Partial<UserAccount>): Promise<Omit<UserAccount, 'password'>> {
+    const user = await this.userRepository.findByUsername(username);
+    if (!user) {
+      throw new NotFoundException(`User with username ${username} not found`);
+    }
+    return this.update(user.userAccountId, userData);
+  }
+
   async update(id: number, userData: Partial<UserAccount>): Promise<Omit<UserAccount, 'password'>> {
     const user = await this.userRepository.findById(id);
     if (!user) {
@@ -58,9 +97,15 @@ export class UsersService {
     }
 
     if (userData.username && userData.username !== user.username) {
-      const existingUser = await this.userRepository.findByUsername(userData.username);
+      const existingUser = await this.userRepository.findByUsernameAll(userData.username);
       if (existingUser) {
-        throw new ConflictException('Username already exists');
+        if (!existingUser.isDeleted) {
+          throw new ConflictException('Username already exists');
+        } else {
+          // Rename the deleted user to free up the username
+          existingUser.username = `${existingUser.username}_deleted_${Date.now()}`;
+          await this.userRepository.save(existingUser);
+        }
       }
     }
 
@@ -74,12 +119,35 @@ export class UsersService {
     return result;
   }
 
-  async remove(id: number): Promise<void> {
-    const user = await this.userRepository.findById(id);
+  async remove(id: number, isHard: boolean = false): Promise<void> {
+    const user = await this.userRepository.findOne({ where: { userAccountId: id } });
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
-    user.isDeleted = true;
-    await this.userRepository.save(user);
+    
+    if (isHard) {
+      await this.userRepository.delete(id);
+    } else {
+      if (user.isDeleted) return; // Already soft-deleted
+      user.isDeleted = true;
+      user.username = `${user.username}_deleted_${Date.now()}`;
+      await this.userRepository.save(user);
+    }
+  }
+
+  async removeByUsername(username: string, isHard: boolean = false): Promise<void> {
+    const user = await this.userRepository.findByUsernameAll(username);
+    if (!user) {
+      throw new NotFoundException(`User with username ${username} not found`);
+    }
+
+    if (isHard) {
+      await this.userRepository.delete(user.userAccountId);
+    } else {
+      if (user.isDeleted) return; // Already soft-deleted
+      user.isDeleted = true;
+      user.username = `${user.username}_deleted_${Date.now()}`;
+      await this.userRepository.save(user);
+    }
   }
 }

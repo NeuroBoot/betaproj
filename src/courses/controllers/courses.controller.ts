@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards, ParseIntPipe } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
 import { CoursesService } from '../services/courses.service';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
@@ -32,31 +32,49 @@ export class CoursesController {
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get course details' })
+  @ApiOperation({ summary: 'Get course details by ID' })
   async findOne(@Param('id', ParseIntPipe) id: number, @CurrentUser() user: UserAccount) {
     const course = await this.coursesService.findOne(id, user);
-    // Transform sections number into array [1, 2, ...n]
     const sectionList = Array.from({ length: course.sections }, (_, i) => i + 1);
-    return {
-      ...course,
-      data: {
-        sections: sectionList
-      }
-    };
+    return { ...course, data: { sections: sectionList } };
+  }
+
+  @Get('code/:code')
+  @ApiOperation({ summary: 'Get course details by Code' })
+  async findOneByCode(@Param('code') code: string, @CurrentUser() user: UserAccount) {
+    const course = await this.coursesService.findOneByCode(code, user);
+    const sectionList = Array.from({ length: course.sections }, (_, i) => i + 1);
+    return { ...course, data: { sections: sectionList } };
   }
 
   @Put(':id')
   @Roles(Role.ADMIN)
-  @ApiOperation({ summary: 'Update course details (Admin only)' })
+  @ApiOperation({ summary: 'Update course details by ID (Admin only)' })
   async update(@Param('id', ParseIntPipe) id: number, @Body() updateCourseDto: UpdateCourseDto) {
     return this.coursesService.update(id, updateCourseDto);
   }
 
+  @Put('code/:code')
+  @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Update course details by Code (Admin only)' })
+  async updateByCode(@Param('code') code: string, @Body() updateCourseDto: UpdateCourseDto) {
+    return this.coursesService.updateByCode(code, updateCourseDto);
+  }
+
   @Delete(':id')
   @Roles(Role.ADMIN)
-  @ApiOperation({ summary: 'Delete course (Admin only)' })
-  async remove(@Param('id', ParseIntPipe) id: number) {
-    return this.coursesService.remove(id);
+  @ApiOperation({ summary: 'Delete course by ID (Admin only). Use ?hard=true for permanent delete.' })
+  async remove(@Param('id', ParseIntPipe) id: number, @Query('hard') hard?: string) {
+    const isHard = hard === 'true';
+    return this.coursesService.remove(id, isHard);
+  }
+
+  @Delete('code/:code')
+  @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Delete course by Code (Admin only). Use ?hard=true for permanent delete.' })
+  async removeByCode(@Param('code') code: string, @Query('hard') hard?: string) {
+    const isHard = hard === 'true';
+    return this.coursesService.removeByCode(code, isHard);
   }
 
   @Post(':id/students')

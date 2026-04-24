@@ -35,10 +35,25 @@ export class AuthService {
 
       // Check if username is already taken.
       const existingUser = await transactionalRepo.findOne({
-        where: { username, isDeleted: false },
+        where: { username },
       });
+      
       if (existingUser) {
-        throw new ConflictException('Username already exists');
+        if (!existingUser.isDeleted) {
+          throw new ConflictException('Username already exists');
+        }
+        
+        // Restore soft-deleted user
+        const hashedPassword = await bcrypt.hash(password, 10);
+        Object.assign(existingUser, {
+          password: hashedPassword,
+          userType: role || Role.STUDENT,
+          isDeleted: false,
+        });
+        
+        const savedUser = await transactionalRepo.save(existingUser);
+        const { password: _, ...result } = savedUser;
+        return result;
       }
 
       // Securely hash the password before storage.

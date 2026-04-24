@@ -41,6 +41,80 @@
         ],
         "responses": { "200": { "description": "Returns Risk Level and Trend Analysis" } }
       }
+    },
+    "/auth/register": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Register a new user (Restores if soft-deleted)",
+        "responses": { "201": { "description": "User created or restored" } }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Login to get JWT token",
+        "responses": { "200": { "description": "Token issued" } }
+      }
+    },
+    "/users": {
+      "get": { "tags": ["Users"], "summary": "List all users (Admin only)" },
+      "post": { 
+        "tags": ["Users"], 
+        "summary": "Create new user (Restores if soft-deleted)",
+        "responses": { "201": { "description": "User created or restored" } }
+      }
+    },
+    "/courses": {
+      "get": { "tags": ["Courses"], "summary": "List active courses" },
+      "post": { 
+        "tags": ["Courses"], 
+        "summary": "Create course (Restores if soft-deleted)",
+        "responses": { "201": { "description": "Course created or restored" } }
+      }
+    },
+    "/courses/{id}": {
+      "delete": {
+        "tags": ["Courses"],
+        "summary": "Delete course by ID (Admins). Use ?hard=true for permanent.",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } },
+          { "name": "hard", "in": "query", "schema": { "type": "boolean", "default": false } }
+        ],
+        "responses": { "200": { "description": "Success" } }
+      }
+    },
+    "/courses/code/{code}": {
+      "delete": {
+        "tags": ["Courses"],
+        "summary": "Delete course by Code (Admins). Use ?hard=true for permanent.",
+        "parameters": [
+          { "name": "code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "hard", "in": "query", "schema": { "type": "boolean", "default": false } }
+        ],
+        "responses": { "200": { "description": "Success" } }
+      }
+    },
+    "/users/{id}": {
+      "delete": {
+        "tags": ["Users"],
+        "summary": "Delete user by ID (Admins). Use ?hard=true for permanent.",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } },
+          { "name": "hard", "in": "query", "schema": { "type": "boolean", "default": false } }
+        ],
+        "responses": { "200": { "description": "Success" } }
+      }
+    },
+    "/users/username/{username}": {
+      "delete": {
+        "tags": ["Users"],
+        "summary": "Delete user by Username (Admins). Use ?hard=true for permanent.",
+        "parameters": [
+          { "name": "username", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "hard", "in": "query", "schema": { "type": "boolean", "default": false } }
+        ],
+        "responses": { "200": { "description": "Success" } }
+      }
     }
-  }
-}
+    }
+    }

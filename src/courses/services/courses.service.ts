@@ -15,9 +15,34 @@ export class CoursesService {
   ) {}
 
   async create(createCourseDto: CreateCourseDto, adminUser?: UserAccount): Promise<Course> {
-    const existingCourse = await this.courseRepository.findByCode(createCourseDto.code);
+    const existingCourse = await this.courseRepository.findByCodeAll(createCourseDto.code);
+    
     if (existingCourse) {
-      throw new ConflictException(`Course with code ${createCourseDto.code} already exists`);
+      if (!existingCourse.isDeleted) {
+        throw new ConflictException(`Course with code ${createCourseDto.code} already exists`);
+      }
+      
+      // If it exists but is deleted, we can "restore" it to satisfy the user's request
+      // to "add it again". This also avoids unique constraint issues.
+      Object.assign(existingCourse, {
+        ...createCourseDto,
+        instructor: await this.userRepository.findById(createCourseDto.instructorId),
+        isDeleted: false,
+      });
+
+      if (createCourseDto.adminId) {
+        existingCourse.admin = await this.userRepository.findById(createCourseDto.adminId);
+      } else if (adminUser) {
+        existingCourse.admin = adminUser;
+      }
+      
+      // Validation for instructor and admin (already done partially but to be safe)
+      if (!existingCourse.instructor || existingCourse.instructor.userType !== Role.STAFF) {
+        throw new NotFoundException(`Staff with ID ${createCourseDto.instructorId} not found`);
+      }
+
+      existingCourse.students = [];
+      return this.courseRepository.save(existingCourse);
     }
 
     const instructor = await this.userRepository.findById(createCourseDto.instructorId);
@@ -83,6 +108,32 @@ export class CoursesService {
     return course;
   }
 
+  async findOneByCode(code: string, user: UserAccount): Promise<Course> {
+    const course = await this.courseRepository.findOne({
+      where: { code, isDeleted: false },
+      relations: ['instructor', 'admin', 'students'],
+    });
+
+    if (!course) {
+      throw new NotFoundException(`Course with code ${code} not found`);
+    }
+
+    // Permission check
+    if (user.userType === Role.STAFF && course.instructor.userAccountId !== user.userAccountId) {
+      throw new ForbiddenException('You can only access your own courses');
+    }
+
+    return course;
+  }
+
+  async updateByCode(code: string, updateCourseDto: UpdateCourseDto): Promise<Course> {
+    const course = await this.courseRepository.findByCode(code);
+    if (!course) {
+      throw new NotFoundException(`Course with code ${code} not found`);
+    }
+    return this.update(course.courseId, updateCourseDto);
+  }
+
   async update(id: number, updateCourseDto: UpdateCourseDto): Promise<Course> {
     const course = await this.courseRepository.findById(id);
     if (!course) {
@@ -90,9 +141,15 @@ export class CoursesService {
     }
 
     if (updateCourseDto.code && updateCourseDto.code !== course.code) {
-      const existing = await this.courseRepository.findByCode(updateCourseDto.code);
+      const existing = await this.courseRepository.findByCodeAll(updateCourseDto.code);
       if (existing) {
-        throw new ConflictException(`Course with code ${updateCourseDto.code} already exists`);
+        if (!existing.isDeleted) {
+          throw new ConflictException(`Course with code ${updateCourseDto.code} already exists`);
+        } else {
+          // It exists but is deleted. Rename it to free up the code for this update.
+          existing.code = `${existing.code}_deleted_${Date.now()}`;
+          await this.courseRepository.save(existing);
+        }
       }
     }
 
@@ -116,13 +173,36 @@ export class CoursesService {
     return this.courseRepository.save(course);
   }
 
-  async remove(id: number): Promise<void> {
-    const course = await this.courseRepository.findById(id);
+  async remove(id: number, isHard: boolean = false): Promise<void> {
+    const course = await this.courseRepository.findOne({ where: { courseId: id } });
     if (!course) {
       throw new NotFoundException(`Course with ID ${id} not found`);
     }
-    course.isDeleted = true;
-    await this.courseRepository.save(course);
+
+    if (isHard) {
+      await this.courseRepository.delete(id);
+    } else {
+      if (course.isDeleted) return; // Already soft-deleted
+      course.isDeleted = true;
+      course.code = `${course.code}_deleted_${Date.now()}`;
+      await this.courseRepository.save(course);
+    }
+  }
+
+  async removeByCode(code: string, isHard: boolean = false): Promise<void> {
+    const course = await this.courseRepository.findByCodeAll(code);
+    if (!course) {
+      throw new NotFoundException(`Course with code ${code} not found`);
+    }
+
+    if (isHard) {
+      await this.courseRepository.delete(course.courseId);
+    } else {
+      if (course.isDeleted) return; // Already soft-deleted
+      course.isDeleted = true;
+      course.code = `${course.code}_deleted_${Date.now()}`;
+      await this.courseRepository.save(course);
+    }
   }
 
   async enrollStudent(courseId: number, studentId: number, user: UserAccount): Promise<Course> {

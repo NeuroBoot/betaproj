@@ -9,7 +9,8 @@
 			"name": "1. Authentication",
 			"item": [
 				{
-					"name": "Register User",
+					"name": "Register User (Restores if deleted)",
+					"description": "Registers a new user. If the username was soft-deleted, it restores the account.",
 					"request": {
 						"method": "POST",
 						"header": [{ "key": "Content-Type", "value": "application/json" }],
@@ -212,7 +213,16 @@
 					}
 				},
 				{
-					"name": "Create User",
+					"name": "Get User by Username",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{jwt_token}}" }],
+						"url": "{{base_url}}/users/username/staff_member"
+					}
+				},
+				{
+					"name": "Create User (Restores if deleted)",
+					"description": "Creates a user. If the username was soft-deleted, it restores the old account.",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -227,7 +237,7 @@
 					}
 				},
 				{
-					"name": "Update User",
+					"name": "Update User by ID",
 					"request": {
 						"method": "PUT",
 						"header": [
@@ -242,11 +252,46 @@
 					}
 				},
 				{
-					"name": "Delete User",
+					"name": "Update User by Username",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{jwt_token}}" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"fullName\": \"Updated Name via Username\"\n}"
+						},
+						"url": "{{base_url}}/users/username/staff_member"
+					}
+				},
+				{
+					"name": "Delete User by ID",
+					"description": "Soft-deletes the user by ID and renames the username. Use ?hard=true for permanent delete.",
 					"request": {
 						"method": "DELETE",
 						"header": [{ "key": "Authorization", "value": "Bearer {{jwt_token}}" }],
-						"url": "{{base_url}}/users/1"
+						"url": {
+							"raw": "{{base_url}}/users/1?hard=false",
+							"host": ["{{base_url}}"],
+							"path": ["users", "1"],
+							"query": [{ "key": "hard", "value": "false" }]
+						}
+					}
+				},
+				{
+					"name": "Delete User by Username",
+					"description": "Deletes the user using their username. Use ?hard=true for permanent delete.",
+					"request": {
+						"method": "DELETE",
+						"header": [{ "key": "Authorization", "value": "Bearer {{jwt_token}}" }],
+						"url": {
+							"raw": "{{base_url}}/users/username/staff_member?hard=false",
+							"host": ["{{base_url}}"],
+							"path": ["users", "username", "staff_member"],
+							"query": [{ "key": "hard", "value": "false" }]
+						}
 					}
 				}
 			]
@@ -263,7 +308,8 @@
 					}
 				},
 				{
-					"name": "Create Course",
+					"name": "Create Course (Restores if deleted)",
+					"description": "Creates a course. If the code was soft-deleted, it restores the course record.",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -301,11 +347,31 @@
 					}
 				},
 				{
-					"name": "Delete Course",
+					"name": "Delete Course by ID",
+					"description": "Soft-deletes the course by ID and renames its code. Use ?hard=true for permanent delete.",
 					"request": {
 						"method": "DELETE",
 						"header": [{ "key": "Authorization", "value": "Bearer {{jwt_token}}" }],
-						"url": "{{base_url}}/courses/1"
+						"url": {
+							"raw": "{{base_url}}/courses/1?hard=false",
+							"host": ["{{base_url}}"],
+							"path": ["courses", "1"],
+							"query": [{ "key": "hard", "value": "false" }]
+						}
+					}
+				},
+				{
+					"name": "Delete Course by Code",
+					"description": "Deletes the course using its code (e.g. CS101). Use ?hard=true for permanent delete.",
+					"request": {
+						"method": "DELETE",
+						"header": [{ "key": "Authorization", "value": "Bearer {{jwt_token}}" }],
+						"url": {
+							"raw": "{{base_url}}/courses/code/CS101?hard=false",
+							"host": ["{{base_url}}"],
+							"path": ["courses", "code", "CS101"],
+							"query": [{ "key": "hard", "value": "false" }]
+						}
 					}
 				},
 				{

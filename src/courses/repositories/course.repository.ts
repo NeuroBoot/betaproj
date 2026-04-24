@@ -16,6 +16,10 @@ export class CourseRepository extends Repository<Course> {
     return this.findOne({ where: { code, isDeleted: false }, relations: ['instructor', 'admin'] });
   }
 
+  async findByCodeAll(code: string): Promise<Course | null> {
+    return this.findOne({ where: { code }, relations: ['instructor', 'admin', 'students'] });
+  }
+
   async findById(id: number): Promise<Course | null> {
     return this.findOne({ where: { courseId: id, isDeleted: false }, relations: ['instructor', 'admin'] });
   }

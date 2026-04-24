@@ -28,6 +28,12 @@ export class UsersController {
     return this.usersService.findOne(id);
   }
 
+  @Get('username/:username')
+  @ApiOperation({ summary: 'Get user details by Username (Admin only)' })
+  async findOneByUsername(@Param('username') username: string) {
+    return this.usersService.findOneByUsername(username);
+  }
+
   @Post()
   @ApiOperation({ summary: 'Create new user (Admin only)' })
   @ApiResponse({ status: 201, description: 'User created' })
@@ -36,14 +42,28 @@ export class UsersController {
   }
 
   @Put(':id')
-  @ApiOperation({ summary: 'Update user (Admin only)' })
+  @ApiOperation({ summary: 'Update user by ID (Admin only)' })
   async update(@Param('id', ParseIntPipe) id: number, @Body() userData: Partial<UserAccount>) {
     return this.usersService.update(id, userData);
   }
 
+  @Put('username/:username')
+  @ApiOperation({ summary: 'Update user by Username (Admin only)' })
+  async updateByUsername(@Param('username') username: string, @Body() userData: Partial<UserAccount>) {
+    return this.usersService.updateByUsername(username, userData);
+  }
+
   @Delete(':id')
-  @ApiOperation({ summary: 'Soft-delete user (Admin only)' })
-  async remove(@Param('id', ParseIntPipe) id: number) {
-    return this.usersService.remove(id);
+  @ApiOperation({ summary: 'Delete user by ID (Admin only). Use ?hard=true for permanent delete.' })
+  async remove(@Param('id', ParseIntPipe) id: number, @Query('hard') hard?: string) {
+    const isHard = hard === 'true';
+    return this.usersService.remove(id, isHard);
+  }
+
+  @Delete('username/:username')
+  @ApiOperation({ summary: 'Delete user by username (Admin only). Use ?hard=true for permanent delete.' })
+  async removeByUsername(@Param('username') username: string, @Query('hard') hard?: string) {
+    const isHard = hard === 'true';
+    return this.usersService.removeByUsername(username, isHard);
   }
 }
