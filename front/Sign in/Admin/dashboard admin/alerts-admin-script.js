@@ -1,200 +1,226 @@
-const API_BASE_URL = 'http://localhost:3000/api/v1'; 
+const API_BASE_URL = 'http://localhost:3000/api/v1';
+
+function getAuthToken() {
+    let token = localStorage.getItem('token');
+    if (!token) return "";
+    token = token.replace(/['"]+/g, '').trim();
+    if (token.toLowerCase().startsWith('bearer ')) {
+        token = token.substring(7).trim();
+    }
+    return `Bearer ${token}`;
+}
 
 document.addEventListener('DOMContentLoaded', async function () {
-    
-    // 1. --- عرض اسم المسؤول من localStorage ---
-    const userNameElement = document.getElementById('adminName');
-    const savedName = localStorage.getItem('username'); 
-    if (savedName && userNameElement) {
-        userNameElement.textContent = savedName;
-    }
+    const savedName = localStorage.getItem('username');
+    if (savedName) document.getElementById('adminName').textContent = savedName;
 
-    // 2. --- وظائف السايد بار (تحجيم وموبايل) ---
-    const sidebar = document.querySelector('.sidebar');
-    const resizer = document.querySelector('.resizer');
-    const mainContent = document.querySelector('.main-content');
-
-    if (resizer && sidebar) {
-        resizer.addEventListener('mousedown', (e) => {
-            e.preventDefault();
-            document.addEventListener('mousemove', resize);
-            document.addEventListener('mouseup', stopResize);
-            document.body.style.cursor = 'col-resize';
-        });
-        function resize(e) {
-            let newWidth = e.clientX;
-            if (newWidth >= 150 && newWidth <= 500) { sidebar.style.width = newWidth + 'px'; }
-        }
-        function stopResize() {
-            document.removeEventListener('mousemove', resize);
-            document.removeEventListener('mouseup', stopResize);
-            document.body.style.cursor = 'default';
-        }
-    }
-
-    if (mainContent && sidebar) {
-        mainContent.addEventListener('click', () => {
-            if (sidebar.classList.contains('active')) sidebar.classList.remove('active');
-        });
-    }
-
-    // 3. --- جلب التنبيهات الحقيقية من السيرفر عند البدء ---
     await loadAlertsFromServer();
+    await fillRecipients();
 
-    // 4. --- تفعيل زرار الإرسال ---
-    const sendBtn = document.getElementById('sendAlertBtn');
-    if (sendBtn) {
-        sendBtn.addEventListener('click', sendBroadcastAlert);
-    }
-
-    // 5. --- تفعيل زرار مسح الكل ---
-    const clearAllBtn = document.getElementById('clearAllBtn');
-    if (clearAllBtn) {
-        clearAllBtn.addEventListener('click', clearAllAlertsFromServer);
-    }
+    document.getElementById('sendAlertBtn').onclick = handleAlertDispatch;
+    document.getElementById('clearAllBtn').onclick = clearAllAlertsFromServer;
 });
 
-// --- وظيفة جلب التنبيهات ---
+// 1. جلب وعرض التنبيهات مع المحاذاة لليسار
 async function loadAlertsFromServer() {
     const container = document.getElementById('alertsContainer');
     const noAlertsMsg = document.getElementById('noAlertsMsg');
-    const token = localStorage.getItem('token');
 
     try {
-        // GET /api/v1/alerts
         const response = await fetch(`${API_BASE_URL}/alerts`, {
-            headers: { 'Authorization': `Bearer ${token}` }
+            headers: { 'Authorization': getAuthToken() }
         });
-        
-        if (!response.ok) throw new Error('Failed to fetch alerts');
-
         const data = await response.json();
-        // التعامل مع هيكل الـ Response (data.data أو data)
         const alerts = data.data || data;
 
+        container.innerHTML = '';
+
+        const iconMap = {
+            information: 'fa-info-circle',
+            warning: 'fa-exclamation-triangle',
+            important: 'fa-exclamation-circle',
+            emergency: 'fa-bolt',
+            success: 'fa-check-circle'
+        };
+
+        const titleMap = {
+            information: 'Information Update',
+            warning: 'Warning Notification',
+            important: 'Important Alert',
+            emergency: 'Critical System Alert',
+            success: 'Task Completed'
+        };
+
         if (Array.isArray(alerts) && alerts.length > 0) {
-            container.innerHTML = '';
             noAlertsMsg.style.display = 'none';
-            alerts.forEach(alert => renderAlertItem(alert));
+            alerts.forEach(alert => {
+                const typeClass = (alert.type || 'information').toLowerCase();
+                const alertId = alert._id || alert.id;
+                const icon = iconMap[typeClass] || 'fa-bell';
+                const dynamicTitle = titleMap[typeClass] || 'System Alert';
+
+                const html = `
+                    <div class="alert-item ${typeClass}" id="alert-${alertId}">
+                        <div class="alert-icon-box">
+                            <i class="fas ${icon}"></i>
+                        </div>
+                        <div class="alert-content">
+                            <div class="alert-details">
+                                <h4>${dynamicTitle}</h4>
+                                <p>${alert.message}</p>
+                                <span class="time-tag">
+                                    <i class="far fa-clock"></i> ${new Date(alert.createdAt).toLocaleString('en-GB')}
+                                </span>
+                            </div>
+                        </div>
+                        <button class="close-alert" onclick="deleteSingleAlert('${alertId}')">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>`;
+                container.insertAdjacentHTML('beforeend', html);
+            });
         } else {
-            container.innerHTML = '';
             noAlertsMsg.style.display = 'block';
         }
     } catch (error) {
-        console.error("Error loading alerts:", error);
         noAlertsMsg.style.display = 'block';
     }
 }
 
-// --- وظيفة رسم التنبيه (Mapping) ---
-function renderAlertItem(alert) {
-    const container = document.getElementById('alertsContainer');
-    // تحويل النوع لحروف صغيرة ليتناسب مع الـ CSS classes
-    const typeClass = (alert.type || 'information').toLowerCase(); 
-    // السيرفر غالباً يستخدم _id (MongoDB) أو id
-    const alertId = alert._id || alert.id;
+// 2. دالة الحذف اللي فيها "تأكيد بعد الحذف" اللي طلبتيه
+async function deleteSingleAlert(id) {
+    const res = await Swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ff4757',
+        cancelButtonColor: '#2c3e50',
+        confirmButtonText: 'Yes, delete it!'
+    });
 
-    const html = `
-        <div class="alert-item ${typeClass}" id="alert-${alertId}">
-            <div class="alert-content">
-                <i class="fas fa-bell"></i>
-                <div>
-                    <h4>${alert.title || 'System Notification'}</h4>
-                    <p>${alert.message}</p>
-                    <span class="time-tag">${new Date(alert.createdAt).toLocaleString('en-GB')}</span>
-                </div>
-            </div>
-            <button class="close-alert" onclick="deleteSingleAlert('${alertId}')">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-    `;
-    container.insertAdjacentHTML('beforeend', html);
+    if (res.isConfirmed) {
+        try {
+            const response = await fetch(`${API_BASE_URL}/alerts/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': getAuthToken() }
+            });
+
+            if (response.ok) {
+                // الرسالة اللي كانت ناقصة (Success Confirmation)
+                Swal.fire({
+                    title: 'Deleted!',
+                    text: 'The notification has been removed.',
+                    icon: 'success',
+                    timer: 1500,
+                    showConfirmButton: false,
+                    background: '#1e1e2d',
+                    color: '#fff'
+                });
+                await loadAlertsFromServer();
+            } else {
+                Swal.fire('Error', 'Failed to delete.', 'error');
+            }
+        } catch (e) {
+            Swal.fire('Error', 'Connection error.', 'error');
+        }
+    }
 }
 
-// --- وظيفة الإرسال الفعلي (Broadcast) ---
-async function sendBroadcastAlert() {
+// 3. إرسال تنبيه جديد
+async function handleAlertDispatch() {
     const messageField = document.getElementById('broadcastMsg');
-    const typeField = document.getElementById('alertType');
-    const recipientField = document.getElementById('recipients');
+    const message = messageField.value.trim();
+    const type = document.getElementById('alertType').value;
+    const recipient = document.getElementById('recipients').value;
     const sendBtn = document.getElementById('sendAlertBtn');
-    const token = localStorage.getItem('token');
 
-    if (!messageField.value.trim()) {
-        alert("Please enter a message.");
+    if (!message) {
+        Swal.fire({ icon: 'info', title: 'Empty Message', text: 'Please type a message.' });
         return;
     }
 
     sendBtn.disabled = true;
-    sendBtn.textContent = "Sending...";
+    sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+
+    const payload = { title: `System Alert`, message: message, type: type.toLowerCase() };
+    let url = `${API_BASE_URL}/alerts/batch`;
+    if (!['all', 'students', 'staff', 'course'].includes(recipient)) {
+        url = `${API_BASE_URL}/alerts/send/${recipient}`;
+    }
 
     try {
-        const response = await fetch(`${API_BASE_URL}/alerts`, {
+        const response = await fetch(url, {
             method: 'POST',
-            headers: { 
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json' 
-            },
-            body: JSON.stringify({
-                title: `Admin: ${typeField.value}`,
-                message: messageField.value.trim(),
-                type: typeField.value.toLowerCase(), // تأكدي من إرسال النوع lowercase للسيرفر
-                target: recipientField.value
-            })
+            headers: { 'Authorization': getAuthToken(), 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
         });
 
         if (response.ok) {
-            alert("Alert broadcasted successfully! ✅");
-            messageField.value = ''; 
-            await loadAlertsFromServer(); // تحديث القائمة فوراً
+            Swal.fire({
+                icon: 'success',
+                title: 'Sent Successfully',
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                background: '#1e1e2d',
+                color: '#fff'
+            });
+            messageField.value = '';
+            await loadAlertsFromServer();
         } else {
-            const err = await response.json();
-            alert(`Error: ${err.message || 'Failed to send'}`);
+            Swal.fire('Error', 'Failed to dispatch alert.', 'error');
         }
-    } catch (error) {
-        alert("Connection error. Is the server running?");
+    } catch (e) {
+        Swal.fire('Error', 'Server error.', 'error');
     } finally {
         sendBtn.disabled = false;
-        sendBtn.textContent = "Send Alert";
+        sendBtn.textContent = 'Send Alert';
     }
 }
 
-// --- وظيفة حذف تنبيه واحد ---
-async function deleteSingleAlert(id) {
-    if (!confirm("Are you sure you want to remove this alert?")) return;
-    const token = localStorage.getItem('token');
-    try {
-        const response = await fetch(`${API_BASE_URL}/alerts/${id}`, {
-            method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (response.ok) {
-            await loadAlertsFromServer();
-        }
-    } catch (e) { console.error("Delete failed:", e); }
-}
-
-// --- وظيفة مسح كل التنبيهات من السيرفر ---
 async function clearAllAlertsFromServer() {
-    if (!confirm("This will delete ALL notifications from the database. Proceed?")) return;
-    const token = localStorage.getItem('token');
-    try {
-        const response = await fetch(`${API_BASE_URL}/alerts`, {
+    const res = await Swal.fire({
+        title: 'Clear Everything?',
+        icon: 'error',
+        showCancelButton: true,
+        confirmButtonColor: '#ff4d4d',
+        confirmButtonText: 'Yes, clear all!'
+    });
+
+    if (res.isConfirmed) {
+        await fetch(`${API_BASE_URL}/alerts`, {
             method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${token}` }
+            headers: { 'Authorization': getAuthToken() }
         });
-        if (response.ok) {
-            await loadAlertsFromServer();
+        // تأكيد مسح الكل
+        Swal.fire({ title: 'Cleared!', icon: 'success', timer: 1500, showConfirmButton: false });
+        await loadAlertsFromServer();
+    }
+}
+
+async function fillRecipients() {
+    const select = document.getElementById('recipients');
+    try {
+        const response = await fetch(`${API_BASE_URL}/users`, {
+            headers: { 'Authorization': getAuthToken() }
+        });
+        const result = await response.json();
+        const users = result.data || result;
+        if (Array.isArray(users)) {
+            const group = document.createElement('optgroup');
+            group.label = "Individual Users";
+            users.forEach(u => {
+                const opt = document.createElement('option');
+                opt.value = u.id || u.userAccountId;
+                opt.textContent = `${u.fullName || u.username} (${u.role || u.userType})`;
+                group.appendChild(opt);
+            });
+            select.appendChild(group);
         }
-    } catch (e) { console.error("Clear all failed:", e); }
+    } catch (e) { console.error(e); }
 }
 
-function toggleSidebar() {
-    const sidebar = document.querySelector('.sidebar');
-    if (sidebar) sidebar.classList.toggle('active');
-}
-
-function logout() { 
-    localStorage.clear(); 
-    window.location.href = "../../index.html"; 
-}
+function logout() { localStorage.clear(); window.location.href = "../../index.html"; }
+function toggleSidebar() { document.querySelector('.sidebar').classList.toggle('active'); }

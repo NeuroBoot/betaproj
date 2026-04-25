@@ -289,3 +289,124 @@ select option:hover {
     background-color: var(--accent-blue) !important;
     color: #ffffff !important;
 }
+/* --- حاوية التنبيهات الرئيسية --- */
+.alerts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 10px;
+}
+
+/* --- التصميم الموحد للكارت --- */
+.alert-item {
+    display: flex;
+    align-items: flex-start;
+    padding: 20px 25px;
+    border-radius: 14px;
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.08); /* إطار خفيف جداً للوضوح */
+    border-left: 6px solid; /* الشريط الجانبي الملون */
+    transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-align: left; /* المحاذاة لليسار */
+    overflow: hidden;
+}
+
+.alert-item:hover {
+    transform: translateX(8px);
+    filter: brightness(1.1);
+}
+
+/* --- توزيع الألوان "الوسط" (واضحة ومريحة) --- */
+
+/* 1. الطوارئ (Emergency) - أحمر واضحة */
+.alert-item.emergency {
+background: rgba(243, 157, 18, 0.286); 
+    border-left-color: #f39c12; 
+}
+.alert-item.emergency .alert-icon-box { color: #f39c12; }
+
+/* 2. الهام (Important) - أرجواني متميز */
+.alert-item.important {
+    background: rgba(156, 89, 182, 0.362); 
+    border-left-color: #9b59b6;
+}
+.alert-item.important .alert-icon-box { color: #9b59b6; }
+
+/* 3. التحذير (Warning) - برتقالي دافئ */
+.alert-item.warning {
+    background: rgba(231, 77, 60, 0.348); 
+    border-left-color: #e74c3c; 
+    
+}
+.alert-item.warning .alert-icon-box { color: #e74c3c; }
+
+/* 4. المعلومات (Information) - أزرق احترافي */
+.alert-item.information {
+    background: rgba(52, 152, 219, 0.293); 
+    border-left-color: #3498db;
+}
+.alert-item.information .alert-icon-box { color: #3498db; }
+
+/* 5. النجاح (Success/Post) - أخضر هادئ */
+.alert-item.success, .alert-item.post {
+    background: rgba(46, 204, 113, 0.15); 
+    border-left-color: #2ecc71;
+}
+.alert-item.success .alert-icon-box { color: #2ecc71; }
+
+/* --- تفاصيل المحتوى الداخلي --- */
+.alert-icon-box {
+    font-size: 1.6rem;
+    margin-right: 20px;
+    margin-top: 3px;
+    min-width: 30px;
+}
+
+.alert-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+}
+
+.alert-details h4 {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.alert-details p {
+    margin: 6px 0;
+    color: #e0e0e0;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.time-tag {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.5);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 5px;
+}
+
+/* --- زر الحذف الجانبي --- */
+.close-alert {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: 0.2s;
+}
+
+.close-alert:hover {
+    color: #ff4757;
+    transform: scale(1.1);
+}
