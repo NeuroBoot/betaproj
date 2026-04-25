@@ -1,9 +1,12 @@
 import { Injectable, NotFoundException, ConflictException, ForbiddenException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { CourseRepository } from '../repositories/course.repository';
 import { UserRepository } from '../../users/repositories/user.repository';
 import { CreateCourseDto } from '../dto/create-course.dto';
 import { UpdateCourseDto } from '../dto/update-course.dto';
 import { Course } from '../entities/course.entity';
+import { CourseEnrollment } from '../entities/course-enrollment.entity';
 import { Role } from '../../common/enums/role.enum';
 import { UserAccount } from '../../users/entities/user.entity';
 
@@ -12,6 +15,8 @@ export class CoursesService {
   constructor(
     private readonly courseRepository: CourseRepository,
     private readonly userRepository: UserRepository,
+    @InjectRepository(CourseEnrollment)
+    private readonly enrollmentRepository: Repository<CourseEnrollment>,
   ) {}
 
   async create(createCourseDto: CreateCourseDto, adminUser?: UserAccount): Promise<Course> {
@@ -41,7 +46,7 @@ export class CoursesService {
         throw new NotFoundException(`Staff with ID ${createCourseDto.instructorId} not found`);
       }
 
-      existingCourse.students = [];
+      existingCourse.enrollments = [];
       return this.courseRepository.save(existingCourse);
     }
 
@@ -86,7 +91,7 @@ export class CoursesService {
   async findOne(id: number, user: UserAccount): Promise<Course> {
     const course = await this.courseRepository.findOne({
       where: { courseId: id, isDeleted: false },
-      relations: ['instructor', 'admin', 'students'],
+      relations: ['instructor', 'admin', 'enrollments', 'enrollments.student'],
     });
 
     if (!course) {
@@ -99,7 +104,7 @@ export class CoursesService {
     }
 
     if (user.userType === Role.STUDENT) {
-      const isEnrolled = course.students.some(s => s.userAccountId === user.userAccountId);
+      const isEnrolled = course.enrollments.some(e => e.studentId === user.userAccountId);
       if (!isEnrolled) {
         throw new ForbiddenException('You are not enrolled in this course');
       }
@@ -111,7 +116,7 @@ export class CoursesService {
   async findOneByCode(code: string, user: UserAccount): Promise<Course> {
     const course = await this.courseRepository.findOne({
       where: { code, isDeleted: false },
-      relations: ['instructor', 'admin', 'students'],
+      relations: ['instructor', 'admin', 'enrollments', 'enrollments.student'],
     });
 
     if (!course) {
@@ -205,10 +210,16 @@ export class CoursesService {
     }
   }
 
-  async enrollStudent(courseId: number, studentId: number, user: UserAccount): Promise<Course> {
+  async enrollStudent(
+    courseId: number, 
+    studentId: number, 
+    user: UserAccount,
+    section?: string,
+    lecture?: string
+  ): Promise<CourseEnrollment> {
     const course = await this.courseRepository.findOne({
       where: { courseId, isDeleted: false },
-      relations: ['students', 'instructor'],
+      relations: ['instructor'],
     });
     if (!course) {
       throw new NotFoundException(`Course with ID ${courseId} not found`);
@@ -224,18 +235,28 @@ export class CoursesService {
       throw new NotFoundException(`Student with ID ${studentId} not found`);
     }
 
-    if (course.students.some(s => s.userAccountId === studentId)) {
+    const existingEnrollment = await this.enrollmentRepository.findOne({
+      where: { courseId, studentId }
+    });
+
+    if (existingEnrollment) {
       throw new ConflictException('Student already enrolled in this course');
     }
 
-    course.students.push(student);
-    return this.courseRepository.save(course);
+    const enrollment = this.enrollmentRepository.create({
+      courseId,
+      studentId,
+      section,
+      lecture,
+    });
+
+    return this.enrollmentRepository.save(enrollment);
   }
 
   async getEnrolledStudents(courseId: number, user: UserAccount): Promise<UserAccount[]> {
     const course = await this.courseRepository.findOne({
       where: { courseId, isDeleted: false },
-      relations: ['students', 'instructor'],
+      relations: ['instructor', 'enrollments', 'enrollments.student'],
     });
     if (!course) {
       throw new NotFoundException(`Course with ID ${courseId} not found`);
@@ -246,6 +267,6 @@ export class CoursesService {
       throw new ForbiddenException('You can only view students in your own courses');
     }
 
-    return course.students;
+    return (course.enrollments || []).map(e => e.student);
   }
 }

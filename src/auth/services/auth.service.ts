@@ -154,14 +154,16 @@ export class AuthService {
   async getProfile(userId: number) {
     const user = await this.userRepository.findOne({
       where: { userAccountId: userId },
-      relations: ['enrolledCourses', 'managedCourses', 'taughtCourses']
+      relations: ['enrollments', 'enrollments.course', 'managedCourses', 'taughtCourses']
     });
     if (!user) throw new UnauthorizedException('User not found');
     
     const { password, ...result } = user;
+    const enrolledCourses = (user.enrollments || []).map(e => e.course).filter(Boolean);
+
     return {
       ...result,
-      totalCredits: (user.enrolledCourses || []).reduce((sum, c) => sum + (Number(c.credits) || 0), 0)
+      totalCredits: enrolledCourses.reduce((sum, c) => sum + (Number(c.credits) || 0), 0)
     };
   }
 }

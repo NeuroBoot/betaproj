@@ -115,6 +115,55 @@
         ],
         "responses": { "200": { "description": "Success" } }
       }
+    },
+    "/courses/{id}/students": {
+      "get": {
+        "tags": ["Courses"],
+        "summary": "List students in course (Admin/Staff only)",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": { "200": { "description": "Success" } }
+      },
+      "post": {
+        "tags": ["Courses"],
+        "summary": "Enroll student in course (Admin/Staff only)",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "studentId": { "type": "integer" },
+                  "section": { "type": "string" },
+                  "lecture": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Enrolled" } }
+      }
+    },
+    "/attendance": {
+      "get": {
+        "tags": ["Attendance"],
+        "summary": "List attendance with pagination and filters",
+        "parameters": [
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 50 } },
+          { "name": "courseId", "in": "query", "schema": { "type": "integer" } },
+          { "name": "section", "in": "query", "schema": { "type": "integer" } },
+          { "name": "date", "in": "query", "schema": { "type": "string", "format": "date" } }
+        ],
+        "responses": { "200": { "description": "Success" } }
+      },
+      "post": {
+        "tags": ["Attendance"],
+        "summary": "Create or Bulk-save attendance",
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object" } } } },
+        "responses": { "201": { "description": "Created" } }
+      }
     }
-    }
-    }
+  }
+}

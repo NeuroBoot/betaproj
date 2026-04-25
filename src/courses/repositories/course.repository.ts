@@ -17,7 +17,7 @@ export class CourseRepository extends Repository<Course> {
   }
 
   async findByCodeAll(code: string): Promise<Course | null> {
-    return this.findOne({ where: { code }, relations: ['instructor', 'admin', 'students'] });
+    return this.findOne({ where: { code }, relations: ['instructor', 'admin', 'enrollments', 'enrollments.student'] });
   }
 
   async findById(id: number): Promise<Course | null> {
@@ -40,10 +40,10 @@ export class CourseRepository extends Repository<Course> {
 
   async findByStudent(studentId: number): Promise<Course[]> {
     return this.createQueryBuilder('course')
-      .leftJoin('course.students', 'student')
+      .leftJoin('course.enrollments', 'enrollment')
       .leftJoinAndSelect('course.instructor', 'instructor')
       .leftJoinAndSelect('course.admin', 'admin')
-      .where('student.userAccountId = :studentId', { studentId })
+      .where('enrollment.studentId = :studentId', { studentId })
       .andWhere('course.isDeleted = :isDeleted', { isDeleted: false })
       .getMany();
   }
@@ -51,21 +51,21 @@ export class CourseRepository extends Repository<Course> {
   async getEnrolledStudents(courseId: number): Promise<UserAccount[]> {
     const course = await this.findOne({
       where: { courseId, isDeleted: false },
-      relations: ['students'],
+      relations: ['enrollments', 'enrollments.student'],
     });
     
     if (!course) {
       return [];
     }
     
-    return course.students || [];
+    return (course.enrollments || []).map(e => e.student);
   }
 
   async isStudentEnrolled(courseId: number, studentId: number): Promise<boolean> {
     const result = await this.createQueryBuilder('course')
-      .leftJoin('course.students', 'student')
+      .leftJoin('course.enrollments', 'enrollment')
       .where('course.courseId = :courseId', { courseId })
-      .andWhere('student.userAccountId = :studentId', { studentId })
+      .andWhere('enrollment.studentId = :studentId', { studentId })
       .andWhere('course.isDeleted = :isDeleted', { isDeleted: false })
       .getOne();
     

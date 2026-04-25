@@ -20,10 +20,16 @@ export class Attendance {
   @Column({ type: 'date' })
   recordDate: Date;
 
+  @Column()
+  studentId: number;
+
   // relation with UserAccount (Student)
   @ManyToOne(() => UserAccount, user => user.attendanceRecords)
   @JoinColumn({ name: 'studentId' })
   student: UserAccount;
+
+  @Column()
+  courseId: number;
 
   // relation with Course
   @ManyToOne(() => Course, course => course.attendanceRecords)

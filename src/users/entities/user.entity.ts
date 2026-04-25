@@ -2,6 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateCol
 import { Role } from '../../common/enums/role.enum';
 import { Course } from '../../courses/entities/course.entity';
 import { Attendance } from '../../attendance/entities/attendance.entity';
+import { CourseEnrollment } from '../../courses/entities/course-enrollment.entity';
 
 /**
  * Database entity representing a user account in the system.
@@ -42,8 +43,8 @@ export class UserAccount {
   taughtCourses: Course[];
 
   // Courses enrolled by this user (Student only).
-  @ManyToMany(() => Course, (course) => course.students)
-  enrolledCourses: Course[];
+  @OneToMany(() => CourseEnrollment, (enrollment) => enrollment.student)
+  enrollments: CourseEnrollment[];
 
   // Attendance records for this user (Student only).
   @OneToMany(() => Attendance, (attendance) => attendance.student)

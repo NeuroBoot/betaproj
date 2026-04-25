@@ -85,11 +85,17 @@ export class AttendanceRepository {
   }
 
   findByFilter(filter: { courseId: number; section: number; date: string }) {
+    const date = new Date(filter.date);
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+
     return this.repo.find({
       where: {
-        course: { courseId: filter.courseId },
+        courseId: filter.courseId,
         sectionNumber: filter.section,
-        recordDate: new Date(filter.date)
+        recordDate: Between(startOfDay, endOfDay)
       },
       relations: ['student', 'course']
     });

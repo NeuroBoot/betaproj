@@ -29,7 +29,7 @@ export class AttendanceService {
     // 2. Verify Course exists
     const course = await this.courseRepo.findOne({
       where: { courseId: dto.courseId, isDeleted: false },
-      relations: ['students', 'instructor']
+      relations: ['enrollments', 'instructor']
     });
     if (!course) {
       throw new NotFoundException(`Course with ID ${dto.courseId} not found`);
@@ -41,7 +41,7 @@ export class AttendanceService {
     }
 
     // 4. Verify Student is enrolled in Course
-    const isEnrolled = course.students?.some(s => s.userAccountId === student.userAccountId);
+    const isEnrolled = course.enrollments?.some(e => e.studentId === student.userAccountId);
     if (!isEnrolled) {
       throw new ForbiddenException(`Student ${student.username} is not enrolled in course ${course.name}`);
     }
@@ -87,7 +87,9 @@ export class AttendanceService {
     const student = await this.userRepo.findOne({
       where: { userAccountId: userId },
       relations: {
-        enrolledCourses: true,
+        enrollments: {
+          course: true
+        },
         attendanceRecords: {
           course: true
         }
@@ -96,12 +98,14 @@ export class AttendanceService {
 
     if (!student) throw new NotFoundException(`Student with ID ${userId} not found`);
 
+    const enrolledCourses = (student.enrollments || []).map(e => e.course);
+
     const diagram = {
       student: {
         name: student.username,
-        totalCredits: (student.enrolledCourses || []).reduce((sum, c) => sum + (Number(c.credits) || 0), 0),
+        totalCredits: enrolledCourses.reduce((sum, c) => sum + (Number(c.credits) || 0), 0),
       },
-      structure: (student.enrolledCourses || []).map(course => ({
+      structure: enrolledCourses.map(course => ({
         id: `course-${course.courseId}`,
         label: course.name,
         type: 'course',
@@ -123,7 +127,7 @@ export class AttendanceService {
           }
         ]
       })),
-      courses: (student.enrolledCourses || []).map(course => {
+      courses: enrolledCourses.map(course => {
         const records = (student.attendanceRecords || []).filter(r => r.course?.courseId === course.courseId);
         return {
           courseName: course.name,
@@ -135,7 +139,7 @@ export class AttendanceService {
       }),
       metrics: {
         avg: '88%',
-        topCourse: student.enrolledCourses?.[0]?.name || 'N/A',
+        topCourse: enrolledCourses[0]?.name || 'N/A',
         riskStudents: 0,
         aiAccuracy: '99.2%'
       }
@@ -159,7 +163,7 @@ export class AttendanceService {
 
     const course = await this.courseRepo.findOne({
       where: { courseId, isDeleted: false },
-      relations: ['students', 'instructor']
+      relations: ['enrollments', 'instructor']
     });
     if (!course) throw new NotFoundException(`Course with ID ${courseId} not found`);
 
@@ -190,7 +194,7 @@ export class AttendanceService {
       }
 
       // Verify enrollment
-      const isEnrolled = course.students?.some(s => s.userAccountId === student.userAccountId);
+      const isEnrolled = course.enrollments?.some(e => e.studentId === student.userAccountId);
       if (!isEnrolled) {
         skippedStudents.push(`${item.studentId} (Not enrolled)`);
         continue;

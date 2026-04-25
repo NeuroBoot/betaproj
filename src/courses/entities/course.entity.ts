@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, ManyToMany, JoinTable, OneToMany } from 'typeorm';
 import { UserAccount } from '../../users/entities/user.entity';
 import { Attendance } from '../../attendance/entities/attendance.entity';
+import { CourseEnrollment } from './course-enrollment.entity';
 
 /**
  * Database entity representing a course in the system.
@@ -30,14 +31,9 @@ export class Course {
   @ManyToOne(() => UserAccount)
   instructor: UserAccount;
 
-  // Students enrolled in the course.
-  @ManyToMany(() => UserAccount, (user) => user.enrolledCourses)
-  @JoinTable({
-    name: 'course_enrollments',
-    joinColumn: { name: 'courseId', referencedColumnName: 'courseId' },
-    inverseJoinColumn: { name: 'userAccountId', referencedColumnName: 'userAccountId' },
-  })
-  students: UserAccount[];
+  // Enrollments in the course.
+  @OneToMany(() => CourseEnrollment, (enrollment) => enrollment.course)
+  enrollments: CourseEnrollment[];
 
   // Attendance records for this course.
   @OneToMany(() => Attendance, (attendance) => attendance.course)

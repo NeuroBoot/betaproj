@@ -8,6 +8,7 @@ import { AttendanceModule } from './attendance/attendance.module';
 import { UserAccount } from './users/entities/user.entity';
 import { Alert } from './users/entities/alert.entity';
 import { Course } from './courses/entities/course.entity';
+import { CourseEnrollment } from './courses/entities/course-enrollment.entity';
 import { Attendance } from './attendance/entities/attendance.entity';
 import { validate } from './common/config/env.validation';
 
@@ -35,7 +36,7 @@ import { validate } from './common/config/env.validation';
           username: configService.get<string>('DB_USERNAME'),
           password: configService.get<string>('DB_PASSWORD'),
           database: configService.get<string>('DB_NAME'),
-          entities: [UserAccount, Course, Attendance, Alert],
+          entities: [UserAccount, Course, CourseEnrollment, Attendance, Alert],
           synchronize: isSync,
           logging: ['error', 'warn'],
           connectorPackage: 'mysql2',

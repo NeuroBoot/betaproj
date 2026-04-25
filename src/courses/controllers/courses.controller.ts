@@ -83,9 +83,11 @@ export class CoursesController {
   async enrollStudent(
     @Param('id', ParseIntPipe) courseId: number,
     @Body('studentId', ParseIntPipe) studentId: number,
+    @Body('section') section: string,
+    @Body('lecture') lecture: string,
     @CurrentUser() user: UserAccount,
   ) {
-    return this.coursesService.enrollStudent(courseId, studentId, user);
+    return this.coursesService.enrollStudent(courseId, studentId, user, section, lecture);
   }
 
   @Get(':id/students')
