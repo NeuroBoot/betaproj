@@ -109,6 +109,12 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    // Optional: Verify role if provided in LoginDto
+    if (role && user.userType !== role) {
+      console.log(`[AUTH DEBUG] Role mismatch for ${username}. Expected: ${role}, Found: ${user.userType}`);
+      throw new UnauthorizedException('Invalid role for this user');
+    }
+
     // Construct the JWT payload.
     const payload: JwtPayload = {
       sub: user.userAccountId,

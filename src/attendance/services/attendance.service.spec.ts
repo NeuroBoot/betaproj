@@ -4,6 +4,7 @@ import { AttendanceService } from './attendance.service';
 import { AttendanceRepository } from '../repository/attendance.repository';
 import { UserRepository } from '../../users/repositories/user.repository';
 import { CourseRepository } from '../../courses/repositories/course.repository';
+import { AlertService } from '../../users/services/alert.service';
 import { Role } from '../../common/enums/role.enum';
 
 describe('AttendanceService', () => {
@@ -49,6 +50,7 @@ describe('AttendanceService', () => {
         { provide: AttendanceRepository, useValue: attendanceRepo },
         { provide: UserRepository, useValue: userRepo },
         { provide: CourseRepository, useValue: courseRepo },
+        { provide: AlertService, useValue: { checkStudentLowAttendance: jest.fn().mockResolvedValue(null) } },
       ],
     }).compile();
 
@@ -99,7 +101,7 @@ describe('AttendanceService', () => {
         courseId: 2, 
         name: 'Course 1',
         instructor: { userAccountId: 10 },
-        students: [{ userAccountId: 1 }],
+        enrollments: [{ studentId: 1 }],
         isDeleted: false 
       };
       

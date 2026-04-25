@@ -18,43 +18,49 @@ export class UsersController {
   @Get()
   @ApiOperation({ summary: 'List all users (Admin only)' })
   @ApiQuery({ name: 'role', required: false, enum: Role })
+  @ApiResponse({ status: 200, type: [UserAccount] })
   async findAll(@Query('role') role?: Role) {
     return this.usersService.findAll(role);
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get user details by ID (Admin only)' })
+  @ApiResponse({ status: 200, type: UserAccount })
   async findOne(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.findOne(id);
   }
 
   @Get('username/:username')
   @ApiOperation({ summary: 'Get user details by Username (Admin only)' })
+  @ApiResponse({ status: 200, type: UserAccount })
   async findOneByUsername(@Param('username') username: string) {
     return this.usersService.findOneByUsername(username);
   }
 
   @Post()
   @ApiOperation({ summary: 'Create new user (Admin only)' })
-  @ApiResponse({ status: 201, description: 'User created' })
+  @ApiResponse({ status: 201, description: 'User created', type: UserAccount })
   async create(@Body() userData: Partial<UserAccount>) {
     return this.usersService.create(userData);
   }
 
   @Put(':id')
   @ApiOperation({ summary: 'Update user by ID (Admin only)' })
+  @ApiResponse({ status: 200, type: UserAccount })
   async update(@Param('id', ParseIntPipe) id: number, @Body() userData: Partial<UserAccount>) {
     return this.usersService.update(id, userData);
   }
 
   @Put('username/:username')
   @ApiOperation({ summary: 'Update user by Username (Admin only)' })
+  @ApiResponse({ status: 200, type: UserAccount })
   async updateByUsername(@Param('username') username: string, @Body() userData: Partial<UserAccount>) {
     return this.usersService.updateByUsername(username, userData);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete user by ID (Admin only). Use ?hard=true for permanent delete.' })
+  @ApiResponse({ status: 200, description: 'User deleted' })
   async remove(@Param('id', ParseIntPipe) id: number, @Query('hard') hard?: string) {
     const isHard = hard === 'true';
     return this.usersService.remove(id, isHard);
@@ -62,6 +68,7 @@ export class UsersController {
 
   @Delete('username/:username')
   @ApiOperation({ summary: 'Delete user by username (Admin only). Use ?hard=true for permanent delete.' })
+  @ApiResponse({ status: 200, description: 'User deleted' })
   async removeByUsername(@Param('username') username: string, @Query('hard') hard?: string) {
     const isHard = hard === 'true';
     return this.usersService.removeByUsername(username, isHard);

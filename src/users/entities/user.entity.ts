@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, ManyToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
+import { ApiProperty } from '@nestjs/swagger';
 import { Role } from '../../common/enums/role.enum';
 import { Course } from '../../courses/entities/course.entity';
 import { Attendance } from '../../attendance/entities/attendance.entity';
@@ -11,18 +12,22 @@ import { CourseEnrollment } from '../../courses/entities/course-enrollment.entit
 @Entity('users')
 export class UserAccount {
   // Unique primary identifier for each user.
+  @ApiProperty({ example: 1, description: 'The unique identifier of the user' })
   @PrimaryGeneratedColumn()
   userAccountId: number;
 
   // Unique username for authentication purposes.
+  @ApiProperty({ example: 'ziad_taha', description: 'The unique username of the user' })
   @Column({ unique: true })
   username: string;
 
   // Securely hashed password string.
+  @ApiProperty({ example: 'hashed_password', description: 'The hashed password (hidden in responses usually)' })
   @Column()
   password: string;
 
   // The classification of the user (Admin, Staff, or Student).
+  @ApiProperty({ enum: Role, default: Role.STUDENT, description: 'The role of the user' })
   @Column({
     type: 'simple-enum',
     enum: Role,
@@ -31,6 +36,7 @@ export class UserAccount {
   userType: Role;
 
   // Flag for soft-deletion of the user record.
+  @ApiProperty({ example: false, description: 'Soft deletion flag' })
   @Column({ default: false })
   isDeleted: boolean;
 
@@ -51,10 +57,12 @@ export class UserAccount {
   attendanceRecords: Attendance[];
 
   // Automatically recorded timestamp of account creation.
+  @ApiProperty({ example: '2024-01-01T00:00:00.000Z' })
   @CreateDateColumn()
   createdAt: Date;
 
   // Automatically updated timestamp of the last account modification.
+  @ApiProperty({ example: '2024-01-01T00:00:00.000Z' })
   @UpdateDateColumn()
   updatedAt: Date;
 }

@@ -2,6 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { CoursesService } from './courses.service';
 import { CourseRepository } from '../repositories/course.repository';
 import { UserRepository } from '../../users/repositories/user.repository';
+import { CourseEnrollment } from '../entities/course-enrollment.entity';
+import { getRepositoryToken } from '@nestjs/typeorm';
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { Role } from '../../common/enums/role.enum';
 
@@ -29,6 +31,7 @@ describe('CoursesService', () => {
         CoursesService,
         { provide: CourseRepository, useValue: courseRepository },
         { provide: UserRepository, useValue: userRepository },
+        { provide: getRepositoryToken(CourseEnrollment), useValue: { findOne: jest.fn(), create: jest.fn(), save: jest.fn() } },
       ],
     }).compile();
 
@@ -63,7 +66,7 @@ describe('CoursesService', () => {
       expect(courseRepository.findByCodeAll).toHaveBeenCalledWith('CS101');
       expect(result.isDeleted).toBe(false);
       expect(result.name).toBe('New Name');
-      expect(result.students).toEqual([]);
+      expect(result.enrollments).toEqual([]);
       expect(courseRepository.save).toHaveBeenCalledWith(expect.objectContaining({ courseId: 1 }));
     });
 
