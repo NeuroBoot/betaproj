@@ -10,7 +10,7 @@ import { AttendanceService } from '../../attendance/services/attendance.service'
 
 @ApiTags('Student')
 @ApiBearerAuth('JWT-auth')
-@Controller('api/v1/student')
+@Controller('student')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class StudentController {
   constructor(private readonly attendanceService: AttendanceService) {}

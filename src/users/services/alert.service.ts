@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between } from 'typeorm';
 import { ModuleRef } from '@nestjs/core';
@@ -152,6 +152,10 @@ export class AlertService {
   }
 
   async sendBatchAlerts(userIds: number[], message: string, type: string = 'info', title: string = 'Batch Alert') {
+    if (!userIds || !Array.isArray(userIds)) {
+      throw new BadRequestException('userIds must be an array of numbers');
+    }
+    
     const results = [];
     
     for (const userId of userIds) {

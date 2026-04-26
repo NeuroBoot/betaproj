@@ -256,11 +256,13 @@ export class AttendanceService {
 
     if (user.userType === Role.STAFF) {
       if (query?.courseId) {
-        return this.attendanceRepo.findByFilter({
+        // Use findAllPaginated logic instead which handles optional date.
+        const result = await this.attendanceRepo.findAllWithFilters(1, 1000, {
           courseId: parseInt(query.courseId),
-          section: parseInt(query.section) || 1,
-          date: query.date || new Date().toISOString()
+          section: parseInt(query.section) || undefined,
+          date: query.date
         });
+        return result.data;
       }
       return this.attendanceRepo.findByStaff(user.userAccountId);
     }
@@ -331,11 +333,12 @@ export class AttendanceService {
   }
 
   async getCourseAttendance(courseId: number, section?: number, date?: string) {
-    return this.attendanceRepo.findByFilter({
+    const result = await this.attendanceRepo.findAllWithFilters(1, 1000, {
       courseId,
-      section: section || 1,
-      date: date || new Date().toISOString()
+      section,
+      date
     });
+    return result.data;
   }
 
   async isStaffAuthorizedForCourse(staffId: number, courseId: number): Promise<boolean> {
@@ -395,6 +398,13 @@ export class AttendanceService {
   }
 
   private normalizeDate(dateString: string): Date {
+    // If it's already a full ISO string, just parse it and set time to 0
+    // If it's just YYYY-MM-DD, append T00:00:00Z
+    if (dateString.includes('T')) {
+      const date = new Date(dateString);
+      date.setUTCHours(0, 0, 0, 0);
+      return date;
+    }
     return new Date(dateString + 'T00:00:00Z');
   }
 }

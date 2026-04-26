@@ -22,7 +22,7 @@
               "mode": "raw",
               "raw": "{\n  \"username\": \"new_user\",\n  \"password\": \"password123\",\n  \"role\": \"student\"\n}"
             },
-            "url": "{{base_url}}/api/v1/auth/register"
+            "url": "{{base_url}}/auth/register"
           }
         },
         {
@@ -39,7 +39,7 @@
               "mode": "raw",
               "raw": "{\n  \"username\": \"ziad_taha\",\n  \"password\": \"password123\"\n}"
             },
-            "url": "{{base_url}}/api/v1/auth/login"
+            "url": "{{base_url}}/auth/login"
           }
         },
         {
@@ -52,7 +52,7 @@
                 "value": "Bearer {{jwt_token}}"
               }
             ],
-            "url": "{{base_url}}/api/v1/auth/profile"
+            "url": "{{base_url}}/auth/profile"
           }
         },
         {
@@ -65,7 +65,7 @@
                 "value": "Bearer {{jwt_token}}"
               }
             ],
-            "url": "{{base_url}}/api/v1/auth/refresh"
+            "url": "{{base_url}}/auth/refresh"
           }
         },
         {
@@ -78,7 +78,7 @@
                 "value": "Bearer {{jwt_token}}"
               }
             ],
-            "url": "{{base_url}}/api/v1/auth/admin-only"
+            "url": "{{base_url}}/auth/admin-only"
           }
         }
       ]
@@ -96,7 +96,7 @@
                 "value": "Bearer {{jwt_token}}"
               }
             ],
-            "url": "{{base_url}}/api/v1/student/charts"
+            "url": "{{base_url}}/student/charts"
           }
         },
         {
@@ -109,7 +109,7 @@
                 "value": "Bearer {{jwt_token}}"
               }
             ],
-            "url": "{{base_url}}/api/v1/student/alerts"
+            "url": "{{base_url}}/student/alerts"
           }
         }
       ]
@@ -127,7 +127,7 @@
                 "value": "Bearer {{jwt_token}}"
               }
             ],
-            "url": "{{base_url}}/api/v1/alerts"
+            "url": "{{base_url}}/alerts"
           }
         },
         {
@@ -140,7 +140,7 @@
                 "value": "Bearer {{jwt_token}}"
               }
             ],
-            "url": "{{base_url}}/api/v1/alerts"
+            "url": "{{base_url}}/alerts"
           }
         },
         {
@@ -153,7 +153,7 @@
                 "value": "Bearer {{jwt_token}}"
               }
             ],
-            "url": "{{base_url}}/api/v1/alerts/1"
+            "url": "{{base_url}}/alerts/1"
           }
         },
         {
@@ -166,7 +166,7 @@
                 "value": "Bearer {{jwt_token}}"
               }
             ],
-            "url": "{{base_url}}/api/v1/alerts/settings"
+            "url": "{{base_url}}/alerts/settings"
           }
         },
         {
@@ -187,7 +187,7 @@
               "mode": "raw",
               "raw": "{\n  \"lowAttendanceWarnings\": true,\n  \"systemUpdates\": true\n}"
             },
-            "url": "{{base_url}}/api/v1/alerts/settings"
+            "url": "{{base_url}}/alerts/settings"
           }
         }
       ]
@@ -206,14 +206,12 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/users?role=student",
+              "raw": "{{base_url}}/users?role=student",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
-                "api",
-                "v1",
-                "users?role=student"
+                "users"
               ],
               "query": [
                 {
@@ -234,7 +232,7 @@
                 "value": "Bearer {{jwt_token}}"
               }
             ],
-            "url": "{{base_url}}/api/v1/users/1"
+            "url": "{{base_url}}/users/1"
           }
         },
         {
@@ -255,7 +253,7 @@
               "mode": "raw",
               "raw": "{\n  \"username\": \"staff_member\",\n  \"role\": \"staff\",\n  \"fullName\": \"Staff Name\"\n}"
             },
-            "url": "{{base_url}}/api/v1/users"
+            "url": "{{base_url}}/users"
           }
         },
         {
@@ -276,7 +274,7 @@
               "mode": "raw",
               "raw": "{\n  \"fullName\": \"Updated Name\"\n}"
             },
-            "url": "{{base_url}}/api/v1/users/1"
+            "url": "{{base_url}}/users/1"
           }
         },
         {
@@ -289,7 +287,7 @@
                 "value": "Bearer {{jwt_token}}"
               }
             ],
-            "url": "{{base_url}}/api/v1/users/1"
+            "url": "{{base_url}}/users/1"
           }
         },
         {
@@ -306,7 +304,7 @@
                 "value": "application/json"
               }
             ],
-            "url": "{{base_url}}/api/v1/users/{id}",
+            "url": "{{base_url}}/users/{id}",
             "description": "Get user details by ID (Admin only)"
           }
         },
@@ -324,7 +322,7 @@
                 "value": "application/json"
               }
             ],
-            "url": "{{base_url}}/api/v1/users/{id}",
+            "url": "{{base_url}}/users/{id}",
             "description": "Update user by ID (Admin only)"
           }
         },
@@ -342,7 +340,7 @@
                 "value": "application/json"
               }
             ],
-            "url": "{{base_url}}/api/v1/users/{id}",
+            "url": "{{base_url}}/users/{id}",
             "description": "Delete user by ID (Admin only). Use ?hard=true for permanent delete."
           }
         },
@@ -360,7 +358,7 @@
                 "value": "application/json"
               }
             ],
-            "url": "{{base_url}}/api/v1/users/username/{username}",
+            "url": "{{base_url}}/users/username/{username}",
             "description": "Get user details by Username (Admin only)"
           }
         },
@@ -378,7 +376,7 @@
                 "value": "application/json"
               }
             ],
-            "url": "{{base_url}}/api/v1/users/username/{username}",
+            "url": "{{base_url}}/users/username/{username}",
             "description": "Update user by Username (Admin only)"
           }
         },
@@ -396,7 +394,7 @@
                 "value": "application/json"
               }
             ],
-            "url": "{{base_url}}/api/v1/users/username/{username}",
+            "url": "{{base_url}}/users/username/{username}",
             "description": "Delete user by username (Admin only). Use ?hard=true for permanent delete."
           }
         }
@@ -415,7 +413,7 @@
                 "value": "Bearer {{jwt_token}}"
               }
             ],
-            "url": "{{base_url}}/api/v1/courses"
+            "url": "{{base_url}}/courses"
           }
         },
         {
@@ -436,7 +434,7 @@
               "mode": "raw",
               "raw": "{\n  \"name\": \"Computer Science\",\n  \"code\": \"CS101\",\n  \"sections\": 4,\n  \"credits\": 3,\n  \"schedule\": \"Mon/Wed 10:00-12:00\",\n  \"room\": \"Room 302\",\n  \"instructorId\": 2\n}"
             },
-            "url": "{{base_url}}/api/v1/courses"
+            "url": "{{base_url}}/courses"
           }
         },
         {
@@ -449,7 +447,7 @@
                 "value": "Bearer {{jwt_token}}"
               }
             ],
-            "url": "{{base_url}}/api/v1/courses/1"
+            "url": "{{base_url}}/courses/1"
           }
         },
         {
@@ -470,7 +468,7 @@
               "mode": "raw",
               "raw": "{\n  \"name\": \"Advanced CS\"\n}"
             },
-            "url": "{{base_url}}/api/v1/courses/1"
+            "url": "{{base_url}}/courses/1"
           }
         },
         {
@@ -483,7 +481,7 @@
                 "value": "Bearer {{jwt_token}}"
               }
             ],
-            "url": "{{base_url}}/api/v1/courses/1"
+            "url": "{{base_url}}/courses/1"
           }
         },
         {
@@ -504,7 +502,7 @@
               "mode": "raw",
               "raw": "{\n  \"studentId\": 3\n}"
             },
-            "url": "{{base_url}}/api/v1/courses/1/students"
+            "url": "{{base_url}}/courses/1/students"
           }
         },
         {
@@ -517,7 +515,7 @@
                 "value": "Bearer {{jwt_token}}"
               }
             ],
-            "url": "{{base_url}}/api/v1/courses/1/students"
+            "url": "{{base_url}}/courses/1/students"
           }
         },
         {
@@ -534,7 +532,7 @@
                 "value": "application/json"
               }
             ],
-            "url": "{{base_url}}/api/v1/courses/{id}",
+            "url": "{{base_url}}/courses/{id}",
             "description": "Get course details by ID"
           }
         },
@@ -552,7 +550,7 @@
                 "value": "application/json"
               }
             ],
-            "url": "{{base_url}}/api/v1/courses/{id}",
+            "url": "{{base_url}}/courses/{id}",
             "description": "Update course details by ID (Admin only)"
           }
         },
@@ -570,7 +568,7 @@
                 "value": "application/json"
               }
             ],
-            "url": "{{base_url}}/api/v1/courses/{id}",
+            "url": "{{base_url}}/courses/{id}",
             "description": "Delete course by ID (Admin only). Use ?hard=true for permanent delete."
           }
         },
@@ -588,7 +586,7 @@
                 "value": "application/json"
               }
             ],
-            "url": "{{base_url}}/api/v1/courses/code/{code}",
+            "url": "{{base_url}}/courses/code/{code}",
             "description": "Get course details by Code"
           }
         },
@@ -606,7 +604,7 @@
                 "value": "application/json"
               }
             ],
-            "url": "{{base_url}}/api/v1/courses/code/{code}",
+            "url": "{{base_url}}/courses/code/{code}",
             "description": "Update course details by Code (Admin only)"
           }
         },
@@ -624,7 +622,7 @@
                 "value": "application/json"
               }
             ],
-            "url": "{{base_url}}/api/v1/courses/code/{code}",
+            "url": "{{base_url}}/courses/code/{code}",
             "description": "Delete course by Code (Admin only). Use ?hard=true for permanent delete."
           }
         },
@@ -642,7 +640,7 @@
                 "value": "application/json"
               }
             ],
-            "url": "{{base_url}}/api/v1/courses/{id}/students",
+            "url": "{{base_url}}/courses/{id}/students",
             "description": "Enroll student in course (Admin/Staff only)"
           }
         },
@@ -660,7 +658,7 @@
                 "value": "application/json"
               }
             ],
-            "url": "{{base_url}}/api/v1/courses/{id}/students",
+            "url": "{{base_url}}/courses/{id}/students",
             "description": "List students in course (Admin/Staff only)"
           }
         }
@@ -680,23 +678,38 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/attendance?courseId=1&section=1",
+              "raw": "{{base_url}}/attendance?courseId=1&section=1&date=2024-01-15&page=1&limit=50",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
-                "api",
-                "v1",
-                "attendance?courseId=1&section=1"
+                "attendance"
               ],
               "query": [
                 {
                   "key": "courseId",
-                  "value": "1"
+                  "value": "1",
+                  "description": "Optional"
                 },
                 {
                   "key": "section",
-                  "value": "1"
+                  "value": "1",
+                  "description": "Optional"
+                },
+                {
+                  "key": "date",
+                  "value": "2024-01-15",
+                  "description": "Optional"
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Optional"
+                },
+                {
+                  "key": "limit",
+                  "value": "50",
+                  "description": "Optional"
                 }
               ]
             }
@@ -720,7 +733,7 @@
               "mode": "raw",
               "raw": "{\n  \"courseId\": 1,\n  \"section\": 1,\n  \"date\": \"2026-04-21\",\n  \"room\": \"Room 101\",\n  \"sessionType\": \"LECTURE\",\n  \"attendance\": [\n    { \"studentId\": 3, \"status\": \"Present\" },\n    { \"studentId\": 4, \"status\": \"Absent\" }\n  ]\n}"
             },
-            "url": "{{base_url}}/api/v1/attendance"
+            "url": "{{base_url}}/attendance"
           }
         },
         {
@@ -741,7 +754,7 @@
               "mode": "raw",
               "raw": "{\n  \"studentId\": 3,\n  \"courseId\": 1,\n  \"staffId\": 2,\n  \"recordDate\": \"2026-04-21T10:00:00Z\",\n  \"attendanceStatusId\": 1,\n  \"room\": \"R3\",\n  \"sessionType\": \"LECTURE\",\n  \"sectionNumber\": 1\n}"
             },
-            "url": "{{base_url}}/api/v1/attendance"
+            "url": "{{base_url}}/attendance"
           }
         },
         {
@@ -754,7 +767,7 @@
                 "value": "Bearer {{jwt_token}}"
               }
             ],
-            "url": "{{base_url}}/api/v1/attendance/statistics"
+            "url": "{{base_url}}/attendance/statistics"
           }
         },
         {
@@ -771,7 +784,7 @@
                 "value": "application/json"
               }
             ],
-            "url": "{{base_url}}/api/v1/attendance/my",
+            "url": "{{base_url}}/attendance/my",
             "description": "Get my attendance (Student only)"
           }
         },
@@ -789,7 +802,7 @@
                 "value": "application/json"
               }
             ],
-            "url": "{{base_url}}/api/v1/attendance/course/{courseId}",
+            "url": "{{base_url}}/attendance/course/{courseId}",
             "description": "Get attendance by course"
           }
         },
@@ -807,7 +820,7 @@
                 "value": "application/json"
               }
             ],
-            "url": "{{base_url}}/api/v1/attendance/student/{studentId}",
+            "url": "{{base_url}}/attendance/student/{studentId}",
             "description": "Get attendance for specific student"
           }
         },
@@ -825,7 +838,7 @@
                 "value": "application/json"
               }
             ],
-            "url": "{{base_url}}/api/v1/attendance/track/{studentId}",
+            "url": "{{base_url}}/attendance/track/{studentId}",
             "description": "Get intelligent tracking and risk analysis for a student"
           }
         },
@@ -843,7 +856,7 @@
                 "value": "application/json"
               }
             ],
-            "url": "{{base_url}}/api/v1/attendance/{recordId}",
+            "url": "{{base_url}}/attendance/{recordId}",
             "description": "Update attendance record"
           }
         },
@@ -861,7 +874,7 @@
                 "value": "application/json"
               }
             ],
-            "url": "{{base_url}}/api/v1/attendance/{recordId}",
+            "url": "{{base_url}}/attendance/{recordId}",
             "description": "Delete attendance record (Admin only)"
           }
         }
@@ -884,7 +897,7 @@
                 "value": "application/json"
               }
             ],
-            "url": "{{base_url}}/api/v1/alerts/{id}",
+            "url": "{{base_url}}/alerts/{id}",
             "description": "Delete specific alert"
           }
         },
@@ -902,7 +915,7 @@
                 "value": "application/json"
               }
             ],
-            "url": "{{base_url}}/api/v1/alerts/check-low-attendance/{courseId}",
+            "url": "{{base_url}}/alerts/check-low-attendance/{courseId}",
             "description": "Trigger low attendance check for a course"
           }
         },
@@ -920,7 +933,7 @@
                 "value": "application/json"
               }
             ],
-            "url": "{{base_url}}/api/v1/alerts/report/{courseId}",
+            "url": "{{base_url}}/alerts/report/{courseId}",
             "description": "Get low attendance report for a course"
           }
         },
@@ -938,7 +951,16 @@
                 "value": "application/json"
               }
             ],
-            "url": "{{base_url}}/api/v1/alerts/batch",
+            "url": "{{base_url}}/alerts/batch",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userIds\": [1, 2, 3],\n  \"message\": \"Important update for all students\",\n  \"title\": \"System Notification\",\n  \"type\": \"info\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "description": "Send alerts to multiple users"
           }
         },
@@ -956,7 +978,7 @@
                 "value": "application/json"
               }
             ],
-            "url": "{{base_url}}/api/v1/alerts/send/{userId}",
+            "url": "{{base_url}}/alerts/send/{userId}",
             "description": "Send a targeted alert to a specific student"
           }
         }

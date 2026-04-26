@@ -14,7 +14,7 @@ import { Role } from '../../common/enums/role.enum';
  * Defines endpoints for registration, login, profile management, and role-based access testing.
  */
 @ApiTags('Authentication')
-@Controller('api/v1/auth')
+@Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 

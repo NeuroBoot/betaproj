@@ -47,11 +47,10 @@ export class AttendanceRepository {
     }
     if (filters.date) {
       const date = new Date(filters.date);
-      const startOfDay = new Date(date);
-      startOfDay.setHours(0, 0, 0, 0);
-      const endOfDay = new Date(date);
-      endOfDay.setHours(23, 59, 59, 999);
-      where.recordDate = Between(startOfDay, endOfDay);
+      if (!isNaN(date.getTime())) {
+        const dateStr = date.toISOString().split('T')[0];
+        where.recordDate = dateStr;
+      }
     }
     
     const [data, total] = await this.repo.findAndCount({
@@ -86,16 +85,13 @@ export class AttendanceRepository {
 
   findByFilter(filter: { courseId: number; section: number; date: string }) {
     const date = new Date(filter.date);
-    const startOfDay = new Date(date);
-    startOfDay.setHours(0, 0, 0, 0);
-    const endOfDay = new Date(date);
-    endOfDay.setHours(23, 59, 59, 999);
+    const dateStr = !isNaN(date.getTime()) ? date.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
 
     return this.repo.find({
       where: {
         courseId: filter.courseId,
         sectionNumber: filter.section,
-        recordDate: Between(startOfDay, endOfDay)
+        recordDate: dateStr as any
       },
       relations: ['student', 'course']
     });

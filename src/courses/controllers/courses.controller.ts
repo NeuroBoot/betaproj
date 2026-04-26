@@ -13,7 +13,7 @@ import { UserAccount } from '../../users/entities/user.entity';
 @ApiTags('Courses')
 @ApiBearerAuth('JWT-auth')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Controller('api/v1/courses')
+@Controller('courses')
 export class CoursesController {
   constructor(private readonly coursesService: CoursesService) {}
 

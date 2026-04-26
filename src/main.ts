@@ -26,6 +26,9 @@ async function bootstrap() {
     }),
   );
 
+  // Global Prefix
+  app.setGlobalPrefix('api/v1');
+
   // Global Interceptors
   app.useGlobalInterceptors(new LoggingInterceptor());
   app.useGlobalInterceptors(new TransformInterceptor());

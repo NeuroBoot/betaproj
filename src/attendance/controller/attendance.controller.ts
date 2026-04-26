@@ -28,7 +28,7 @@ import { Role } from '../../common/enums/role.enum';
 
 @ApiTags('Attendance')
 @ApiBearerAuth('JWT-auth')
-@Controller('api/v1/attendance')
+@Controller('attendance')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class AttendanceController {
 

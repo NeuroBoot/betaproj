@@ -1,5 +1,5 @@
 import { Controller, Get, Delete, Put, Post, Body, Param, Query, UseGuards, ParseIntPipe, DefaultValuePipe } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery, ApiBody } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Roles } from '../../auth/decorators/roles.decorator';
@@ -7,10 +7,11 @@ import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import { UserAccount } from '../entities/user.entity';
 import { AlertService } from '../services/alert.service';
 import { Role } from '../../common/enums/role.enum';
+import { BatchAlertDto } from '../dto/batch-alert.dto';
 
 @ApiTags('Alerts')
 @ApiBearerAuth('JWT-auth')
-@Controller('api/v1/alerts')
+@Controller('alerts')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class AlertController {
   constructor(private readonly alertService: AlertService) {}
@@ -60,8 +61,9 @@ export class AlertController {
   @Post('batch')
   @Roles(Role.ADMIN, Role.STAFF)
   @ApiOperation({ summary: 'Send alerts to multiple users' })
+  @ApiBody({ type: BatchAlertDto })
   async sendBatch(
-    @Body() payload: { userIds: number[], message: string, title?: string, type?: string }
+    @Body() payload: BatchAlertDto
   ) {
     return this.alertService.sendBatchAlerts(
       payload.userIds,
