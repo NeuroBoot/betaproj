@@ -6,7 +6,7 @@ import { Roles } from '../../auth/decorators/roles.decorator';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import { UserAccount } from '../../users/entities/user.entity';
 import { Role } from '../../common/enums/role.enum';
-import { AttendanceService } from '../../attendance/services/attendance.service';
+import { AttendanceService } from '../services/attendance.service';
 
 @ApiTags('Student')
 @ApiBearerAuth('JWT-auth')

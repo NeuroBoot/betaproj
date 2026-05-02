@@ -8,6 +8,8 @@ import { UserAccount } from '../entities/user.entity';
 import { AlertService } from '../services/alert.service';
 import { Role } from '../../common/enums/role.enum';
 import { BatchAlertDto } from '../dto/batch-alert.dto';
+import { CreateAlertDto } from '../dto/create-alert.dto';
+import { UpdateAlertSettingsDto } from '../dto/update-alert-settings.dto';
 
 @ApiTags('Alerts')
 @ApiBearerAuth('JWT-auth')
@@ -26,16 +28,20 @@ export class AlertController {
   @ApiOperation({ summary: 'Clear all alerts' })
   async clearAll(@CurrentUser() user: UserAccount) {
     await this.alertService.clearAll(user);
-    return { success: true, message: 'All alerts cleared successfully' };
+    return { message: 'All alerts cleared successfully' };
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete specific alert' })
   async remove(@Param('id', ParseIntPipe) id: number, @CurrentUser() user: UserAccount) {
     await this.alertService.remove(id, user);
-    return { success: true, message: `Alert ${id} deleted successfully` };
+    return { message: `Alert ${id} deleted successfully` };
   }
 
+  /**
+   * NOTE: If you receive a 400 error with "Validation failed (numeric string is expected)", 
+   * ensure you are passing a numeric ID in the URL (e.g. /5) and not a literal placeholder like /{5}.
+   */
   @Post('check-low-attendance/:courseId')
   @Roles(Role.ADMIN, Role.STAFF)
   @ApiOperation({ summary: 'Trigger low attendance check for a course' })
@@ -76,9 +82,10 @@ export class AlertController {
   @Post('send/:userId')
   @Roles(Role.ADMIN, Role.STAFF)
   @ApiOperation({ summary: 'Send a targeted alert to a specific student' })
+  @ApiBody({ type: CreateAlertDto })
   async sendToUser(
     @Param('userId', ParseIntPipe) userId: number,
-    @Body() payload: { message: string, title?: string, type?: string, metadata?: any }
+    @Body() payload: CreateAlertDto
   ) {
     return this.alertService.sendAlert(
       userId,
@@ -92,7 +99,6 @@ export class AlertController {
   @Get('settings')
   @ApiOperation({ summary: 'Get alert settings' })
   async getSettings() {
-    // These could be moved to a UserSettings entity if needed
     return {
       lowAttendanceWarnings: true,
       systemUpdates: true,
@@ -102,8 +108,9 @@ export class AlertController {
 
   @Put('settings')
   @ApiOperation({ summary: 'Update alert settings' })
-  async updateSettings(@Body() payload: any) {
-    return { success: true, message: 'Settings updated successfully', data: payload };
+  @ApiBody({ type: UpdateAlertSettingsDto })
+  async updateSettings(@Body() payload: UpdateAlertSettingsDto) {
+    return { message: 'Settings updated successfully', data: payload };
   }
 }
 

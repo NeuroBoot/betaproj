@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Export | FACEMARK</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/styleexport.css">
+</head>
+
+<body>
+
+<div class="container-fluid">
+  <div class="row">
+<!-- Mobile Toggle -->
+<button class="btn btn-dark d-md-none m-3"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#sidebarMenu">
+  <i class="bi bi-list"></i>
+</button>
+    <!-- Sidebar -->
+    <div class="col-md-2 collapse d-md-block sidebar" id="sidebarMenu">
+      <h5 class="brand mb-3">
+        <i class="bi bi-eye"></i> FACEMARK
+      </h5>
+      <small class="text-muted">staff portal</small>
+
+      <div class="user-box">
+        <small>Welcome,</small>
+        <div class="user-name">سَس</div>
+        <small>Staff Portal</small>
+      </div>
+
+      <ul class="nav flex-column">
+        <li class="nav-item">
+          <a class="nav-link" href="staffdashboard.html">
+            <i class="bi bi-grid"></i> Dashboard
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="manualattendance.html">
+            <i class="bi bi-person-check"></i> Manual Attendance
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="face-capture.html">
+            <i class="bi bi-camera"></i> Face Capture
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="charts.html">
+            <i class="bi bi-bar-chart"></i> Charts & Reports
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" href="#">
+            <i class="bi bi-download"></i> Export
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="alerts.html">
+            <i class="bi bi-bell"></i> Alerts
+          </a>
+        </li>
+
+        <li class="nav-item mt-5">
+          <a class="nav-link text-danger" href="#">
+            <i class="bi bi-box-arrow-left"></i> Sign Out
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="col-12 col-md-10 p-3 p-md-4">
+
+      <!-- Export Form -->
+      <div class="panel">
+        <h3 class="mb-4">Export Attendance Data</h3>
+
+        <!-- FORM START -->
+        <form id="exportForm">
+
+          <div class="row g-4 align-items-end">
+            <div class="col-md-3">
+              <label class="form-label">Date From</label>
+              <input type="date" name="dateFrom" class="form-control" required>
+            </div>
+
+            <div class="col-md-3">
+              <label class="form-label">Date To</label>
+              <input type="date" name="dateTo" class="form-control" required>
+            </div>
+
+            <div class="col-md-3">
+              <label class="form-label">Course</label>
+              <select name="course" class="manual-input">
+                <option>Mathematics</option>
+                <option>Physics</option>
+                <option>Chemistry</option>
+              </select>
+            </div>
+
+            <div class="col-md-3">
+              <label class="form-label">Format</label>
+              <select name="format" class="manual-input">
+                <option>PDF (.pdf)</option>
+                <option>Excel (.xlsx)</option>
+                <option>CSV (.csv)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="mt-4">
+            <button type="submit" class="export-btn">
+              <i class="bi bi-download"></i> Export Report
+            </button>
+          </div>
+
+        </form>
+        <!-- FORM END -->
+
+      </div>
+
+      <!-- Quick Export -->
+      <div class="panel">
+        <h4 class="mb-4">Quick Export Templates</h4>
+
+        <div class="row g-4">
+          <div class="col-md-6">
+            <div class="quick-card">
+              <strong>Weekly Summary</strong>
+              <small class="d-block mt-1">Last 7 days attendance report</small>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="quick-card">
+              <strong>Monthly Report</strong>
+              <small class="d-block mt-1">Current month detailed report</small>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="quick-card">
+              <strong>Semester Overview</strong>
+              <small class="d-block mt-1">Complete semester statistics</small>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="quick-card">
+              <strong>Low Attendance Alert List</strong>
+              <small class="d-block mt-1">Students below 75% attendance</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- JAVASCRIPT POST -->
+<script>
+document.getElementById("exportForm").addEventListener("submit", function(e) {
+
+  e.preventDefault();
+
+  const dateFrom = this.dateFrom.value;
+  const dateTo = this.dateTo.value;
+  const course = this.course.value;
+  const format = this.format.value;
+
+  let collectedData = [];
+
+  // قراءة كل المفاتيح من LocalStorage
+  for (let i = 0; i < localStorage.length; i++) {
+
+    const key = localStorage.key(i);
+
+    if (key.startsWith("attendance_" + course)) {
+
+      const parts = key.split("_");
+      const date = parts[parts.length - 1];
+
+      if (date >= dateFrom && date <= dateTo) {
+        const data = JSON.parse(localStorage.getItem(key));
+        collectedData = collectedData.concat(data);
+      }
+    }
+  }
+
+  if (collectedData.length === 0) {
+    alert("No data found for selected range");
+    return;
+  }
+
+  // ===== CSV  =====
+  function generateCSV(data) {
+    let csv = "Student ID,Name,Status,Time\n";
+    data.forEach(row => {
+      csv += `${row.id},${row.name},${row.status},${row.time}\n`;
+    });
+    return csv;
+  }
+
+  // ===== PDF  =====
+  function generatePDF(data) {
+    let content = `
+      <html>
+      <head>
+        <title>Attendance Report</title>
+      </head>
+      <body>
+        <h2>Attendance Report - ${course}</h2>
+        <table border="1" cellspacing="0" cellpadding="5">
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Status</th>
+            <th>Time</th>
+          </tr>
+    `;
+
+    data.forEach(row => {
+      content += `
+        <tr>
+          <td>${row.id}</td>
+          <td>${row.name}</td>
+          <td>${row.status}</td>
+          <td>${row.time}</td>
+        </tr>
+      `;
+    });
+
+    content += `
+        </table>
+      </body>
+      </html>
+    `;
+
+    const blob = new Blob([content], { type: "application/pdf" });
+    return blob;
+  }
+
+  // ===== تنزيل الملف =====
+  if (format.includes("CSV") || format.includes("Excel")) {
+
+    const csvData = generateCSV(collectedData);
+    const blob = new Blob([csvData], { type: "text/csv" });
+
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "attendance_report.csv";
+    link.click();
+
+  } else if (format.includes("PDF")) {
+
+    const pdfBlob = generatePDF(collectedData);
+
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(pdfBlob);
+    link.download = "attendance_report.pdf";
+    link.click();
+  }
+
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

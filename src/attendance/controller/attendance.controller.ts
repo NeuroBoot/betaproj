@@ -39,20 +39,20 @@ export class AttendanceController {
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
   @ApiQuery({ name: 'courseId', required: false })
-  @ApiQuery({ name: 'section', required: false })
+  @ApiQuery({ name: 'session', required: false })
   @ApiQuery({ name: 'date', required: false })
   async findAll(
     @CurrentUser() user: UserAccount,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(50), ParseIntPipe) limit: number,
     @Query('courseId', new DefaultValuePipe(null), ParseIntPipe) courseId?: number,
-    @Query('section', new DefaultValuePipe(null), ParseIntPipe) section?: number,
+    @Query('session') session?: string,
     @Query('date') date?: string,
   ) {
     if (page > 0 && limit > 0) {
-      return this.service.findAllPaginated(page, limit, { courseId, section, date }, user);
+      return this.service.findAllPaginated(page, limit, { courseId, session, date }, user);
     }
-    return this.service.findAll(user, { courseId, section, date });
+    return this.service.findAll(user, { courseId, session, date });
   }
 
   @Get('my')
@@ -66,15 +66,19 @@ export class AttendanceController {
     return this.service.getStudentAttendance(user.userAccountId, courseId);
   }
 
+  /**
+   * NOTE: If you receive a 400 error with "Validation failed (numeric string is expected)", 
+   * ensure you are passing a numeric ID in the URL (e.g. /5) and not a literal placeholder like /{5}.
+   */
   @Get('course/:courseId')
   @Roles(Role.ADMIN, Role.STAFF)
   @ApiOperation({ summary: 'Get attendance by course' })
-  @ApiQuery({ name: 'section', required: false })
+  @ApiQuery({ name: 'session', required: false })
   @ApiQuery({ name: 'date', required: false })
   async getByCourse(
     @CurrentUser() user: UserAccount,
     @Param('courseId', ParseIntPipe) courseId: number,
-    @Query('section', new DefaultValuePipe(null), ParseIntPipe) section?: number,
+    @Query('session') session?: string,
     @Query('date') date?: string,
   ) {
     if (user.userType === Role.STAFF) {
@@ -83,7 +87,7 @@ export class AttendanceController {
         throw new ForbiddenException('You are not authorized to view attendance for this course');
       }
     }
-    return this.service.getCourseAttendance(courseId, section, date);
+    return this.service.getCourseAttendance(courseId, session, date);
   }
 
   @Get('student/:studentId')
@@ -110,11 +114,14 @@ export class AttendanceController {
 
   @Post()
   @Roles(Role.ADMIN, Role.STAFF)
-  @ApiOperation({ summary: 'Create/Bulk-save attendance record' })
-  @ApiBody({ description: 'Can accept either a single CreateAttendanceDto or a BulkAttendanceDto' })
-  create(@Body() dto: any, @CurrentUser() user: UserAccount) {
-    // Determine if it is a bulk save operation
-    if (dto.attendance && Array.isArray(dto.attendance)) {
+  @ApiOperation({ 
+    summary: 'Create/Bulk-save attendance record',
+    description: 'Accepts either a single CreateAttendanceDto or a BulkAttendanceDto (if it contains an "attendance" array).'
+  })
+  @ApiBody({ schema: { oneOf: [{ $ref: '#/components/schemas/CreateAttendanceDto' }, { $ref: '#/components/schemas/BulkAttendanceDto' }] } })
+  create(@Body() dto: CreateAttendanceDto | BulkAttendanceDto, @CurrentUser() user: UserAccount) {
+    // Determine if it is a bulk save operation by checking for the presence of the 'attendance' array
+    if ('attendance' in dto && Array.isArray(dto.attendance)) {
       return this.service.saveBulk(dto as BulkAttendanceDto, user);
     }
     return this.service.create(dto as CreateAttendanceDto, user);

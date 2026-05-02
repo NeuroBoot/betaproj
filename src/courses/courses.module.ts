@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Course } from './entities/course.entity';
 import { CourseEnrollment } from './entities/course-enrollment.entity';
@@ -10,7 +10,7 @@ import { UsersModule } from '../users/users.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([Course, CourseEnrollment]),
-    UsersModule,
+    forwardRef(() => UsersModule),
   ],
   controllers: [CoursesController],
   providers: [CourseRepository, CoursesService],

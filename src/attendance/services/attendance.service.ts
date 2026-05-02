@@ -68,8 +68,13 @@ export class AttendanceService {
       attendanceStatusId: dto.attendanceStatusId,
       room: dto.room,
       sessionType: dto.sessionType,
-      sectionNumber: dto.sectionNumber,
+      sessionNumber: dto.sessionNumber,
+      lectureNumber: dto.lectureNumber,
       faceConfidence: dto.faceConfidence,
+      detected: dto.detected !== undefined ? dto.detected : true,
+      accuracy: dto.accuracy,
+      processingTime: dto.processingTime,
+      recognitionRate: dto.recognitionRate,
       checkInTime: dto.checkInTime,
     });
 
@@ -129,16 +134,24 @@ export class AttendanceService {
       })),
       courses: enrolledCourses.map(course => {
         const records = (student.attendanceRecords || []).filter(r => r.course?.courseId === course.courseId);
+        // Status 1 = Present, 3 = Late (both count as attendance)
+        const attendedCount = records.filter(r => r.attendanceStatusId === 1 || r.attendanceStatusId === 3).length;
         return {
           courseName: course.name,
           credits: Number(course.credits) || 0,
           attendanceRate: records.length > 0 
-            ? Math.round((records.filter(r => r.attendanceStatusId === 1).length / records.length) * 100)
+            ? Math.round((attendedCount / records.length) * 100)
             : 0
         };
       }),
       metrics: {
-        avg: '88%',
+        avg: enrolledCourses.length > 0 
+          ? (enrolledCourses.reduce((acc, course) => {
+              const records = (student.attendanceRecords || []).filter(r => r.course?.courseId === course.courseId);
+              const attendedCount = records.filter(r => r.attendanceStatusId === 1 || r.attendanceStatusId === 3).length;
+              return acc + (records.length > 0 ? (attendedCount / records.length) : 0);
+            }, 0) / enrolledCourses.length * 100).toFixed(1) + '%'
+          : '0%',
         topCourse: enrolledCourses[0]?.name || 'N/A',
         riskStudents: 0,
         aiAccuracy: '99.2%'
@@ -151,7 +164,7 @@ export class AttendanceService {
   private calculateSessionStats(records: any[], courseId: number, type: string) {
     const filtered = records.filter(r => r.course?.courseId === courseId && r.sessionType === type);
     return {
-      attended: filtered.filter(r => r.attendanceStatusId === 1).length,
+      attended: filtered.filter(r => r.attendanceStatusId === 1 || r.attendanceStatusId === 3).length,
       total: filtered.length,
       rooms: [...new Set(filtered.map(r => r.room).filter(Boolean))]
     };
@@ -206,9 +219,11 @@ export class AttendanceService {
         course: course,
         staffId: user.userAccountId,
         attendanceStatusId: this.mapStatusToId(item.status),
-        room: 'Manual Bulk',
-        sessionType: 'SECTION',
-        sectionNumber: parseInt(dto.section) || 1,
+        room: dto.room || 'Manual Bulk',
+        sessionType: dto.sessionType || 'SECTION',
+        sessionNumber: dto.section ? String(dto.section) : '1',
+        detected: true,
+        accuracy: 1.0, // Manual bulk is considered 100% accurate as it's human-verified
       });
       processedStudentIds.add(student.userAccountId);
     }
@@ -218,19 +233,18 @@ export class AttendanceService {
     }
 
     const savedRecords = await this.attendanceRepo.saveMany(recordsToSave);
+// Automatic Alert Check for affected students
+processedStudentIds.forEach(sId => {
+  this.alertService.checkStudentLowAttendance(sId, course.courseId).catch(() => {});
+});
 
-    // Automatic Alert Check for affected students
-    processedStudentIds.forEach(sId => {
-      this.alertService.checkStudentLowAttendance(sId, course.courseId).catch(() => {});
-    });
-
-    return {
-      message: `Successfully saved ${savedRecords.length} attendance records.`,
-      savedCount: savedRecords.length,
-      skippedCount: skippedStudents.length,
-      skipped: skippedStudents.length > 0 ? skippedStudents : undefined
-    };
-  }
+return {
+  message: `Successfully saved ${savedRecords.length} attendance records.`,
+  savedCount: savedRecords.length,
+  skippedCount: skippedStudents.length,
+  skipped: skippedStudents.length > 0 ? skippedStudents : undefined
+};
+}
 
   private mapStatusToId(status: string): number {
     const map = { 'Present': 1, 'Absent': 2, 'Late': 3, 'Excused': 4 };
@@ -259,7 +273,7 @@ export class AttendanceService {
         // Use findAllPaginated logic instead which handles optional date.
         const result = await this.attendanceRepo.findAllWithFilters(1, 1000, {
           courseId: parseInt(query.courseId),
-          section: parseInt(query.section) || undefined,
+          session: query.session || undefined,
           date: query.date
         });
         return result.data;
@@ -332,10 +346,10 @@ export class AttendanceService {
     };
   }
 
-  async getCourseAttendance(courseId: number, section?: number, date?: string) {
+  async getCourseAttendance(courseId: number, session?: string, date?: string) {
     const result = await this.attendanceRepo.findAllWithFilters(1, 1000, {
       courseId,
-      section,
+      session,
       date
     });
     return result.data;
@@ -395,6 +409,43 @@ export class AttendanceService {
     }
     
     return this.attendanceRepo.delete(recordId);
+  }
+
+  async recordAiAttendance(data: {
+    studentId: number;
+    courseId: number;
+    sessionId: string;
+    confidenceScore: number;
+    matchStatus: string;
+  }) {
+    const today = new Date().toISOString().split('T')[0];
+    
+    // Check for duplicate
+    const duplicate = await this.attendanceRepo.findDuplicate(data.studentId, data.courseId, today);
+    if (duplicate) {
+      return { status: 'ALREADY_RECORDED', record: duplicate };
+    }
+
+    // Create record
+    const record = await this.attendanceRepo.create({
+      studentId: data.studentId,
+      courseId: data.courseId,
+      recordDate: today as any,
+      attendanceStatusId: 1, // Present
+      confidenceScore: data.confidenceScore,
+      matchStatus: data.matchStatus,
+      sessionId: data.sessionId,
+      sessionType: 'LECTURE',
+      detected: true,
+      accuracy: data.confidenceScore,
+      room: 'AI Vision',
+    });
+
+    return { status: 'RECORDED', record };
+  }
+
+  async findBySession(sessionId: string) {
+    return this.attendanceRepo.findBySession(sessionId);
   }
 
   private normalizeDate(dateString: string): Date {

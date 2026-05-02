@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Manual Attendance | FACEMARK</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+  <!-- Existing CSS -->
+  <link rel="stylesheet" href="css/styleattendance.css">
+
+  <style>
+    /* ===== COLORS ONLY – NOTHING REMOVED ===== */
+
+    body {
+     background: #0f0c29;
+      color: #ffffff;
+       min-height: 100vh;
+  font-family: "Segoe UI", sans-serif;
+    }
+
+    /* ===== Manual Card ===== */
+    .manual-card {
+     background: #15132b;
+      border-radius: 22px;
+      padding: 26px 28px;
+      margin-bottom: 30px;
+      border: 1px solid rgba(255,255,255,0.10);
+    }
+
+    .manual-card h4 {
+      margin-bottom: 22px;
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    .manual-card .form-label {
+      color: #cbd5e1;
+      font-size: 13px;
+      margin-bottom: 6px;
+      display: block;
+    }
+.attendance-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table-wrapper {
+  max-height: 350px;
+  overflow-y: auto;
+}
+    .manual-input {
+      width: 100%;
+      height: 46px;
+      padding: 10px 14px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.20);
+      color: #ffffff;
+      font-size: 14px;
+      appearance: none;
+    }
+
+    .manual-input:focus {
+      outline: none;
+      border-color: #312e81;
+      background: rgba(255,255,255,0.10);
+    }
+
+    /* Select arrow */
+    select.manual-input {
+      background-image:
+        linear-gradient(45deg, transparent 50%, #cbd5e1 50%),
+        linear-gradient(135deg, #cbd5e1 50%, transparent 50%);
+      background-position:
+        calc(100% - 18px) 19px,
+        calc(100% - 13px) 19px;
+      background-size: 5px 5px, 5px 5px;
+      background-repeat: no-repeat;
+    }
+.table-wrapper {
+  overflow-x: auto;
+}
+.attendance-table {
+  min-width: 700px;
+}
+@media (max-width: 768px) {
+
+  .attendance-header {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .manual-card {
+    padding: 20px;
+  }
+
+  .panel {
+    padding: 18px;
+  }
+
+}
+    select.manual-input option {
+      background-color: #1e293b;
+      color: #ffffff;
+    }
+
+    select.manual-input option:hover {
+      background-color: #312e81;
+    }
+
+    .manual-input::-webkit-calendar-picker-indicator {
+      filter: invert(1);
+      opacity: 0.7;
+      cursor: pointer;
+    }
+
+    /* ===== Buttons ===== */
+    .load-btn,
+    .save-btn {
+      background: #312e81;
+      color: #ffffff;
+      border: none;
+      padding: 10px 22px;
+      border-radius: 14px;
+      font-weight: 500;
+    }
+
+    .load-btn:hover,
+    .save-btn:hover {
+      background: #1e1b4b;
+    }
+
+    /* ===== Panel & Table (UNCHANGED STRUCTURE) ===== */
+    .panel {
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      border-radius: 20px;
+      padding: 22px;
+    }
+
+    .attendance-header h5 {
+      color: #ffffff;
+    }
+
+    .search-input {
+      background: rgba(0,0,0,0.50);
+      border: 1px solid rgba(255,255,255,0.10);
+      color: #ffffff;
+      border-radius: 12px;
+      padding: 8px 14px;
+    }
+
+    .attendance-table th {
+      color: #cbd5e1;
+    }
+
+    .attendance-table td {
+      color: #d1d5db;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container-fluid">
+  <div class="row">
+<!-- Mobile Toggle -->
+<button class="btn btn-dark d-md-none m-3" type="button" 
+        data-bs-toggle="collapse" 
+        data-bs-target="#sidebarMenu">
+  <i class="bi bi-list"></i>
+</button>
+    <!-- Sidebar -->
+   <div class="col-md-2 collapse d-md-block sidebar" id="sidebarMenu">
+      <h5 class="mb-4"><i class="bi bi-eye"></i> FACEMARK</h5>
+      <p class="small text-muted">Staff Portal</p>
+
+      <div class="user-box">
+        <small>Welcome,</small>
+        <div class="user-name">سَس</div>
+        <small>Staff Portal</small>
+      </div>
+
+      <ul class="nav flex-column">
+        <li class="nav-item"><a class="nav-link" href="staffdashboard.html"><i class="bi bi-grid"></i> Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link active" href="#"><i class="bi bi-person-check"></i> Manual Attendance</a></li>
+        <li class="nav-item"><a class="nav-link" href="face-capture.html"><i class="bi bi-camera"></i> Face Capture</a></li>
+        <li class="nav-item"><a class="nav-link" href="charts.html"><i class="bi bi-bar-chart"></i> Charts & Reports</a></li>
+        <li class="nav-item"><a class="nav-link" href="export.html"><i class="bi bi-download"></i> Export</a></li>
+        <li class="nav-item"><a class="nav-link" href="alerts.html"><i class="bi bi-bell"></i> Alerts</a></li>
+        <li class="nav-item mt-5"><a class="nav-link text-danger" href="#"><i class="bi bi-box-arrow-left"></i> Sign Out</a></li>
+      </ul>
+    </div>
+
+    <!-- Main -->
+    <div class="col-12 col-md-10 p-3 p-md-4">
+
+      <!-- Manual Attendance -->
+      <div class="manual-card">
+        <h4>Manual Attendance</h4>
+
+        <div class="row g-4 align-items-end">
+          <div class="col-md-4">
+            <label class="form-label">Course</label>
+            <select class="manual-input">
+              <option selected>Mathematics</option>
+              <option>Physics</option>
+              <option>Chemistry</option>
+            </select>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Section</label>
+            <select class="manual-input">
+              <option selected>Section A</option>
+              <option>Section B</option>
+              <option>Section C</option>
+            </select>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Date</label>
+            <input type="date" class="manual-input">
+          </div>
+
+          <div class="col-md-12">
+            <button class="load-btn">Load Attendance</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Attendance Table -->
+      <div class="panel">
+        <div class="attendance-header">
+          <h5>Attendance Record</h5>
+          <input class="search-input" placeholder="Search by ID...">
+        </div>
+<div class="table-wrapper">
+  <table class="attendance-table">
+          <thead>
+            <tr>
+              <th>Student ID</th>
+              <th>Name</th>
+              <th>Status</th>
+              <th>Time</th>
+              <th style="text-align:right">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>2021001</td>
+              <td>Ahmed Hassan</td>
+              <td><span class="status present">Present</span></td>
+              <td>08:15 AM</td>
+              <td>
+                <select class="manual-input">
+                  <option selected>Present</option>
+                  <option>Absent</option>
+                  <option>Late</option>
+                </select>
+              </td>
+            </tr>
+          </tbody>
+         </table>
+</div>
+
+        <button class="save-btn">Save Attendance</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  const loadBtn = document.querySelector(".load-btn");
+  const saveBtn = document.querySelector(".save-btn");
+  const tbody = document.querySelector(".attendance-table tbody");
+  const searchInput = document.querySelector(".search-input");
+
+  const courseSelect = document.querySelectorAll(".manual-input")[0];
+  const sectionSelect = document.querySelectorAll(".manual-input")[1];
+  const dateInput = document.querySelector('input[type="date"]');
+
+  // بيانات تجريبية
+  const students = [
+    { id: "2021001", name: "Ahmed Hassan" },
+    { id: "2021002", name: "Sara Ali" },
+    { id: "2021003", name: "Mohamed Adel" },
+    { id: "2021004", name: "Mona Khaled" },
+    { id: "2021005", name: "Youssef Tamer" },
+    
+  ];
+
+  // تحميل الطلاب
+  loadBtn.addEventListener("click", function () {
+    tbody.innerHTML = "";
+
+    students.forEach(student => {
+      const row = document.createElement("tr");
+
+      row.innerHTML = `
+        <td>${student.id}</td>
+        <td>${student.name}</td>
+        <td><span class="status present">Present</span></td>
+        <td>--</td>
+        <td>
+          <select class="manual-input status-select">
+            <option value="Present" selected>Present</option>
+            <option value="Absent">Absent</option>
+            <option value="Late">Late</option>
+          </select>
+        </td>
+      `;
+
+      tbody.appendChild(row);
+    });
+  });
+
+  // تغيير الحالة
+  tbody.addEventListener("change", function (e) {
+    if (e.target.classList.contains("status-select")) {
+      const row = e.target.closest("tr");
+      const statusCell = row.querySelector(".status");
+      const timeCell = row.children[3];
+
+      const value = e.target.value;
+      statusCell.textContent = value;
+      statusCell.className = "status " + value.toLowerCase();
+
+      if (value === "Present") {
+        timeCell.textContent = new Date().toLocaleTimeString();
+      } else {
+        timeCell.textContent = "--";
+      }
+    }
+  });
+
+  // البحث
+  searchInput.addEventListener("keyup", function () {
+    const value = this.value.toLowerCase();
+    const rows = tbody.querySelectorAll("tr");
+
+    rows.forEach(row => {
+      const id = row.children[0].textContent.toLowerCase();
+      row.style.display = id.includes(value) ? "" : "none";
+    });
+  });
+
+  //  الحفظ في LocalStorage
+  saveBtn.addEventListener("click", function () {
+
+    const rows = tbody.querySelectorAll("tr");
+    const attendanceData = [];
+
+    rows.forEach(row => {
+      attendanceData.push({
+        id: row.children[0].textContent,
+        name: row.children[1].textContent,
+        status: row.children[2].textContent,
+        time: row.children[3].textContent
+      });
+    });
+
+    // مفتاح مميز حسب الكورس والسيكشن والتاريخ
+    const key = `attendance_${courseSelect.value}_${sectionSelect.value}_${dateInput.value}`;
+
+    localStorage.setItem(key, JSON.stringify(attendanceData));
+
+    console.log("Saved successfully:", key);
+  });
+
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

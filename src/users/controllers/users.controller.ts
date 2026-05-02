@@ -23,6 +23,10 @@ export class UsersController {
     return this.usersService.findAll(role);
   }
 
+  /**
+   * NOTE: If you receive a 400 error with "Validation failed (numeric string is expected)", 
+   * ensure you are passing a numeric ID in the URL (e.g. /5) and not a literal placeholder like /{5}.
+   */
   @Get(':id')
   @ApiOperation({ summary: 'Get user details by ID (Admin only)' })
   @ApiResponse({ status: 200, type: UserAccount })
@@ -63,7 +67,8 @@ export class UsersController {
   @ApiResponse({ status: 200, description: 'User deleted' })
   async remove(@Param('id', ParseIntPipe) id: number, @Query('hard') hard?: string) {
     const isHard = hard === 'true';
-    return this.usersService.remove(id, isHard);
+    await this.usersService.remove(id, isHard);
+    return { message: `User ${id} deleted successfully`, type: isHard ? 'hard' : 'soft' };
   }
 
   @Delete('username/:username')
@@ -71,6 +76,7 @@ export class UsersController {
   @ApiResponse({ status: 200, description: 'User deleted' })
   async removeByUsername(@Param('username') username: string, @Query('hard') hard?: string) {
     const isHard = hard === 'true';
-    return this.usersService.removeByUsername(username, isHard);
+    await this.usersService.removeByUsername(username, isHard);
+    return { message: `User ${username} deleted successfully`, type: isHard ? 'hard' : 'soft' };
   }
 }

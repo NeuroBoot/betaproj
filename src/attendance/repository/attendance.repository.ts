@@ -30,7 +30,7 @@ export class AttendanceRepository {
   async findAllWithFilters(
     page: number, 
     limit: number, 
-    filters: { courseId?: number; section?: number; date?: string }, 
+    filters: { courseId?: number; session?: string; date?: string }, 
     courseIds?: number[]
   ): Promise<{ data: Attendance[]; total: number; page: number; limit: number; totalPages: number }> {
     const skip = (page - 1) * limit;
@@ -42,8 +42,8 @@ export class AttendanceRepository {
     if (filters.courseId) {
       where.courseId = filters.courseId;
     }
-    if (filters.section) {
-      where.sectionNumber = filters.section;
+    if (filters.session) {
+      where.sessionNumber = filters.session;
     }
     if (filters.date) {
       const date = new Date(filters.date);
@@ -83,14 +83,14 @@ export class AttendanceRepository {
     });
   }
 
-  findByFilter(filter: { courseId: number; section: number; date: string }) {
+  findByFilter(filter: { courseId: number; session: string; date: string }) {
     const date = new Date(filter.date);
     const dateStr = !isNaN(date.getTime()) ? date.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
 
     return this.repo.find({
       where: {
         courseId: filter.courseId,
-        sectionNumber: filter.section,
+        sessionNumber: filter.session,
         recordDate: dateStr as any
       },
       relations: ['student', 'course']
@@ -150,6 +150,23 @@ export class AttendanceRepository {
     const record = await this.findOneById(recordId);
     if (!record) return null;
     return this.repo.remove(record);
+  }
+
+  async findDuplicate(studentId: number, courseId: number, recordDate: string): Promise<Attendance | null> {
+    return this.repo.findOne({
+      where: {
+        studentId,
+        courseId,
+        recordDate: recordDate as any
+      }
+    });
+  }
+
+  async findBySession(sessionId: string): Promise<Attendance[]> {
+    return this.repo.find({
+      where: { sessionId },
+      relations: ['student', 'course']
+    });
   }
 
   statisticsByStaff(staffId: number) {

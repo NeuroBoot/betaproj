@@ -14,11 +14,16 @@ export class UpdateAttendanceDto {
   @IsDateString()
   recordDate?: string;
 
-  @ApiProperty({ required: false, example: 1 })
+  @ApiProperty({ required: false, example: '1A' })
   @IsOptional()
-  @IsInt()
-  @Min(1)
-  sectionNumber?: number;
+  @IsString()
+  sessionNumber?: string;
+
+  @ApiProperty({ required: false, example: 'A' })
+  @IsOptional()
+  @IsString()
+  @IsIn(['A', 'B', 'C', 'D'])
+  lectureNumber?: string;
 
   @ApiProperty({ required: false, example: 'LECTURE', enum: ['LECTURE', 'SECTION'] })
   @IsOptional()

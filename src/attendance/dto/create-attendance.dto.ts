@@ -31,11 +31,16 @@ export class CreateAttendanceDto {
   @IsNotEmpty({ message: 'recordDate is required' })
   recordDate: string;
 
-  @ApiProperty({ required: false, example: 1, description: 'Section number' })
+  @ApiProperty({ required: false, example: '1A', description: 'Session number (accepts strings)' })
   @IsOptional()
-  @IsInt({ message: 'sectionNumber must be an integer' })
-  @Min(1)
-  sectionNumber: number;
+  @IsString({ message: 'sessionNumber must be a string' })
+  sessionNumber: string;
+
+  @ApiProperty({ required: false, example: 'A', description: 'Lecture number (A, B, C, D)' })
+  @IsOptional()
+  @IsString({ message: 'lectureNumber must be a string' })
+  @IsIn(['A', 'B', 'C', 'D'], { message: 'lectureNumber must be A, B, C, or D' })
+  lectureNumber: string;
 
   @ApiProperty({ example: 'R3', description: 'Room name/number' })
   @IsString({ message: 'room must be a string' })
@@ -54,6 +59,25 @@ export class CreateAttendanceDto {
   @Min(0)
   @Max(1)
   faceConfidence?: number;
+
+  @ApiProperty({ required: false, example: true, description: 'Whether the face was detected' })
+  @IsOptional()
+  detected?: boolean;
+
+  @ApiProperty({ required: false, example: 0.98, description: 'AI Accuracy' })
+  @IsOptional()
+  @IsNumber()
+  accuracy?: number;
+
+  @ApiProperty({ required: false, example: 150.5, description: 'Processing time in ms' })
+  @IsOptional()
+  @IsNumber()
+  processingTime?: number;
+
+  @ApiProperty({ required: false, example: 0.92, description: 'Recognition Rate' })
+  @IsOptional()
+  @IsNumber()
+  recognitionRate?: number;
 
   @ApiProperty({ required: false, example: '09:30:00', description: 'Check-in time' })
   @IsOptional()

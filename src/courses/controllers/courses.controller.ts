@@ -8,6 +8,7 @@ import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import { Role } from '../../common/enums/role.enum';
 import { CreateCourseDto } from '../dto/create-course.dto';
 import { UpdateCourseDto } from '../dto/update-course.dto';
+import { EnrollStudentDto } from '../dto/enroll-student.dto';
 import { UserAccount } from '../../users/entities/user.entity';
 
 @ApiTags('Courses')
@@ -31,6 +32,10 @@ export class CoursesController {
     return this.coursesService.create(createCourseDto, admin);
   }
 
+  /**
+   * NOTE: If you receive a 400 error with "Validation failed (numeric string is expected)", 
+   * ensure you are passing a numeric ID in the URL (e.g. /5) and not a literal placeholder like /{5}.
+   */
   @Get(':id')
   @ApiOperation({ summary: 'Get course details by ID' })
   async findOne(@Param('id', ParseIntPipe) id: number, @CurrentUser() user: UserAccount) {
@@ -66,7 +71,8 @@ export class CoursesController {
   @ApiOperation({ summary: 'Delete course by ID (Admin only). Use ?hard=true for permanent delete.' })
   async remove(@Param('id', ParseIntPipe) id: number, @Query('hard') hard?: string) {
     const isHard = hard === 'true';
-    return this.coursesService.remove(id, isHard);
+    await this.coursesService.remove(id, isHard);
+    return { message: `Course ${id} deleted successfully`, type: isHard ? 'hard' : 'soft' };
   }
 
   @Delete('code/:code')
@@ -74,7 +80,8 @@ export class CoursesController {
   @ApiOperation({ summary: 'Delete course by Code (Admin only). Use ?hard=true for permanent delete.' })
   async removeByCode(@Param('code') code: string, @Query('hard') hard?: string) {
     const isHard = hard === 'true';
-    return this.coursesService.removeByCode(code, isHard);
+    await this.coursesService.removeByCode(code, isHard);
+    return { message: `Course ${code} deleted successfully`, type: isHard ? 'hard' : 'soft' };
   }
 
   @Post(':id/students')
@@ -82,12 +89,16 @@ export class CoursesController {
   @ApiOperation({ summary: 'Enroll student in course (Admin/Staff only)' })
   async enrollStudent(
     @Param('id', ParseIntPipe) courseId: number,
-    @Body('studentId', ParseIntPipe) studentId: number,
-    @Body('section') section: string,
-    @Body('lecture') lecture: string,
+    @Body() enrollDto: EnrollStudentDto,
     @CurrentUser() user: UserAccount,
   ) {
-    return this.coursesService.enrollStudent(courseId, studentId, user, section, lecture);
+    return this.coursesService.enrollStudent(
+      courseId, 
+      enrollDto.studentId, 
+      user, 
+      enrollDto.section, 
+      enrollDto.lecture
+    );
   }
 
   @Get(':id/students')

@@ -24,6 +24,14 @@ export class BulkAttendanceDto {
   @IsNotEmpty({ message: 'date is required' })
   date: string;
 
+  @IsOptional()
+  @IsString()
+  room?: string;
+
+  @IsOptional()
+  @IsString()
+  sessionType?: string;
+
   @IsArray({ message: 'attendance must be an array' })
   @ValidateNested({ each: true })
   @Type(() => IndividualAttendanceDto)

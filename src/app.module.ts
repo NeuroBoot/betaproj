@@ -5,6 +5,7 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { CoursesModule } from './courses/courses.module';
 import { AttendanceModule } from './attendance/attendance.module';
+import { VisionModule } from './vision/vision.module';
 import { UserAccount } from './users/entities/user.entity';
 import { Alert } from './users/entities/alert.entity';
 import { Course } from './courses/entities/course.entity';
@@ -47,6 +48,7 @@ import { validate } from './common/config/env.validation';
     UsersModule,
     CoursesModule,
     AttendanceModule,
+    VisionModule,
   ],
 })
 export class AppModule {}

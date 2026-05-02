@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>FaceMark | Report a Problem</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+ <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+  <style>
+    /* ===== GLOBAL LAYOUT ===== */
+    body {
+      margin: 0;
+      display: flex; 
+      background: linear-gradient(135deg, #0b1020, #1a1f3c);
+      color: #fff;
+      font-family: "Segoe UI", sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ===== SIDEBAR  ===== */
+    .sidebar {
+      width: 240px;
+      background: linear-gradient(180deg, #0c0f2d, #11164a);
+      min-height: 100vh;
+      padding: 20px;
+      flex-shrink: 0;
+    }
+
+    .user-box {
+      background: linear-gradient(135deg, #1f2547, #2a2f5a);
+      border-radius: 14px;
+      padding: 14px;
+      margin: 18px 0 24px;
+    }
+
+    .user-box small { color: #aab0ff; font-size: 13px; }
+    .user-name { font-size: 16px; font-weight: 600; color: #fff; }
+
+    .sidebar .nav-link {
+      color: #bfc4ff;
+      margin-bottom: 10px;
+      border-radius: 10px;
+      padding: 10px 14px;
+    }
+
+    .sidebar .nav-link.active,
+    .sidebar .nav-link:hover {
+      background: #2b5cff;
+      color: #fff;
+    }
+
+    /* ===== CONTENT ===== */
+    .content {
+      flex: 1;              
+      padding: 40px;
+    }
+
+    .card-dark {
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.08);
+      padding: 25px;
+      margin-bottom: 24px;
+    }
+
+    .form-control,
+    .form-select,
+    textarea {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: #fff;
+    }
+
+    .form-control::placeholder,
+    textarea::placeholder {
+      color: #b8bcff;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+      background: rgba(255,255,255,0.12);
+      color: #fff;
+      box-shadow: none;
+      border-color: #4f7cff;
+    }
+
+    /* Fix select option white */
+    .form-select option {
+      background-color: #1f2547;
+      color: #fff;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #2563eb, #6d28d9);
+      border: none;
+      padding: 12px 25px;
+      border-radius: 12px;
+    }
+
+    /* ===== REPORT ITEMS ===== */
+    .report-item {
+      border-radius: 14px;
+      padding: 18px;
+      margin-bottom: 15px;
+      position: relative;
+    }
+
+    .report-warning {
+      background: rgba(234,179,8,0.25);
+      border-left: 5px solid #eab308;
+    }
+
+    .report-success {
+      background: rgba(34,197,94,0.25);
+      border-left: 5px solid #22c55e;
+    }
+
+    .status-badge {
+      position: absolute;
+      right: 15px;
+      top: 15px;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+    }
+
+    .pending {
+      background: #eab308;
+      color: #000;
+    }
+
+    .resolved {
+      background: #22c55e;
+      color: #fff;
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <h5 class="mb-4"><i class="bi bi-eye"></i> FACEMARK</h5>
+  <p class="small text-muted">Student Portal</p>
+
+  <div class="user-box">
+    <small>Welcome,</small>
+    <div class="user-name">سَس</div>
+    <small>Student Portal</small>
+  </div>
+
+  <ul class="nav flex-column">
+    <li class="nav-item"><a class="nav-link" href="studentdashboard.html"><i class="bi bi-grid"></i> Dashboard</a></li>
+    <li class="nav-item"><a class="nav-link" href="viewcourse.html"><i class="fa-solid fa-book me-2"></i> View Courses</a></li>
+    <li class="nav-item"><a class="nav-link" href="studentcharts.html"><i class="bi bi-bar-chart"></i> Charts & Reports</a></li>
+    <li class="nav-item"><a class="nav-link" href="alertstudent.html"><i class="bi bi-bell"></i> Alerts</a></li>
+    <li class="nav-item"><a class="nav-link" href="studentexport.html"><i class="bi bi-download"></i> Export</a></li>
+    <li class="nav-item"><a class="nav-link active" href="#"><i class="bi bi-exclamation-triangle"></i> Report a Problem</a></li>
+  </ul>
+
+  <hr class="text-secondary">
+  <a><i class="bi bi-box-arrow-right"></i> Sign Out</a>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+
+  <!-- REPORT FORM -->
+  <div class="card-dark">
+    <h3 class="mb-3">Report a Problem</h3>
+    <p class="text-muted">
+      If you encounter any issues with attendance records, face recognition, or system functionality, please report them here.
+    </p>
+
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label">Problem Category</label>
+        <select class="form-select">
+          <option selected>Select a category</option>
+          <option>Attendance Record Issue</option>
+          <option>Face Recognition Error</option>
+          <option>System Performance</option>
+          <option>Other</option>
+        </select>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Priority</label>
+        <select class="form-select">
+          <option>Low</option>
+          <option selected>Medium</option>
+          <option>High</option>
+        </select>
+      </div>
+
+      <div class="col-12">
+        <label class="form-label">Problem Title</label>
+        <input type="text" class="form-control" placeholder="Brief description of the problem">
+      </div>
+
+      <div class="col-12">
+        <label class="form-label">Detailed Description</label>
+        <textarea rows="4" class="form-control"
+          placeholder="Please provide as much detail as possible about the issue..."></textarea>
+      </div>
+
+      <div class="col-12">
+        <button class="btn btn-primary mt-2">
+          <i class="bi bi-send"></i> Submit Problem Report
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RECENT REPORTS -->
+  <div class="card-dark">
+    <h4 class="mb-3">Recent Reports</h4>
+
+    <div class="report-item report-warning">
+      <span class="status-badge pending">Pending</span>
+      <h6>Face Recognition Not Working</h6>
+      <p class="mb-1">Category: Face Recognition Error</p>
+      <small class="text-muted">Submitted: Nov 25, 2024</small>
+    </div>
+
+    <div class="report-item report-success">
+      <span class="status-badge resolved">Resolved</span>
+      <h6>Incorrect Attendance Record</h6>
+      <p class="mb-1">Category: Attendance Record Issue</p>
+      <small class="text-muted">Submitted: Nov 23, 2024</small>
+    </div>
+  </div>
+
+</div>
+<script>
+document.querySelector(".btn-primary").addEventListener("click", function () {
+
+  // Get form values
+  const category = document.querySelectorAll(".form-select")[0].value;
+  const priority = document.querySelectorAll(".form-select")[1].value;
+  const title = document.querySelector("input[type='text']").value;
+  const description = document.querySelector("textarea").value;
+
+  // Validation
+  if (title.trim() === "" || description.trim() === "" || category === "Select a category") {
+    alert("Please fill all required fields!");
+    return;
+  }
+
+  // Get reports container
+  const reportsContainer = document.querySelectorAll(".card-dark")[1];
+
+  // Create report item
+  const reportItem = document.createElement("div");
+  reportItem.classList.add("report-item", "report-warning");
+
+  // Get current date
+  const today = new Date();
+  const formattedDate = today.toLocaleDateString("en-US", {
+    month: "short",
+    day: "2-digit",
+    year: "numeric"
+  });
+
+  // Insert HTML inside new report
+  reportItem.innerHTML = `
+    <span class="status-badge pending">Pending</span>
+    <h6>${title}</h6>
+    <p class="mb-1">Category: ${category}</p>
+    <small class="text-muted">Submitted: ${formattedDate}</small>
+  `;
+
+  // Add new report at top
+  reportsContainer.appendChild(reportItem);
+
+  // Clear form
+  document.querySelector("input[type='text']").value = "";
+  document.querySelector("textarea").value = "";
+  document.querySelectorAll(".form-select")[0].selectedIndex = 0;
+  document.querySelectorAll(".form-select")[1].selectedIndex = 1;
+
+});
+</script>
+</body>
+</html>
