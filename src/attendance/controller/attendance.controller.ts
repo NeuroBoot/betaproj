@@ -57,8 +57,11 @@ export class AttendanceController {
 
   @Get('my')
   @Roles(Role.STUDENT)
-  @ApiOperation({ summary: 'Get my attendance (Student only)' })
-  @ApiQuery({ name: 'courseId', required: false })
+  @ApiOperation({ 
+    summary: 'Get my attendance (Student only)', 
+    description: 'Retrieve your full attendance history sorted by date. Optionally filter by courseId.' 
+  })
+  @ApiQuery({ name: 'courseId', required: false, description: 'Optional: Filter records for a specific course' })
   async getMyAttendance(
     @CurrentUser() user: UserAccount,
     @Query('courseId', new DefaultValuePipe(null), ParseIntPipe) courseId?: number,

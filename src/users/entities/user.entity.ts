@@ -56,6 +56,21 @@ export class UserAccount {
   @OneToMany(() => Attendance, (attendance) => attendance.student)
   attendanceRecords: Attendance[];
 
+  // Face recognition embedding data.
+  @ApiProperty({ description: 'The AI face embedding for this user' })
+  @Column({ type: 'text', nullable: true })
+  faceEmbedding: string;
+
+  // Version of the AI model used to generate the embedding.
+  @ApiProperty({ description: 'The version of the model that generated the embedding' })
+  @Column({ nullable: true })
+  embeddingVersion: string;
+
+  // Timestamp of when the embedding was last generated.
+  @ApiProperty({ description: 'When the face embedding was created' })
+  @Column({ nullable: true })
+  embeddingCreatedAt: Date;
+
   // Automatically recorded timestamp of account creation.
   @ApiProperty({ example: '2024-01-01T00:00:00.000Z' })
   @CreateDateColumn()

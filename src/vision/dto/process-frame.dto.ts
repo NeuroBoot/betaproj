@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsNumber } from 'class-validator';
+import { IsString, IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class ProcessFrameDto {
@@ -21,4 +21,20 @@ export class ProcessFrameDto {
   @IsNumber()
   @IsNotEmpty()
   courseId: number;
+
+  @ApiProperty({ example: 'LECTURE', description: 'The session type (LECTURE or SECTION)' })
+  @IsString()
+  @IsNotEmpty()
+  sessionType: string;
+
+  @ApiProperty({ example: '1', description: 'The lecture or section number' })
+  @IsString()
+  @IsNotEmpty()
+  sessionNumber: string;
+
+  @ApiProperty({ example: 'Room 301', description: 'The room location' })
+  @IsString()
+  @IsOptional()
+  room?: string;
 }
+

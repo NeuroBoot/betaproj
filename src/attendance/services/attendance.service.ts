@@ -79,6 +79,10 @@ export class AttendanceService {
     });
 
     // 7. Automatic Alert Check (Asynchronous)
+    if (dto.attendanceStatusId === 2) {
+      this.triggerAbsenceAlert(student.userAccountId, course.courseId, this.normalizeDate(dto.recordDate).toISOString().split('T')[0]).catch(() => {});
+    }
+    
     if (dto.attendanceStatusId !== 1) { // Only check if not Present to optimize
        this.alertService.checkStudentLowAttendance(student.userAccountId, course.courseId).catch(err => {
          console.error(`[Alert Error] Failed to check low attendance for student ${student.userAccountId}:`, err);
@@ -213,18 +217,23 @@ export class AttendanceService {
         continue;
       }
 
+      const statusId = this.mapStatusToId(item.status);
       recordsToSave.push({
         recordDate: this.normalizeDate(dto.date),
         student: student,
         course: course,
         staffId: user.userAccountId,
-        attendanceStatusId: this.mapStatusToId(item.status),
+        attendanceStatusId: statusId,
         room: dto.room || 'Manual Bulk',
         sessionType: dto.sessionType || 'SECTION',
         sessionNumber: dto.section ? String(dto.section) : '1',
         detected: true,
         accuracy: 1.0, // Manual bulk is considered 100% accurate as it's human-verified
       });
+      
+      if (statusId === 2) {
+        this.triggerAbsenceAlert(student.userAccountId, course.courseId, this.normalizeDate(dto.date).toISOString().split('T')[0]).catch(() => {});
+      }
       processedStudentIds.add(student.userAccountId);
     }
 
@@ -289,7 +298,35 @@ return {
   }
 
   async getStudentAttendance(studentId: number, courseId?: number) {
-    return this.attendanceRepo.findByStudent(studentId, courseId);
+    const records = await this.attendanceRepo.findByStudent(studentId, courseId);
+    
+    // Map status IDs to human-readable labels
+    const statusMap = { 1: 'Present', 2: 'Absent', 3: 'Late', 4: 'Excused' };
+    
+    return records.map(record => ({
+      ...record,
+      statusLabel: statusMap[record.attendanceStatusId] || 'Unknown'
+    }));
+  }
+
+  /**
+   * Internal helper to send an alert when a student is marked absent.
+   */
+  private async triggerAbsenceAlert(studentId: number, courseId: number, date: string) {
+    try {
+      const student = await this.userRepo.findById(studentId);
+      const course = await this.courseRepo.findById(courseId);
+      if (!student || !course) return;
+
+      await this.alertService.sendAlert(
+        studentId,
+        `You were marked Absent for ${course.name} on ${date}.`,
+        'danger',
+        'Absence Recorded'
+      );
+    } catch (error) {
+      console.error('Failed to trigger absence alert:', error.message);
+    }
   }
 
   async getStudentTracking(studentId: number, courseId: number) {
@@ -414,32 +451,63 @@ return {
   async recordAiAttendance(data: {
     studentId: number;
     courseId: number;
-    sessionId: string;
+    sessionType: string;
+    sessionNumber: string;
+    room?: string;
     confidenceScore: number;
     matchStatus: string;
+    sessionId?: string;
   }) {
+    // 1. Verify Student exists
+    const student = await this.userRepo.findById(data.studentId);
+    if (!student || student.userType !== Role.STUDENT) {
+      throw new NotFoundException(`Student with ID ${data.studentId} not found or is not a student`);
+    }
+
+    // 2. Verify Course exists
+    const course = await this.courseRepo.findOne({
+      where: { courseId: data.courseId, isDeleted: false },
+      relations: ['enrollments', 'instructor']
+    });
+    if (!course) {
+      throw new NotFoundException(`Course with ID ${data.courseId} not found`);
+    }
+
+    // 3. Verify Enrollment
+    const isEnrolled = course.enrollments?.some(e => e.studentId === student.userAccountId);
+    if (!isEnrolled) {
+      throw new ForbiddenException(`Student ${student.username} is not enrolled in course ${course.name}`);
+    }
+
     const today = new Date().toISOString().split('T')[0];
     
-    // Check for duplicate
+    // 4. Check for duplicate today
     const duplicate = await this.attendanceRepo.findDuplicate(data.studentId, data.courseId, today);
     if (duplicate) {
       return { status: 'ALREADY_RECORDED', record: duplicate };
     }
 
-    // Create record
+    // 5. Create record
     const record = await this.attendanceRepo.create({
-      studentId: data.studentId,
-      courseId: data.courseId,
+      student: student,
+      course: course,
       recordDate: today as any,
       attendanceStatusId: 1, // Present
+      staffId: course.instructor?.userAccountId || 0, // AI recording maps to course instructor or 0
       confidenceScore: data.confidenceScore,
+      faceConfidence: data.confidenceScore,
       matchStatus: data.matchStatus,
       sessionId: data.sessionId,
-      sessionType: 'LECTURE',
+      sessionType: data.sessionType,
+      sessionNumber: data.sessionNumber,
+      room: data.room || 'AI Vision',
       detected: true,
       accuracy: data.confidenceScore,
-      room: 'AI Vision',
+      checkInTime: new Date().toTimeString().split(' ')[0],
     });
+
+    // 6. Alert Check
+    this.alertService.checkStudentLowAttendance(student.userAccountId, course.courseId).catch(() => {});
 
     return { status: 'RECORDED', record };
   }

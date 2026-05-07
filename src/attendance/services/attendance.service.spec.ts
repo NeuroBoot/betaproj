@@ -29,6 +29,8 @@ describe('AttendanceService', () => {
       findOneById: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
+      findDuplicate: jest.fn(),
+      findBySession: jest.fn(),
     };
 
     userRepo = {
@@ -112,6 +114,61 @@ describe('AttendanceService', () => {
       const result = await service.create(mockDto, mockUser);
       expect(result).toBeDefined();
       expect(attendanceRepo.create).toHaveBeenCalled();
+    });
+  });
+
+  describe('recordAiAttendance', () => {
+    const mockAiData = {
+      studentId: 1,
+      courseId: 2,
+      sessionType: 'LECTURE',
+      sessionNumber: '1',
+      confidenceScore: 0.95,
+      matchStatus: 'MATCH',
+      sessionId: 'sess_1'
+    };
+
+    it('should throw ForbiddenException if student not enrolled', async () => {
+      userRepo.findById.mockResolvedValue({ userAccountId: 1, userType: Role.STUDENT });
+      courseRepo.findOne.mockResolvedValue({ 
+        courseId: 2, 
+        enrollments: [], // Not enrolled
+        isDeleted: false 
+      });
+      
+      await expect(service.recordAiAttendance(mockAiData)).rejects.toThrow(ForbiddenException);
+    });
+
+    it('should return ALREADY_RECORDED if record exists for today', async () => {
+      userRepo.findById.mockResolvedValue({ userAccountId: 1, userType: Role.STUDENT });
+      courseRepo.findOne.mockResolvedValue({ 
+        courseId: 2, 
+        enrollments: [{ studentId: 1 }],
+        isDeleted: false 
+      });
+      attendanceRepo.findDuplicate.mockResolvedValue({ recordId: 500 });
+
+      const result = await service.recordAiAttendance(mockAiData);
+      expect(result.status).toBe('ALREADY_RECORDED');
+    });
+
+    it('should record attendance if all checks pass', async () => {
+      userRepo.findById.mockResolvedValue({ userAccountId: 1, userType: Role.STUDENT });
+      courseRepo.findOne.mockResolvedValue({ 
+        courseId: 2, 
+        instructor: { userAccountId: 10 },
+        enrollments: [{ studentId: 1 }],
+        isDeleted: false 
+      });
+      attendanceRepo.findDuplicate.mockResolvedValue(null);
+      attendanceRepo.create.mockResolvedValue({ recordId: 600 });
+
+      const result = await service.recordAiAttendance(mockAiData);
+      expect(result.status).toBe('RECORDED');
+      expect(attendanceRepo.create).toHaveBeenCalledWith(expect.objectContaining({
+        attendanceStatusId: 1,
+        confidenceScore: 0.95
+      }));
     });
   });
 });

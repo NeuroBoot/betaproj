@@ -17,14 +17,14 @@ export class VisionController {
   @Post('upload')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN, Role.STAFF)
-  @ApiOperation({ summary: 'Upload student photo for AI embedding generation' })
+  @ApiOperation({ summary: 'Model 1: Register student face embeddings from a batch of images' })
   async upload(@Body() dto: ProcessUploadDto) {
-    return this.visionService.uploadEmbedding(dto);
+    return this.visionService.registerStudent(dto);
   }
 
   @Post('recognize')
-  @ApiOperation({ summary: 'Process camera frame for face recognition and attendance' })
+  @ApiOperation({ summary: 'Model 2: Process camera frame for recognition and automated attendance' })
   async recognize(@Body() dto: ProcessFrameDto) {
-    return this.visionService.recognizeFace(dto);
+    return this.visionService.processAttendanceFrame(dto);
   }
 }

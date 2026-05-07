@@ -11,49 +11,15 @@
       "name": "5. Vision AI",
       "item": [
         {
-          "name": "[Vision] Upload Student Embedding",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{jwt_token}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"imageBase64\": \"{{testImageBase64}}\",\n  \"studentId\": \"1\",\n  \"name\": \"Ziad Ahmed\",\n  \"sectionId\": \"S1\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/vision/upload",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "vision",
-                "upload"
-              ]
-            }
-          }
-        },
-        {
-          "name": "[Vision] Recognize Face (Camera Frame)",
+          "name": "Model 1: Register Student Face (Batch)",
           "event": [
             {
               "listen": "test",
               "script": {
                 "exec": [
                   "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
-                  "pm.test(\"Has status field\", () => pm.expect(pm.response.json()).to.have.property('status'));",
-                  "pm.test(\"Status is valid value\", () => pm.expect(['RECORDED','ALREADY_RECORDED','NO_FACE_DETECTED','NO_MATCH']).to.include(pm.response.json().status));",
-                  "pm.test(\"Has timestamp\", () => pm.expect(pm.response.json()).to.have.property('timestamp'));",
-                  "if (pm.response.json().status === 'RECORDED') {",
-                  "    pm.test(\"Has confidenceScore\", () => pm.expect(pm.response.json().confidenceScore).to.be.a('number'));",
-                  "}"
+                  "pm.test(\"Registration Successful\", () => pm.expect(pm.response.json().status).to.equal('SUCCESS'));",
+                  "pm.test(\"Has model version\", () => pm.expect(pm.response.json().data.version).to.exist);"
                 ],
                 "type": "text/javascript"
               }
@@ -73,7 +39,57 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"imageBase64\": \"{{testImageBase64}}\",\n  \"sectionId\": \"S1\",\n  \"sessionId\": \"sess_001\",\n  \"courseId\": 1\n}"
+              "raw": "{\n  \"imagesBase64\": [\"{{img1}}\", \"{{img2}}\"],\n  \"studentId\": \"1\",\n  \"name\": \"Ziad Taha\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/vision/upload",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "vision",
+                "upload"
+              ]
+            },
+            "description": "Model 1: Registers student face embeddings from a batch of images."
+          }
+        },
+        {
+          "name": "Model 2: Recognize and Mark Attendance",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Has status field\", () => pm.expect(pm.response.json()).to.have.property('status'));",
+                  "pm.test(\"Detailed matching info present\", () => {",
+                  "    const res = pm.response.json();",
+                  "    if (res.status === 'RECORDED' || res.status === 'ALREADY_RECORDED') {",
+                  "        pm.expect(res.student).to.exist;",
+                  "        pm.expect(res.session).to.exist;",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"imageBase64\": \"{{frame1}}\",\n  \"courseId\": 1,\n  \"sessionType\": \"LECTURE\",\n  \"sessionNumber\": \"1\",\n  \"sessionId\": \"sess_ai_001\",\n  \"room\": \"Hall A\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/vision/recognize",
@@ -84,7 +100,8 @@
                 "vision",
                 "recognize"
               ]
-            }
+            },
+            "description": "Model 2: Processes camera frame for recognition and marks attendance if student is enrolled."
           }
         }
       ]

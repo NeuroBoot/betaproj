@@ -3,6 +3,7 @@ import { HttpModule } from '@nestjs/axios';
 import { VisionService } from './vision.service';
 import { VisionController } from './vision.controller';
 import { AttendanceModule } from '../attendance/attendance.module';
+import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
@@ -11,6 +12,7 @@ import { AttendanceModule } from '../attendance/attendance.module';
       maxRedirects: 5,
     }),
     AttendanceModule,
+    UsersModule,
   ],
   controllers: [VisionController],
   providers: [VisionService],

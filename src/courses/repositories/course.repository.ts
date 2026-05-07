@@ -40,10 +40,9 @@ export class CourseRepository extends Repository<Course> {
 
   async findByStudent(studentId: number): Promise<Course[]> {
     return this.createQueryBuilder('course')
-      .leftJoin('course.enrollments', 'enrollment')
+      .innerJoinAndSelect('course.enrollments', 'enrollment', 'enrollment.studentId = :studentId', { studentId })
       .leftJoinAndSelect('course.instructor', 'instructor')
       .leftJoinAndSelect('course.admin', 'admin')
-      .where('enrollment.studentId = :studentId', { studentId })
       .andWhere('course.isDeleted = :isDeleted', { isDeleted: false })
       .getMany();
   }

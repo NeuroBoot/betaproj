@@ -13,6 +13,9 @@ yarn-error.log*
 *.pptx
 *.mp4
 *.txt
+*.zip
+*.rar
+*.7z
 
 # UI Folders
 front/
@@ -24,3 +27,12 @@ betaproj/
 src.zip
 BACKEND_HANDOVER.md
 session_audit_summary.txt
+MASTER_POSTMAN_COLLECTION.json
+MASTER_SWAGGER_OPENAPI.json
+postman_end.json
+Attendance Master Collection.postman_collection.json.bak
+coverage/
+*.png
+*.jpg
+*.jpeg
+*.gif
