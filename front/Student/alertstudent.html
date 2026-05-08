@@ -290,7 +290,7 @@ async function loadProfile() {
     document.getElementById("username").textContent = username;
 
     if (role.toLowerCase() !== "student") {
-      alert("Access denied");
+      showAlert("Access denied", "error");
       redirectToLogin();
     }
 
@@ -413,86 +413,64 @@ async function loadAlerts() {
   showLoading();
 
   try {
-
-    const res = await fetch(`${API_BASE_URL}/alerts`, {
+    const res = await fetch(`${API_BASE_URL}/student/alerts`, {
       headers: authHeaders()
     });
 
     const response = await res.json();
-    console.log("Alerts API:", response);
 
-    if(!res.ok) throw new Error("failed");
+    if (!res.ok) throw new Error();
 
-    // لو API بيرجع data
-    let alerts = response.data || response.alerts || response;
+    const alerts = response.data || [];
 
-    if(!Array.isArray(alerts)){
-      alerts = [alerts];
-    }
-
-    if(!alerts.length){
+    if (!alerts.length) {
       showEmpty();
       return;
     }
 
     const container = document.getElementById("alertsContainer");
 
-    container.innerHTML = alerts.map(alert=>{
+    container.innerHTML = alerts.map(alert => {
 
       let type = (alert.type || "info").toLowerCase();
 
-      let alertClass="alert-info-custom";
-      let icon="bi-clock-fill text-info";
+      let alertClass = "alert-info-custom";
+      let icon = "bi-clock-fill text-info";
 
-      if(type.includes("warning")){
-         alertClass="alert-warning-custom";
-         icon="bi-exclamation-triangle-fill text-warning";
+      if (type.includes("danger") || type.includes("warning")) {
+        alertClass = "alert-warning-custom";
+        icon = "bi-exclamation-triangle-fill text-warning";
       }
 
-      if(type.includes("success")){
-         alertClass="alert-success-custom";
-         icon="bi-check-circle-fill text-success";
-      }
-
-      if(type.includes("schedule")){
-         alertClass="alert-purple-custom";
-         icon="bi-calendar-event-fill";
+      if (type.includes("success")) {
+        alertClass = "alert-success-custom";
+        icon = "bi-check-circle-fill text-success";
       }
 
       return `
-        <div class="alert-item ${alertClass}" data-id="${alert.id || ''}">
+        <div class="alert-item ${alertClass}" data-id="${alert.id}">
             <i class="bi ${icon} me-2"></i>
-            <strong>${alert.title || "Notification"}</strong>
+
+            <strong>${alert.courseName || "Course"}</strong>
 
             <p class="mb-1">
-              ${alert.message || alert.description || ""}
+              ${alert.message}
             </p>
 
-          <div class="alert-time">
- ${formatTime(
-  alert.createdAt ||
-  alert.date ||
-  alert.created_at ||
-  new Date()
-)}
-</div>
+            <div class="alert-time">just now</div>
 
             <span class="close-btn dismiss-alert">
                <i class="bi bi-x-lg"></i>
             </span>
         </div>
       `;
-
     }).join("");
 
-  }
-
-  catch(err){
-      console.error(err);
-      showError();
+  } catch (err) {
+    console.error(err);
+    showError();
   }
 }
-
 /* ================= ACTIONS ================= */
 
 async function clearAll() {
@@ -508,25 +486,80 @@ async function clearAll() {
 
   } catch (err) {
     console.error(err);
-    alert("Failed to clear alerts");
+    showAlert("Failed to clear alerts", "error");
   }
 }
 
 async function dismissAlert(id, element) {
   try {
     if (id) {
-      await fetch(`${API_BASE_URL}/student/alerts/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/alerts/${id}`, {
         method: 'DELETE',
         headers: authHeaders()
       });
+
+      if (!res.ok) throw new Error("Delete failed");
     }
+
     element.remove();
 
-  } catch {
-    element.remove();
+  } catch (err) {
+    console.error(err);
+    showAlert("Failed to delete alert", "error");
   }
 }
+//alert
+function showAlert(message, type = "success") {
+  Swal.fire({
+    text: message,
+    icon: type, // success | error | warning | info
+    background: "#1a1a3a",
+    color: "#fff",
+    confirmButtonColor: "#3060ff",
+    confirmButtonText: "OK",
+    showClass: {
+      popup: "animate__animated animate__zoomIn"
+    },
+    hideClass: {
+      popup: "animate__animated animate__fadeOut"
+    }
+  });
+}
+//alert low attendance
+async function checkLowAttendance() {
+  try {
+    const res = await fetch(`${API_BASE_URL}/student/charts`, {
+      headers: authHeaders()
+    });
 
+    const response = await res.json();
+    const avg = parseFloat(response.data.metrics.avg || 0);
+
+    if (avg < 75) {
+
+      const container = document.getElementById("alertsContainer");
+
+      const alertHTML = `
+        <div class="alert-item alert-warning-custom">
+          <i class="bi bi-exclamation-triangle-fill me-2 text-warning"></i>
+          <strong>Low Attendance</strong>
+          <p class="mb-1">
+            Your attendance is ${avg}%. You must keep it above 75%.
+          </p>
+          <div class="alert-time">just now</div>
+          <span class="close-btn dismiss-alert">
+            <i class="bi bi-x-lg"></i>
+          </span>
+        </div>
+      `;
+
+      container.insertAdjacentHTML("afterbegin", alertHTML);
+    }
+
+  } catch (err) {
+    console.log("Attendance check failed", err);
+  }
+}
 /* ================= EVENTS ================= */
 
 document.getElementById("clearAllBtn").addEventListener("click", clearAll);
@@ -542,16 +575,25 @@ document.addEventListener("click", function (e) {
 });
 
 document.getElementById("logoutBtn").addEventListener("click", () => {
-  localStorage.clear();
-  window.location.href = "./sign in/index.html";
+ Swal.fire({
+        text: "Logged out successfully",
+        icon: "success",
+        background: "#1a1a3a",
+        color: "#fff",
+        confirmButtonColor: "#3060ff",
+        confirmButtonText: "OK"
+    }).then(() => {
+        window.location.href = "./sign in/index.html";
+    });
 });
 
 /* ================= INIT ================= */
 document.addEventListener("DOMContentLoaded", ()=>{
    loadProfile();
    loadAlerts();
+   checkLowAttendance();
 });
 </script>
-
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 </html>
