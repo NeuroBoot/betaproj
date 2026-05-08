@@ -16,19 +16,20 @@
     /* ===== COLORS ONLY – NOTHING REMOVED ===== */
 
     body {
-     background: #0f0c29;
-      color: #ffffff;
+      background: #0f0c29;
+  color: #ffffff;
        min-height: 100vh;
   font-family: "Segoe UI", sans-serif;
     }
 
     /* ===== Manual Card ===== */
     .manual-card {
-     background: #15132b;
+    background: #1a1a3a;
+  border: 1px solid rgba(255,255,255,0.05);
       border-radius: 22px;
       padding: 26px 28px;
       margin-bottom: 30px;
-      border: 1px solid rgba(255,255,255,0.10);
+    
     }
 
     .manual-card h4 {
@@ -38,7 +39,7 @@
     }
 
     .manual-card .form-label {
-      color: #cbd5e1;
+      color: #b0b0b0;
       font-size: 13px;
       margin-bottom: 6px;
       display: block;
@@ -57,17 +58,18 @@
       height: 46px;
       padding: 10px 14px;
       border-radius: 14px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.20);
-      color: #ffffff;
+     
+       background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: #ffffff;
       font-size: 14px;
       appearance: none;
     }
 
     .manual-input:focus {
       outline: none;
-      border-color: #312e81;
-      background: rgba(255,255,255,0.10);
+     border-color: #3060ff;
+  background: rgba(255,255,255,0.06);
     }
 
     /* Select arrow */
@@ -122,8 +124,8 @@
     /* ===== Buttons ===== */
     .load-btn,
     .save-btn {
-      background: #312e81;
-      color: #ffffff;
+      background: #3060ff;
+  color: #fff;
       border: none;
       padding: 10px 22px;
       border-radius: 14px;
@@ -132,12 +134,13 @@
 
     .load-btn:hover,
     .save-btn:hover {
-      background: #1e1b4b;
+       background: #244ce0;
     }
 
     /* ===== Panel & Table (UNCHANGED STRUCTURE) ===== */
     .panel {
-      background: linear-gradient(135deg, #1e293b, #0f172a);
+      background: #1a1a3a;
+  border: 1px solid rgba(255,255,255,0.05);
       border-radius: 20px;
       padding: 22px;
     }
@@ -147,19 +150,19 @@
     }
 
     .search-input {
-      background: rgba(0,0,0,0.50);
-      border: 1px solid rgba(255,255,255,0.10);
-      color: #ffffff;
+       background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: #fff;
       border-radius: 12px;
       padding: 8px 14px;
     }
 
     .attendance-table th {
-      color: #cbd5e1;
+      color: #b0b0b0;
     }
 
     .attendance-table td {
-      color: #d1d5db;
+      color: #ffffff;
     }
   </style>
 </head>
@@ -176,12 +179,12 @@
 </button>
     <!-- Sidebar -->
    <div class="col-md-2 collapse d-md-block sidebar" id="sidebarMenu">
-      <h5 class="mb-4"><i class="bi bi-eye"></i> FACEMARK</h5>
-      <p class="small text-muted">Staff Portal</p>
+      <h5 class="mb-4"><img src="face.jpeg"  alt="" width="50px" height="50px"> FACEMARK</h5>
+      <p class="small text-muted " style="color:white !important">Staff Portal</p>
 
       <div class="user-box">
         <small>Welcome,</small>
-        <div class="user-name">سَس</div>
+         <div class="user-name">guest1</div>
         <small>Staff Portal</small>
       </div>
 
@@ -192,8 +195,12 @@
         <li class="nav-item"><a class="nav-link" href="charts.html"><i class="bi bi-bar-chart"></i> Charts & Reports</a></li>
         <li class="nav-item"><a class="nav-link" href="export.html"><i class="bi bi-download"></i> Export</a></li>
         <li class="nav-item"><a class="nav-link" href="alerts.html"><i class="bi bi-bell"></i> Alerts</a></li>
-        <li class="nav-item mt-5"><a class="nav-link text-danger" href="#"><i class="bi bi-box-arrow-left"></i> Sign Out</a></li>
       </ul>
+      <hr class="text-secondary">
+
+<button id="logoutBtn" class="btn btn-danger w-100 mt-2">
+    <i class="bi bi-box-arrow-right"></i> Sign Out
+</button>
     </div>
 
     <!-- Main -->
@@ -203,180 +210,483 @@
       <div class="manual-card">
         <h4>Manual Attendance</h4>
 
-        <div class="row g-4 align-items-end">
-          <div class="col-md-4">
-            <label class="form-label">Course</label>
-            <select class="manual-input">
-              <option selected>Mathematics</option>
-              <option>Physics</option>
-              <option>Chemistry</option>
-            </select>
-          </div>
-
-          <div class="col-md-4">
-            <label class="form-label">Section</label>
-            <select class="manual-input">
-              <option selected>Section A</option>
-              <option>Section B</option>
-              <option>Section C</option>
-            </select>
-          </div>
-
-          <div class="col-md-4">
-            <label class="form-label">Date</label>
-            <input type="date" class="manual-input">
-          </div>
-
-          <div class="col-md-12">
-            <button class="load-btn">Load Attendance</button>
-          </div>
-        </div>
+       <div class="row g-4 align-items-end">
+  <div class="col-md-6">
+    <label class="form-label">Course</label>
+    <select class="manual-input" id="courseSelect"></select>
+  </div>
+  <div class="col-md-6">
+    <label class="form-label">Type</label>
+    <select class="manual-input" id="typeSelect">
+      <option value="">Select Type</option>
+      <option value="section">Section</option>
+      <option value="Lecture">Lecture</option>
+    </select>
+  </div>
+  <div class="col-md-6">
+    <label class="form-label">Section</label>
+    <select class="manual-input" name="section"></select>
+  </div>
+  <div class="col-md-6">
+    <label class="form-label">Date</label>
+    <input type="date" class="manual-input">
+  </div>
+  <div class="col-md-12">
+    <button class="load-btn">Load Attendance</button>
+  </div>
+</div>
       </div>
 
-      <!-- Attendance Table -->
-      <div class="panel">
-        <div class="attendance-header">
-          <h5>Attendance Record</h5>
-          <input class="search-input" placeholder="Search by ID...">
-        </div>
-<div class="table-wrapper">
-  <table class="attendance-table">
-          <thead>
-            <tr>
-              <th>Student ID</th>
-              <th>Name</th>
-              <th>Status</th>
-              <th>Time</th>
-              <th style="text-align:right">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>2021001</td>
-              <td>Ahmed Hassan</td>
-              <td><span class="status present">Present</span></td>
-              <td>08:15 AM</td>
-              <td>
-                <select class="manual-input">
-                  <option selected>Present</option>
-                  <option>Absent</option>
-                  <option>Late</option>
-                </select>
-              </td>
-            </tr>
-          </tbody>
-         </table>
-</div>
+     
 
-        <button class="save-btn">Save Attendance</button>
+    </div>
+  </div>
+</div>
+<!-- Attendance Modal -->
+<div class="modal fade" id="attendanceModal" tabindex="-1">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content" style="background:#1a1a3a; color:#fff; border-radius:20px;">
+
+      <div class="modal-header border-0">
+        <h5 class="modal-title">Manage Attendance</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <div class="table-wrapper">
+          <table class="attendance-table">
+            <thead>
+              <tr>
+                <th>Student ID</th>
+                <th>Name</th>
+                <th>Status</th>
+                <th>Time</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="modalTbody"></tbody>
+          </table>
+        </div>
+
+      </div>
+
+      <div class="modal-footer border-0">
+    <button class="btn btn-success" id="saveBtn">Save Attendance</button>
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
       </div>
 
     </div>
   </div>
 </div>
-
 <script>
+const API_BASE_URL = 'http://localhost:3000/api/v1';
+
 document.addEventListener("DOMContentLoaded", function () {
 
+  const logoutBtn = document.getElementById('logoutBtn');
   const loadBtn = document.querySelector(".load-btn");
-  const saveBtn = document.querySelector(".save-btn");
-  const tbody = document.querySelector(".attendance-table tbody");
-  const searchInput = document.querySelector(".search-input");
+  const saveBtn = document.getElementById("saveBtn"); 
 
-  const courseSelect = document.querySelectorAll(".manual-input")[0];
-  const sectionSelect = document.querySelectorAll(".manual-input")[1];
-  const dateInput = document.querySelector('input[type="date"]');
+  const usernameEl = document.querySelector(".user-name");
+  const courseSelect = document.getElementById("courseSelect");
+  const sectionSelect = document.querySelector("select[name='section']");
+  const dateInput = document.querySelector("input[type='date']");
 
-  // بيانات تجريبية
-  const students = [
-    { id: "2021001", name: "Ahmed Hassan" },
-    { id: "2021002", name: "Sara Ali" },
-    { id: "2021003", name: "Mohamed Adel" },
-    { id: "2021004", name: "Mona Khaled" },
-    { id: "2021005", name: "Youssef Tamer" },
-    
-  ];
+  
+  saveBtn.addEventListener("click", saveAttendance);
 
-  // تحميل الطلاب
-  loadBtn.addEventListener("click", function () {
-    tbody.innerHTML = "";
+  let loadedAttendance = [];
 
-    students.forEach(student => {
-      const row = document.createElement("tr");
+  // ================= USERNAME FROM LOGIN =================
+  const savedUsername = localStorage.getItem("loggedUser");
+  if (savedUsername) {
+    usernameEl.textContent = savedUsername;
+  }
 
-      row.innerHTML = `
-        <td>${student.id}</td>
-        <td>${student.name}</td>
-        <td><span class="status present">Present</span></td>
-        <td>--</td>
-        <td>
-          <select class="manual-input status-select">
-            <option value="Present" selected>Present</option>
-            <option value="Absent">Absent</option>
-            <option value="Late">Late</option>
-          </select>
-        </td>
-      `;
+  // ================= TOKEN =================
+  function getToken() {
+    return localStorage.getItem('token');
+  }
 
-      tbody.appendChild(row);
-    });
-  });
+  function authHeaders() {
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${getToken()}`
+    };
+  }
 
-  // تغيير الحالة
-  tbody.addEventListener("change", function (e) {
-    if (e.target.classList.contains("status-select")) {
-      const row = e.target.closest("tr");
-      const statusCell = row.querySelector(".status");
-      const timeCell = row.children[3];
+  function redirectToLogin() {
+    localStorage.clear();
+    window.location.href = "./sign in/index.html";
+  }
 
-      const value = e.target.value;
-      statusCell.textContent = value;
-      statusCell.className = "status " + value.toLowerCase();
+  // ================= PROFILE (Fallback + Auth Check) =================
+ async function loadProfile() {
 
-      if (value === "Present") {
-        timeCell.textContent = new Date().toLocaleTimeString();
-      } else {
-        timeCell.textContent = "--";
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    showAlert("Login first", "error");
+    window.location.href = "./sign in/index.html";
+    return;
+  }
+
+  try {
+
+    const res = await fetch("http://localhost:3000/api/v1/auth/profile", {
+      headers: {
+        "Authorization": `Bearer ${token}`
       }
+    });
+
+    const text = await res.text();
+    console.log("RAW:", text);
+
+    let result;
+    try {
+      result = JSON.parse(text);
+    } catch {
+      throw new Error("Invalid JSON");
+    }
+
+    console.log("RESULT:", result);
+
+    // 🔥 مرن جدًا
+    const user =
+      result.data?.user ||
+      result.data ||
+      result.user ||
+      result;
+
+    console.log("USER:", user);
+
+    const role = user.role || user.userType;
+
+    if (!user || !role) {
+      throw new Error("User or role missing");
+    }
+
+    document.querySelector(".user-name").textContent =
+      user.username || "Staff";
+
+    if (role.toLowerCase() !== "staff") {
+      showAlert("Staff only", "error");
+      localStorage.clear();
+      window.location.href = "./sign in/index.html";
+    }
+
+  } catch (err) {
+
+    console.error("ERROR:", err);
+    showAlert(err.message, "error");
+
+    localStorage.clear();
+    window.location.href = "./sign in/index.html";
+  }
+}
+
+  // ================= LOAD COURSES =================
+  async function loadCourses() {
+    try {
+      const res = await fetch(`${API_BASE_URL}/courses`, {
+        headers: authHeaders()
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error();
+
+      const courses = data.data || data;
+
+      courseSelect.innerHTML = `<option value="">Select Course</option>`;
+
+     courses.forEach(c => {
+  courseSelect.innerHTML += `
+   <option value="${c.courseId || c.id}">
+      ${c.name || c.title}
+    </option>
+  `;
+});
+
+    } catch (err) {
+      console.error("Courses error:", err);
+    }
+  }
+
+  // ================= LOAD SECTIONS =================
+async function loadSections(courseId) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/courses/${courseId}`, {
+      headers: authHeaders()
+    });
+
+    const data = await res.json();
+    const course = data.data || data;
+
+    const totalSections = course.sections || 0;
+
+    sectionSelect.innerHTML = `<option value="">Select Section</option>`;
+
+    for (let i = 1; i <= totalSections; i++) {
+      sectionSelect.innerHTML += `
+        <option value="${i}">Section ${i}</option>
+      `;
+    }
+
+  } catch (err) {
+    console.error("Sections error:", err);
+  }
+}
+  // ================= LOAD STUDENTS =================
+  async function loadStudents(courseId) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/courses/${courseId}/students`, {
+        headers: authHeaders()
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error();
+
+      return data.data || [];
+
+    } catch (err) {
+      console.error("Students error:", err);
+      return [];
+    }
+  }
+
+  // ================= RENDER =================
+  function renderAttendanceRows(students) {
+  tbody.innerHTML = "";
+
+  if (!students.length) {
+    tbody.innerHTML = `<tr><td colspan="5">No data</td></tr>`;
+    return;
+  }
+
+  students.forEach(s => {
+    const row = document.createElement("tr");
+
+    row.setAttribute("data-record-id", s.recordId || ""); // 🔥 مهم
+
+    row.innerHTML = `
+      <td>${s.studentId}</td>
+      <td>${s.name}</td>
+      <td><span class="status">${s.status}</span></td>
+      <td>${s.time}</td>
+      <td>
+        <select class="manual-input status-select">
+          <option ${s.status === "Present" ? "selected" : ""}>Present</option>
+          <option ${s.status === "Absent" ? "selected" : ""}>Absent</option>
+          <option ${s.status === "Late" ? "selected" : ""}>Late</option>
+        </select>
+      </td>
+    `;
+
+    tbody.appendChild(row);
+  });
+}
+//rendalmodel
+function renderModal() {
+
+  modalTbody.innerHTML = "";
+
+  if (!loadedAttendance.length) {
+    modalTbody.innerHTML = `
+      <tr>
+        <td colspan="5" style="text-align:center">No data</td>
+      </tr>
+    `;
+    return;
+  }
+
+  loadedAttendance.forEach(s => {
+
+    const row = document.createElement("tr");
+
+    row.setAttribute("data-record-id", s.recordId);
+
+    row.innerHTML = `
+      <td>${s.studentId}</td>
+      <td>${s.name}</td>
+      <td>${s.status}</td>
+      <td>${s.time}</td>
+      <td>
+        <select class="manual-input">
+          <option ${s.status === "Present" ? "selected" : ""}>Present</option>
+          <option ${s.status === "Absent" ? "selected" : ""}>Absent</option>
+          <option ${s.status === "Late" ? "selected" : ""}>Late</option>
+        </select>
+      </td>
+    `;
+
+    modalTbody.appendChild(row);
+  });
+}
+  // ================= LOAD ATTENDANCE =================
+const modal = new bootstrap.Modal(document.getElementById('attendanceModal'));
+const modalTbody = document.getElementById("modalTbody");
+const tbody = modalTbody; 
+//alert
+function showAlert(message, type = "success") {
+  Swal.fire({
+    text: message,
+    icon: type, // success | error | warning | info
+    background: "#1a1a3a",
+    color: "#fff",
+    confirmButtonColor: "#3060ff",
+    confirmButtonText: "OK",
+    showClass: {
+      popup: "animate__animated animate__zoomIn"
+    },
+    hideClass: {
+      popup: "animate__animated animate__fadeOut"
+    }
+  });
+}
+
+async function loadAttendance() {
+
+if (!courseSelect.value || !sectionSelect.value || !dateInput.value) {
+  showNoData("Please select all fields");
+  return;
+}
+
+try {
+
+const url =
+`${API_BASE_URL}/attendance?page=1&limit=100` +
+`&courseId=${courseSelect.value}` +
+`&section=${sectionSelect.value}` +
+`&date=${dateInput.value}`;
+
+const res = await fetch(url,{ headers: authHeaders() });
+
+if (!res.ok) throw new Error("Server error");
+
+const data = await res.json();
+const attendance = data?.data?.data || [];
+
+if(attendance.length === 0){
+  showNoData("No attendance records found");
+  return;
+}
+
+loadedAttendance = attendance.map(a => ({
+recordId: a.recordId,
+studentId: a.student?.userAccountId || a.studentId,
+name: a.student?.username || "Student",
+status: a.attendanceStatusId == 1 ? "Present"
+      : a.attendanceStatusId == 2 ? "Absent"
+      : a.attendanceStatusId == 3 ? "Late"
+      : "Unknown",
+time: a.checkInTime
+? new Date(a.checkInTime).toLocaleTimeString([],{
+hour:"2-digit",
+minute:"2-digit"
+})
+: "--"
+}));
+
+renderModal();
+modal.show();
+
+}
+catch(err){
+console.error(err);
+
+/* 🔥 أي error يفتح popup ويعرض No Data */
+showNoData("Failed to load data");
+}
+}
+//=================show No Data in Modal=================
+function showNoData(message){
+
+modalTbody.innerHTML = `
+<tr>
+  <td colspan="5" style="text-align:center; padding:30px; color:#aaa;">
+    <i class="bi bi-exclamation-circle" style="font-size:22px;"></i><br>
+    ${message}
+  </td>
+</tr>
+`;
+
+modal.show();
+}
+  // ================= SAVE =================
+ async function saveAttendance() {
+
+  const rows = tbody.querySelectorAll("tr");
+
+  saveBtn.disabled = true;
+
+  try {
+
+    for (let row of rows) {
+
+      const recordId = row.getAttribute("data-record-id");
+
+      if (!recordId) continue; // 🔥 مفيش record → سيبه
+
+      const statusText = row.querySelector("select").value;
+
+let attendanceStatusId =
+  statusText === "Present" ? 1 :
+  statusText === "Absent" ? 2 :
+  statusText === "Late" ? 3 : 1;
+
+await fetch(`${API_BASE_URL}/attendance/${recordId}`, {
+  method: "PUT",
+  headers: authHeaders(),
+  body: JSON.stringify({
+    attendanceStatusId
+  })
+});
+    }
+
+    showAlert("Updated successfully", "success");
+
+  } catch (err) {
+    console.error("Save error:", err);
+    showAlert("Update failed", "error");
+  } finally {
+    saveBtn.disabled = false;
+  }
+}
+  // ================= EVENTS =================
+  courseSelect.addEventListener("change", () => {
+    if (courseSelect.value) {
+      loadSections(courseSelect.value);
     }
   });
 
-  // البحث
-  searchInput.addEventListener("keyup", function () {
-    const value = this.value.toLowerCase();
-    const rows = tbody.querySelectorAll("tr");
+  loadBtn.addEventListener("click", loadAttendance);
 
-    rows.forEach(row => {
-      const id = row.children[0].textContent.toLowerCase();
-      row.style.display = id.includes(value) ? "" : "none";
+
+ 
+
+ 
+
+  logoutBtn.addEventListener("click", () => {
+  Swal.fire({
+        text: "Logged out successfully",
+        icon: "success",
+        background: "#1a1a3a",
+        color: "#fff",
+        confirmButtonColor: "#3060ff",
+        confirmButtonText: "OK"
+    }).then(() => {
+        window.location.href = "./sign in/index.html";
     });
   });
 
-  //  الحفظ في LocalStorage
-  saveBtn.addEventListener("click", function () {
-
-    const rows = tbody.querySelectorAll("tr");
-    const attendanceData = [];
-
-    rows.forEach(row => {
-      attendanceData.push({
-        id: row.children[0].textContent,
-        name: row.children[1].textContent,
-        status: row.children[2].textContent,
-        time: row.children[3].textContent
-      });
-    });
-
-    // مفتاح مميز حسب الكورس والسيكشن والتاريخ
-    const key = `attendance_${courseSelect.value}_${sectionSelect.value}_${dateInput.value}`;
-
-    localStorage.setItem(key, JSON.stringify(attendanceData));
-
-    console.log("Saved successfully:", key);
-  });
+  // ================= INIT =================
+  loadProfile();
+  loadCourses();
 
 });
 </script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
