@@ -96,15 +96,6 @@ export class UserAccount {
   @OneToMany(() => CourseEnrollment, (enrollment) => enrollment.student)
   enrollments: CourseEnrollment[];
 
-  // Courses enrolled by this user (Student only) - Many-to-Many
-  @ManyToMany(() => Course, (course) => course.enrollments)
-  @JoinTable({
-    name: 'CourseEnrollment',
-    joinColumn: { name: 'userAccountId', referencedColumnName: 'userAccountId' },
-    inverseJoinColumn: { name: 'courseId', referencedColumnName: 'courseId' },
-  })
-  enrolledCourses: Course[];
-
   // Attendance records for this user (Student only).
   @OneToMany(() => Attendance, (attendance) => attendance.student)
   attendanceRecords: Attendance[];
