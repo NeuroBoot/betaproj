@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, ManyToMany, JoinTable } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { Role } from '../../common/enums/role.enum';
 import { Course } from '../../courses/entities/course.entity';
@@ -7,7 +7,7 @@ import { CourseEnrollment } from '../../courses/entities/course-enrollment.entit
 
 /**
  * Database entity representing a user account in the system.
- * Maps to the 'UserAccount' table in MySQL.
+ * Maps to the 'users' table in MySQL.
  */
 @Entity('users')
 export class UserAccount {
@@ -26,6 +26,21 @@ export class UserAccount {
   @Column()
   password: string;
 
+  // Full name of the user
+  @ApiProperty({ example: 'Ziad Taha', description: 'Full name of the user', required: false })
+  @Column({ nullable: true })
+  fullName: string;
+
+  // Email address of the user
+  @ApiProperty({ example: 'ziad@example.com', description: 'Email address', required: false })
+  @Column({ nullable: true })
+  email: string;
+
+  // Phone number of the user
+  @ApiProperty({ example: '+20123456789', description: 'Phone number', required: false })
+  @Column({ nullable: true })
+  phone: string;
+
   // The classification of the user (Admin, Staff, or Student).
   @ApiProperty({ enum: Role, default: Role.STUDENT, description: 'The role of the user' })
   @Column({
@@ -40,6 +55,35 @@ export class UserAccount {
   @Column({ default: false })
   isDeleted: boolean;
 
+  // ==================== AI Face Recognition Fields ====================
+  
+  // Face recognition embedding data (JSON string or vector)
+  @ApiProperty({ description: 'The AI face embedding for this user', required: false })
+  @Column({ type: 'text', nullable: true })
+  faceEmbedding: string;
+
+  // Version of the AI model used to generate the embedding.
+  @ApiProperty({ description: 'The version of the model that generated the embedding', required: false })
+  @Column({ nullable: true })
+  embeddingVersion: string;
+
+  // Timestamp of when the embedding was last generated.
+  @ApiProperty({ description: 'When the face embedding was created', required: false })
+  @Column({ nullable: true })
+  embeddingCreatedAt: Date;
+
+  // Number of images used to generate the embedding
+  @ApiProperty({ description: 'Number of images used to generate the embedding', required: false, default: 0 })
+  @Column({ nullable: true, default: 0 })
+  embeddingImagesCount: number;
+
+  // Last time the face was recognized
+  @ApiProperty({ description: 'Last time the face was recognized', required: false })
+  @Column({ nullable: true })
+  lastRecognizedAt: Date;
+
+  // ==================== Relationships ====================
+
   // Courses managed by this user (Admin only).
   @OneToMany(() => Course, (course) => course.admin)
   managedCourses: Course[];
@@ -48,28 +92,24 @@ export class UserAccount {
   @OneToMany(() => Course, (course) => course.instructor)
   taughtCourses: Course[];
 
-  // Courses enrolled by this user (Student only).
+  // Enrollments in courses (Student only).
   @OneToMany(() => CourseEnrollment, (enrollment) => enrollment.student)
   enrollments: CourseEnrollment[];
+
+  // Courses enrolled by this user (Student only) - Many-to-Many
+  @ManyToMany(() => Course, (course) => course.enrollments)
+  @JoinTable({
+    name: 'CourseEnrollment',
+    joinColumn: { name: 'userAccountId', referencedColumnName: 'userAccountId' },
+    inverseJoinColumn: { name: 'courseId', referencedColumnName: 'courseId' },
+  })
+  enrolledCourses: Course[];
 
   // Attendance records for this user (Student only).
   @OneToMany(() => Attendance, (attendance) => attendance.student)
   attendanceRecords: Attendance[];
 
-  // Face recognition embedding data.
-  @ApiProperty({ description: 'The AI face embedding for this user' })
-  @Column({ type: 'text', nullable: true })
-  faceEmbedding: string;
-
-  // Version of the AI model used to generate the embedding.
-  @ApiProperty({ description: 'The version of the model that generated the embedding' })
-  @Column({ nullable: true })
-  embeddingVersion: string;
-
-  // Timestamp of when the embedding was last generated.
-  @ApiProperty({ description: 'When the face embedding was created' })
-  @Column({ nullable: true })
-  embeddingCreatedAt: Date;
+  // ==================== Timestamps ====================
 
   // Automatically recorded timestamp of account creation.
   @ApiProperty({ example: '2024-01-01T00:00:00.000Z' })

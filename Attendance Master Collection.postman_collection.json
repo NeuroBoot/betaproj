@@ -19,7 +19,7 @@
                 "exec": [
                   "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
                   "pm.test(\"Registration Successful\", () => pm.expect(pm.response.json().status).to.equal('SUCCESS'));",
-                  "pm.test(\"Has model version\", () => pm.expect(pm.response.json().data.version).to.exist);"
+                  "pm.test(\"Has student metadata\", () => pm.expect(pm.response.json().studentId).to.exist);"
                 ],
                 "type": "text/javascript"
               }
@@ -89,7 +89,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"imageBase64\": \"{{frame1}}\",\n  \"courseId\": 1,\n  \"sessionType\": \"LECTURE\",\n  \"sessionNumber\": \"1\",\n  \"sessionId\": \"sess_ai_001\",\n  \"room\": \"Hall A\"\n}"
+              "raw": "{\n  \"imageBase64\": \"{{frame1}}\",\n  \"courseId\": 1,\n  \"sessionId\": \"LECTURE-1\",\n  \"room\": \"Hall A\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/vision/recognize",

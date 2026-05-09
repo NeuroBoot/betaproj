@@ -457,6 +457,7 @@ return {
     confidenceScore: number;
     matchStatus: string;
     sessionId?: string;
+    processingTimeMs?: number;
   }) {
     // 1. Verify Student exists
     const student = await this.userRepo.findById(data.studentId);

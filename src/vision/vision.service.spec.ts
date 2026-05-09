@@ -17,6 +17,8 @@ describe('VisionService', () => {
   beforeEach(async () => {
     httpService = {
       post: jest.fn(),
+      get: jest.fn(),
+      delete: jest.fn(),
     };
     attendanceService = {
       recordAiAttendance: jest.fn(),
@@ -50,6 +52,7 @@ describe('VisionService', () => {
     };
 
     it('should throw BadGatewayException if AI service fails', async () => {
+      httpService.get.mockReturnValue(of({ data: { status: 'ok' } }));
       httpService.post.mockReturnValue(throwError(() => new Error('AI Down')));
       await expect(service.registerStudent(mockDto)).rejects.toThrow(BadGatewayException);
     });
@@ -60,9 +63,12 @@ describe('VisionService', () => {
           embedding: 'dense_vector_xyz',
           versionOfModel: 'v1.0',
           dateCreated: '2024-05-07T10:00:00Z',
-          status: 'success'
+          status: 'success',
+          facesDetected: 1,
+          imagesProcessed: 1
         }
       };
+      httpService.get.mockReturnValue(of({ data: { status: 'ok' } }));
       httpService.post.mockReturnValue(of(aiResponse));
       userRepo.findById.mockResolvedValue({ userAccountId: 1 });
       userRepo.save.mockResolvedValue({});
@@ -101,6 +107,7 @@ describe('VisionService', () => {
           embedding: ''
         }
       };
+      httpService.get.mockReturnValue(of({ data: { status: 'ok' } }));
       httpService.post.mockReturnValue(of(aiResponse));
 
       const result = await service.processAttendanceFrame(mockDto);
@@ -120,7 +127,9 @@ describe('VisionService', () => {
           status: 'success'
         }
       };
+      httpService.get.mockReturnValue(of({ data: { status: 'ok' } }));
       httpService.post.mockReturnValue(of(aiResponse));
+      userRepo.findById.mockResolvedValue({ userAccountId: 1 });
       attendanceService.recordAiAttendance.mockResolvedValue({
         status: 'RECORDED',
         record: { recordId: 777 }
@@ -149,7 +158,9 @@ describe('VisionService', () => {
           status: 'success'
         }
       };
+      httpService.get.mockReturnValue(of({ data: { status: 'ok' } }));
       httpService.post.mockReturnValue(of(aiResponse));
+      userRepo.findById.mockResolvedValue({ userAccountId: 1 });
       attendanceService.recordAiAttendance.mockRejectedValue(new Error('Student not enrolled'));
 
       const result = await service.processAttendanceFrame(mockDto);

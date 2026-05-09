@@ -52,7 +52,7 @@ describe('AttendanceService', () => {
         { provide: AttendanceRepository, useValue: attendanceRepo },
         { provide: UserRepository, useValue: userRepo },
         { provide: CourseRepository, useValue: courseRepo },
-        { provide: AlertService, useValue: { checkStudentLowAttendance: jest.fn().mockResolvedValue(null) } },
+        { provide: AlertService, useValue: { checkStudentLowAttendance: jest.fn().mockResolvedValue(null), triggerAbsenceAlert: jest.fn() } },
       ],
     }).compile();
 
