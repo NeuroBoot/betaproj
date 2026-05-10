@@ -269,3 +269,86 @@ tr:hover td { background-color: rgba(255, 255, 255, 0.02); }
     cursor: pointer;
     min-width: 140px;
 }
+/* =========================================================
+   7. STUDENTS ENROLLMENT SECTION (داخل المودال)
+   ========================================================= */
+
+/* القسم الجديد تحت بيانات الكورس */
+.students-enrollment-section {
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color); /* خط فاصل بسيط */
+}
+
+/* تنسيق عداد الطلاب المختارين */
+#selectedCount {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--accent);
+    background: rgba(48, 96, 255, 0.1);
+    padding: 2px 8px;
+    border-radius: 5px;
+}
+
+/* صندوق البحث بالـ ID */
+#studentSearchInside {
+    width: 100%;
+    margin-bottom: 12px;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.02) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 10px;
+    color: white;
+}
+
+/* حاوية القائمة التي تسمح بالـ Scroll */
+.student-list-container {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    max-height: 200px; /* طول محدد عشان المودال ميكبرش بزيادة */
+    overflow-y: auto; /* تفعيل السكرول */
+    border: 1px solid var(--border-color);
+}
+
+/* ستايل شريط السكرول (ScrollBar) ليناسب الثيم المظلم */
+.student-list-container::-webkit-scrollbar {
+    width: 6px;
+}
+.student-list-container::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 10px;
+}
+
+/* تنسيق الطالب الواحد داخل القائمة */
+.student-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    transition: 0.2s;
+}
+
+.student-item:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.student-item input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin-right: 15px;
+    cursor: pointer;
+    accent-color: var(--accent); /* يخلي لون علامة الصح أزرق زي الثيم */
+}
+
+.student-info label {
+    display: block;
+    font-size: 0.95rem;
+    color: var(--text-main);
+    cursor: pointer;
+}
+
+.student-info small {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+}

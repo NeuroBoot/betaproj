@@ -82,13 +82,17 @@ body {
     flex-shrink: 0;
 }
 .brand-text h2 { 
-    font-size: 1.45rem; 
-    font-weight: 700; 
-    margin: 0; 
-    line-height: 1.1;
-    white-space: normal;
+    font-size: 1.4rem; 
+    line-height: 1; 
+    white-space: normal; 
+    word-break: break-word; 
 }
 .brand-text h2 span { color: var(--accent-blue); }
+.brand-text p { 
+    font-size: 0.75rem; 
+    color: var(--text-dim); 
+    margin-top: 4px; 
+}
 
 /* User Info */
 .user-profile { 
@@ -361,4 +365,8 @@ body {
 
 .popup-footer button {
     flex: 1; /* عشان الزرارين يبقوا قد بعض */
+}
+.user-role { 
+    font-size: 0.85rem; 
+    color: var(--text-dim); 
 }

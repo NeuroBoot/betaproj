@@ -7,25 +7,17 @@ document.addEventListener('DOMContentLoaded', async function() {
     const modal = document.getElementById('accountModal');
     const editModal = document.getElementById('editModal');
     const tableBody = document.getElementById('accountsTableBody');
-    let enrollmentChart, roleDistributionChart;
+    let roleDistributionChart;
     let currentRow = null;
+    let currentEditingId = null; 
 
-    // === 2. منطق فتح الـ Modal (إضافة حساب) ===
-    // بندور على الزرار بكذا طريقة عشان نضمن إنه يشتغل
-    const addAccountBtn = document.querySelector('.btn-primary') || 
-                        document.querySelector('.add-account-btn') || 
-                        Array.from(document.querySelectorAll('button')).find(btn => btn.textContent.includes('Add Account'));
-
+    // === 2. منطق فتح وإغلاق الـ Modals ===
+    const addAccountBtn = document.getElementById('openModalBtn');
     if (addAccountBtn && modal) {
-        addAccountBtn.onclick = function(e) {
-            e.preventDefault();
-            console.log("Opening Add Account Modal...");
-            modal.style.display = 'flex';
-        };
+        addAccountBtn.onclick = (e) => { e.preventDefault(); modal.style.display = 'flex'; };
     }
 
-    // إغلاق المودالات (Close & Cancel)
-    document.querySelectorAll('.close, .btn-cancel').forEach(btn => {
+    document.querySelectorAll('.close, .btn-cancel, #closeModalBtn, #closeEditModalBtn').forEach(btn => {
         btn.onclick = () => {
             if (modal) modal.style.display = 'none';
             if (editModal) editModal.style.display = 'none';
@@ -37,16 +29,21 @@ document.addEventListener('DOMContentLoaded', async function() {
         if (e.target == editModal) editModal.style.display = 'none';
     };
 
-    // === 3. تحديث اسم المستخدم والترحيب ===
-    const nameDisplay = document.getElementById('adminName') || document.getElementById('userNameDisplay');
-    const savedName = localStorage.getItem('username'); 
-    if (nameDisplay) nameDisplay.textContent = savedName ? savedName : "Admin";
+   // === تحديث اسم المستخدم مع جعل أول حرف كابيتال ===
+const nameDisplay = document.getElementById('adminName'); 
+const savedName = localStorage.getItem('username'); // نجلب الاسم المخزن
 
-    // === 4. إدارة البيانات والربط بالـ APIs ===
+if (nameDisplay && savedName) {
+    // السطر التالي يقوم بتحويل أول حرف لكبير ودمجه مع باقي الاسم
+    const formattedName = savedName.charAt(0).toUpperCase() + savedName.slice(1);
+    nameDisplay.textContent = formattedName;
+} else if (nameDisplay) {
+    nameDisplay.textContent = "Aya_allah"; // القيمة الافتراضية
+}
 
-    // دالة جلب البيانات (GET)
+    // === 3. وظائف جلب البيانات (GET) ===
     async function loadAccounts() {
-        if (!token) return console.error("No token found.");
+        if (!token) return;
         try {
             const response = await fetch(`${API_BASE_URL}/users`, {
                 headers: { 'Authorization': `Bearer ${token}` }
@@ -62,13 +59,15 @@ document.addEventListener('DOMContentLoaded', async function() {
         } catch (error) { console.error("Error loading accounts:", error); }
     }
 
-    // رسم صف الجدول (تم تعديل الـ ID لـ userAccountId)
     function renderUserRow(user) {
         const tr = document.createElement('tr');
-        const displayId = user.userAccountId || user.id || 'N/A';
-        tr.setAttribute('data-id', displayId); 
+        
+        // السر هنا: لازم نتأكد إننا بنسحب الـ ID اللي الباك إند بيفهمه (id أو _id)
+        const dbId = user.id || user._id || user.userAccountId;
+        tr.setAttribute('data-dbid', dbId); 
+
         tr.innerHTML = `
-            <td>${displayId}</td>
+            <td>${user.userAccountId || 'N/A'}</td>
             <td>${user.fullName || user.username || 'Unknown'}</td>
             <td>${user.email || 'N/A'}</td>
             <td><span class="badge ${(user.userType || 'student').toLowerCase()}">${user.userType || 'Student'}</span></td>
@@ -80,7 +79,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         tableBody.appendChild(tr);
     }
 
-    // تحديث العدادات العلوية والشارت
     function updateStatsAndCharts(users) {
         const studentCount = users.filter(u => String(u.userType).toLowerCase() === 'student').length;
         const staffCount = users.filter(u => String(u.userType).toLowerCase() === 'staff').length;
@@ -90,18 +88,12 @@ document.addEventListener('DOMContentLoaded', async function() {
             roleDistributionChart.data.datasets[0].data = [studentCount, staffCount, adminCount];
             roleDistributionChart.update();
         }
-
-        // ربط العدادات بالـ IDs في الـ HTML
-        const sElem = document.getElementById('totalStudentsCount');
-        const fElem = document.getElementById('totalStaffCount');
-        const aElem = document.getElementById('totalAdminCount');
-
-        if (sElem) sElem.textContent = studentCount.toLocaleString();
-        if (fElem) fElem.textContent = staffCount.toLocaleString();
-        if (aElem) aElem.textContent = adminCount.toLocaleString();
+        if (document.getElementById('totalStudentsCount')) document.getElementById('totalStudentsCount').textContent = studentCount;
+        if (document.getElementById('totalStaffCount')) document.getElementById('totalStaffCount').textContent = staffCount;
+        if (document.getElementById('totalAdminCount')) document.getElementById('totalAdminCount').textContent = adminCount;
     }
 
-    // إضافة حساب جديد (POST)
+    // === 4. إضافة حساب جديد (POST) ===
     const accountForm = document.getElementById('accountForm');
     if (accountForm) {
         accountForm.onsubmit = async function(e) {
@@ -109,8 +101,9 @@ document.addEventListener('DOMContentLoaded', async function() {
             const userData = {
                 username: document.getElementById('fullName').value.trim(),
                 email: document.getElementById('email').value.trim(),
-                password: "User@123", 
-                userType: document.getElementById('role').value.toLowerCase()
+                password: document.getElementById('password').value || "User@123", 
+                userType: document.getElementById('role').value.toLowerCase(),
+                userAccountId: parseInt(document.getElementById('idNumber').value.trim())
             };
             try {
                 const response = await fetch(`${API_BASE_URL}/users`, {
@@ -119,71 +112,98 @@ document.addEventListener('DOMContentLoaded', async function() {
                     body: JSON.stringify(userData)
                 });
                 if (response.ok) {
+                    const photoInput = document.getElementById('userPhoto');
+                    if (photoInput && photoInput.files.length > 0) {
+                        const fd = new FormData();
+                        fd.append('file', photoInput.files[0]);
+                        fd.append('userId', userData.userAccountId);
+                        await fetch(`${API_BASE_URL}/vision/upload`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, body: fd });
+                    }
                     modal.style.display = 'none';
                     this.reset();
                     loadAccounts();
+                    Swal.fire('Success', 'User created', 'success');
                 }
             } catch (error) { console.error("Add error:", error); }
         };
     }
 
-    // الحذف والتعديل (Event Delegation)
-    if (tableBody) {
-        tableBody.addEventListener('click', async function(e) {
-            const row = e.target.closest('tr');
-            if (!row) return;
-            const userId = row.getAttribute('data-id');
+    // === 5. الحذف والتعديل (Event Delegation) ===
+    tableBody.addEventListener('click', async function(e) {
+        const row = e.target.closest('tr');
+        if (!row) return;
+        const dbId = row.getAttribute('data-dbid');
 
-            if (e.target.closest('.btn-delete')) {
-                if(confirm('Are you sure you want to delete this account?')) {
-                    try {
-                        const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
-                            method: 'DELETE',
-                            headers: { 'Authorization': `Bearer ${token}` }
-                        });
-                        if (response.ok) loadAccounts();
-                    } catch (error) { console.error("Delete error:", error); }
-                }
+        // حذف
+        if (e.target.closest('.btn-delete')) {
+            if (!dbId || dbId === 'undefined') return Swal.fire('Error', 'Invalid ID', 'error');
+            const result = await Swal.fire({ title: 'Are you sure?', icon: 'warning', showCancelButton: true });
+            if (result.isConfirmed) {
+                try {
+                    const res = await fetch(`${API_BASE_URL}/users/${dbId}`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (res.ok) { loadAccounts(); Swal.fire('Deleted!', '', 'success'); }
+                    else { Swal.fire('Error', 'Could not delete user', 'error'); }
+                } catch (err) { console.error(err); }
             }
-            if (e.target.closest('.btn-edit')) {
-                currentRow = row;
-                document.getElementById('editIdNumber').value = row.cells[0].innerText;
-                document.getElementById('editFullName').value = row.cells[1].innerText;
-                document.getElementById('editEmail').value = row.cells[2].innerText;
-                document.getElementById('editRole').value = row.cells[3].innerText.trim().toLowerCase();
-                editModal.style.display = 'flex';
-            }
-        });
-    }
+        }
 
-    // حفظ التعديلات (PUT)
+        // فتح مودال التعديل
+        if (e.target.closest('.btn-edit')) {
+            currentEditingId = dbId;
+            document.getElementById('editIdNumber').value = row.cells[0].innerText;
+            document.getElementById('editFullName').value = row.cells[1].innerText;
+            document.getElementById('editEmail').value = row.cells[2].innerText;
+            document.getElementById('editRole').value = row.cells[3].innerText.trim().toLowerCase();
+            editModal.style.display = 'flex';
+        }
+    });
+
+    // === 6. حفظ التعديلات (PUT) ===
     const editForm = document.getElementById('editForm');
     if (editForm) {
         editForm.onsubmit = async function(e) {
             e.preventDefault();
-            const userId = currentRow.getAttribute('data-id');
+            if (!currentEditingId || currentEditingId === 'undefined') return;
+
             const updatedData = {
+                // نبعت الـ id الأساسي جوه الـ body عشان TypeORM يعرف إنه تحديث
+                id: isNaN(currentEditingId) ? currentEditingId : parseInt(currentEditingId),
                 username: document.getElementById('editFullName').value.trim(),
                 email: document.getElementById('editEmail').value.trim(),
-                userType: document.getElementById('editRole').value.toLowerCase()
+                userType: document.getElementById('editRole').value.toLowerCase(),
+                userAccountId: parseInt(document.getElementById('editIdNumber').value.trim())
             };
+
+            if (document.getElementById('editPassword').value.trim()) {
+                updatedData.password = document.getElementById('editPassword').value.trim();
+            }
+
             try {
-                const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
+                const response = await fetch(`${API_BASE_URL}/users/${currentEditingId}`, {
                     method: 'PUT',
                     headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
                     body: JSON.stringify(updatedData)
                 });
+
                 if (response.ok) {
                     loadAccounts();
                     editModal.style.display = 'none';
+                    Swal.fire('Updated!', 'Success', 'success');
+                } else {
+                    const err = await response.json();
+                    Swal.fire('Update Failed', err.message || 'Error', 'error');
                 }
-            } catch (error) { console.error("Update error:", error); }
+            } catch (error) { console.error(error); }
         };
     }
 
-    // === 5. الرسوم البيانية والسايد بار ===
+    // === 7. التهيئة والسايد بار ومعاينة الصور ===
     initChartsAndSidebar();
-    loadAccounts(); // تحميل الداتا أول ما الصفحة تفتح
+    setupImagePreviews();
+    loadAccounts(); 
 
     function initChartsAndSidebar() {
         const ctxPie = document.getElementById('roleDistributionChart')?.getContext('2d');
@@ -192,36 +212,37 @@ document.addEventListener('DOMContentLoaded', async function() {
                 type: 'pie',
                 data: {
                     labels: ['Students', 'Staff', 'Admin'],
-                    datasets: [{
-                        data: [0, 0, 0],
-                        backgroundColor: ['#3060ff', '#2ecc71', '#9b59b6']
-                    }]
+                    datasets: [{ data: [0, 0, 0], backgroundColor: ['#4e73df', '#1cc88a', '#8e44ad'] }]
                 },
                 options: { responsive: true, maintainAspectRatio: false }
             });
         }
-
         const sidebar = document.querySelector('.sidebar');
         const resizer = document.querySelector('.resizer');
         if (resizer && sidebar) {
             resizer.addEventListener('mousedown', (e) => {
                 e.preventDefault();
+                const resize = (ev) => { if (ev.clientX >= 150 && ev.clientX <= 400) sidebar.style.width = ev.clientX + 'px'; };
                 document.addEventListener('mousemove', resize);
-                document.addEventListener('mouseup', stopResize);
+                document.addEventListener('mouseup', () => document.removeEventListener('mousemove', resize));
             });
-            function resize(e) {
-                let newWidth = e.clientX;
-                if (newWidth >= 150 && newWidth <= 500) sidebar.style.width = newWidth + 'px';
-            }
-            function stopResize() {
-                document.removeEventListener('mousemove', resize);
-                document.removeEventListener('mouseup', stopResize);
-            }
         }
+    }
+
+    function setupImagePreviews() {
+        const setup = (inId, preId) => {
+            const input = document.getElementById(inId);
+            const preview = document.getElementById(preId);
+            if(input && preview) {
+                input.onchange = function() {
+                    const [file] = this.files;
+                    if (file) { preview.src = URL.createObjectURL(file); preview.style.display = 'block'; }
+                };
+            }
+        };
+        setup('userPhoto', 'imagePreview');
+        setup('editUserPhoto', 'editImagePreview');
     }
 });
 
-function logout() {
-    localStorage.clear();
-    window.location.href = "../../index.html";
-}
+function logout() { localStorage.clear(); window.location.href = "../../index.html"; }

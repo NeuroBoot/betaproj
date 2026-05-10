@@ -74,8 +74,17 @@ body {
     mix-blend-mode: lighten;
 }
 
-.brand-text h2 span {
-    color: var(--accent-blue);
+.brand-text h2 { 
+    font-size: 1.4rem; 
+    line-height: 1; 
+    white-space: normal; 
+    word-break: break-word; 
+}
+.brand-text h2 span { color: var(--accent-blue); }
+.brand-text p { 
+    font-size: 0.75rem; 
+    color: var(--text-dim); 
+    margin-top: 4px; 
 }
 
 /* User Profile Section */

@@ -1,18 +1,24 @@
 const API_BASE_URL = 'http://localhost:3000/api/v1';
 
+// دالة لجلب التوكن والتأكد من صيغته
+function getAuthToken() {
+    let token = localStorage.getItem('token');
+    if (!token) return "";
+    token = token.replace(/['"]+/g, '').trim();
+    return token.toLowerCase().startsWith('bearer ') ? token : `Bearer ${token}`;
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
-    
-    // === 0. تحديث اسم المستخدم ===
+    // 1. تحديث اسم المستخدم
     const nameDisplay = document.getElementById('adminName'); 
     const savedName = localStorage.getItem('username');
     if (nameDisplay) {
         nameDisplay.textContent = savedName || "Aya_allah";
     }
 
-    // === 1. وظيفة التحكم في حجم السايد بار ===
+    // 2. وظيفة التحكم في حجم السايد بار (Sidebar Resizer)
     const sidebar = document.querySelector('.sidebar');
     const resizer = document.getElementById('sidebarResizer');
-
     if (resizer && sidebar) {
         resizer.addEventListener('mousedown', (e) => {
             e.preventDefault();
@@ -35,21 +41,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // === 2. تحميل الكورسات للفلتر فور فتح الصفحة ===
+    // 3. تحميل الكورسات للفلتر فور فتح الصفحة
     await loadCoursesForFilter();
 });
 
-// دالة لجلب الكورسات من السيرفر
+// دالة لجلب الكورسات من السيرفر لوضعها في القائمة المنسدلة
 async function loadCoursesForFilter() {
     const select = document.getElementById('filterCourse');
     if (!select) return;
 
     try {
-        const token = localStorage.getItem('token');
         const response = await fetch(`${API_BASE_URL}/courses`, {
-            headers: { 'Authorization': `Bearer ${token}` }
+            headers: { 'Authorization': getAuthToken() }
         });
-        
         const data = await response.json();
         const courses = data.data || data;
 
@@ -66,13 +70,13 @@ async function loadCoursesForFilter() {
     }
 }
 
-// === 3. وظيفة البحث الأساسية ===
+// === وظيفة البحث الأساسية ===
 async function performSearch() {
     const query = document.getElementById('searchInput').value.trim();
-    const type = document.getElementById('searchType').value;
+    const type = document.getElementById('searchType').value; // student, staff, admin
     const courseId = document.getElementById('filterCourse').value;
     const container = document.getElementById('searchResultsContainer');
-    const searchBtn = document.querySelector('.btn-search');
+    const resultsCount = document.getElementById('resultsCount');
 
     // إظهار حالة التحميل
     container.innerHTML = `
@@ -81,53 +85,52 @@ async function performSearch() {
             <p style="margin-top: 15px; color: #888;">Searching system records...</p>
         </div>
     `;
-    searchBtn.disabled = true;
 
     try {
-        const token = localStorage.getItem('token');
-        
-        // بناء الرابط (URL) حسب الـ Swagger
-        let url = `${API_BASE_URL}/users?role=${type.toLowerCase()}`;
-        if (query) url += `&search=${encodeURIComponent(query)}`;
-        if (courseId !== 'all') url += `&courseId=${courseId}`;
-
-        const response = await fetch(url, {
-            headers: { 'Authorization': `Bearer ${token}` }
+        // جلب جميع المستخدمين لعمل الفلترة برمجياً (لضمان الدقة في الأدوار والـ IDs)
+        const response = await fetch(`${API_BASE_URL}/users`, {
+            headers: { 'Authorization': getAuthToken() }
         });
 
         if (response.status === 401) logout();
 
         const data = await response.json();
-        const results = data.data || data;
+        const allUsers = data.data || data;
 
-        if (Array.isArray(results) && results.length > 0) {
-            renderTable(results);
-        } else {
-            container.innerHTML = `
-                <div class="empty-results" style="text-align: center; padding: 50px; opacity: 0.5;">
-                    <i class="fas fa-folder-open" style="font-size: 3rem;"></i>
-                    <p style="margin-top: 15px;">No results found for your search.</p>
-                </div>`;
+        if (Array.isArray(allUsers)) {
+            // فلترة النتائج بناءً على الاختيارات (النوع، نص البحث)
+            let results = allUsers.filter(user => {
+                const userRole = (user.role || user.userType || "").toLowerCase();
+                const matchesType = userRole === type.toLowerCase();
+                
+                const searchStr = `${user.fullName} ${user.username} ${user.email} ${user.id} ${user.userAccountId}`.toLowerCase();
+                const matchesQuery = query === "" || searchStr.includes(query.toLowerCase());
+
+                return matchesType && matchesQuery;
+            });
+
+            if (resultsCount) resultsCount.textContent = `(${results.length} results found)`;
+
+            if (results.length > 0) {
+                renderTable(results);
+            } else {
+                container.innerHTML = `
+                    <div class="empty-results" style="text-align: center; padding: 50px; opacity: 0.5;">
+                        <i class="fas fa-folder-open" style="font-size: 3rem;"></i>
+                        <p style="margin-top: 15px;">No results found for your search.</p>
+                    </div>`;
+            }
         }
     } catch (error) {
         console.error("Search Error:", error);
-        container.innerHTML = `
-            <div style="text-align: center; color: #ff4757; padding: 50px;">
-                <i class="fas fa-exclamation-triangle" style="font-size: 3rem;"></i>
-                <p style="margin-top: 15px;">Server connection error.</p>
-            </div>`;
-    } finally {
-        searchBtn.disabled = false;
+        container.innerHTML = `<div style="text-align: center; color: #ff4757; padding: 50px;"><p>Server connection error.</p></div>`;
     }
 }
 
-// === 4. رسم جدول النتائج ومعالجة الـ ID ===
+// === رسم جدول النتائج (تم حذف عمود Actions وتعديل الـ Role والـ ID) ===
 function renderTable(data) {
     const container = document.getElementById('searchResultsContainer');
-    const resultsCount = document.getElementById('resultsCount');
     
-    if (resultsCount) resultsCount.textContent = `(${data.length} results found)`;
-
     let html = `
         <div class="table-responsive">
             <table class="search-results-table">
@@ -136,18 +139,17 @@ function renderTable(data) {
                         <th>User Info</th>
                         <th>Identifier</th>
                         <th>Role</th>
-                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
     `;
 
     data.forEach(item => {
-        // فحص شامل لضمان الحصول على الـ ID الصحيح (id أو _id)
-        const userId = item.id || item._id || item.userId || null;
-        const name = item.name || item.username || item.fullName || "Unknown";
+        // فحص الـ ID الصحيح
+        const userId = item.id || item.userAccountId || "N/A";
+        const name = item.fullName || item.username || "Unknown";
         const email = item.email || "No email available";
-        const role = item.role || "User";
+        const role = (item.role || item.userType || "User").toLowerCase();
 
         html += `
             <tr>
@@ -160,14 +162,8 @@ function renderTable(data) {
                         </div>
                     </div>
                 </td>
-                <td><span class="id-tag">ID: ${userId ? userId : 'N/A'}</span></td>
-                <td><span class="role-label">${role}</span></td>
-                <td>
-                    <div class="action-buttons">
-                        <button class="btn-action view" onclick="viewDetails('${userId}')" title="View"><i class="fas fa-eye"></i></button>
-                        <button class="btn-action delete" onclick="deleteEntry('${userId}')" title="Delete"><i class="fas fa-trash"></i></button>
-                    </div>
-                </td>
+                <td><span class="id-tag">ID: ${userId}</span></td>
+                <td><span class="role-badge ${role}">${role.toUpperCase()}</span></td>
             </tr>
         `;
     });
@@ -176,46 +172,7 @@ function renderTable(data) {
     container.innerHTML = html;
 }
 
-// === 5. وظيفة الحذف الحقيقية (DELETE API) ===
-async function deleteEntry(id) {
-    // التأكد أن الـ ID موجود فعلاً وليس كلمة "null" أو "N/A"
-    if (!id || id === 'null' || id === 'undefined' || id === 'N/A') {
-        return alert("Cannot delete: Missing user ID.");
-    }
-
-    if (confirm("Are you sure you want to delete this user permanently?")) {
-        try {
-            const token = localStorage.getItem('token');
-            // استدعاء API الحذف حسب الـ Swagger: /api/v1/users/{id}
-            const response = await fetch(`${API_BASE_URL}/users/${id}`, {
-                method: 'DELETE',
-                headers: { 
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (response.ok) {
-                alert("User deleted successfully!");
-                performSearch(); // تحديث الجدول بعد الحذف
-            } else {
-                const error = await response.json();
-                alert("Failed to delete: " + (error.message || "Unknown error"));
-            }
-        } catch (e) {
-            console.error("Delete request failed:", e);
-            alert("Error connecting to server.");
-        }
-    }
-}
-
-// === 6. وظائف إضافية ===
-function viewDetails(id) {
-    if (!id || id === 'null') return alert("ID not available.");
-    alert("Fetching full details for ID: " + id);
-    // مستقبلاً: window.location.href = `user-details.html?id=${id}`;
-}
-
+// وظائف التنقل والخروج
 function toggleSidebar() {
     document.querySelector('.sidebar').classList.toggle('active');
 }

@@ -11,8 +11,17 @@ function getAuthToken() {
 }
 
 document.addEventListener('DOMContentLoaded', async function () {
-    const savedName = localStorage.getItem('username');
-    if (savedName) document.getElementById('adminName').textContent = savedName;
+   // === تحديث اسم المستخدم مع جعل أول حرف كابيتال ===
+const nameDisplay = document.getElementById('adminName'); 
+const savedName = localStorage.getItem('username'); // نجلب الاسم المخزن
+
+if (nameDisplay && savedName) {
+    // السطر التالي يقوم بتحويل أول حرف لكبير ودمجه مع باقي الاسم
+    const formattedName = savedName.charAt(0).toUpperCase() + savedName.slice(1);
+    nameDisplay.textContent = formattedName;
+} else if (nameDisplay) {
+    nameDisplay.textContent = "Aya_allah"; // القيمة الافتراضية
+}
 
     await loadAlertsFromServer();
     await fillRecipients();

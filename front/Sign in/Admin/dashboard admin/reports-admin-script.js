@@ -4,14 +4,17 @@ let currentReportType = '';
 document.addEventListener('DOMContentLoaded', async () => {
     
     // === 0. تحديث اسم المستخدم ===
-    const nameDisplay = document.getElementById('adminName') || 
-                        document.getElementById('admin-name') || 
-                        document.getElementById('userNameDisplay');
-    
-    const savedName = localStorage.getItem('username');
-    if (nameDisplay) {
-        nameDisplay.textContent = savedName ? savedName : "Aya_allah";
-    }
+  // === تحديث اسم المستخدم مع جعل أول حرف كابيتال ===
+const nameDisplay = document.getElementById('adminName'); 
+const savedName = localStorage.getItem('username'); // نجلب الاسم المخزن
+
+if (nameDisplay && savedName) {
+    // السطر التالي يقوم بتحويل أول حرف لكبير ودمجه مع باقي الاسم
+    const formattedName = savedName.charAt(0).toUpperCase() + savedName.slice(1);
+    nameDisplay.textContent = formattedName;
+} else if (nameDisplay) {
+    nameDisplay.textContent = "Aya_allah"; // القيمة الافتراضية
+}
 
     // === 1. وظيفة التحكم في حجم السايد بار ===
     const sidebar = document.querySelector('.sidebar');

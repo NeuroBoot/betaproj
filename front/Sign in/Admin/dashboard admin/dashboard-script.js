@@ -4,6 +4,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function updateDashboard() {
         if (!token) return;
+
+        // --- التعديل المطلوب لإظهار الاسم ---
+        // بنستخدم الـ ID اللي موجود عندك في الـ HTML بالظبط
+        const nameElement = document.getElementById('userNameDisplay');
+        const savedName = localStorage.getItem('username'); 
+        
+        if (nameElement && savedName) {
+            // مسح علامات التنصيص الزائدة وعرض الاسم
+            nameElement.textContent = savedName.replace(/['"]+/g, ''); 
+        }
+        // ---------------------------------------
+
         const headers = { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' };
 
         try {
@@ -39,9 +51,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (courseHeading) courseHeading.textContent = courses.data.length;
 
                 if (courses.data.length > 0) {
-                    // نبعث الـ ID كـ String لضمان توافق الـ API
                     const firstCourseId = String(courses.data[0].id || courses.data[0]._id);
-                    loadChartData(firstCourseId, headers);
+                    // فحص لمنع إرسال undefined للسيرفر وحل مشكلة الـ BadRequestException
+                    if (firstCourseId && firstCourseId !== 'undefined') {
+                        loadChartData(firstCourseId, headers);
+                    }
                 }
             }
 
@@ -62,12 +76,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         </div>
                     `).join('');
                 } else {
-                    // شكل احترافي في حال عدم وجود نشاط
-                    activityContainer.innerHTML = `
-                        <div style="text-align:center; padding:40px; color:#8e8e93;">
-                            <i class="fas fa-history" style="font-size:2rem; margin-bottom:10px; display:block; opacity:0.5;"></i>
-                            <p>No recent activity yet</p>
-                        </div>`;
+                    activityContainer.innerHTML = `<p style="text-align:center; padding:20px; color:#8e8e93;">No recent activity</p>`;
                 }
             }
 
@@ -77,7 +86,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // دالة تحديث حالة السيستم
     async function checkStatus(headers) {
         try {
             const res = await fetch(`${API_BASE_URL}/auth/profile`, { headers });
@@ -96,7 +104,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // جلب بيانات الشارت
     async function loadChartData(id, headers) {
         try {
             const res = await fetch(`${API_BASE_URL}/attendance/statistics?courseId=${id}`, { headers });
@@ -105,7 +112,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (e) { console.error("Chart failed", e); }
     }
 
-    // رسم الشارت بالهيكل المخطط والأرقام الجانبية
     function drawChart(data) {
         const ctx = document.getElementById('attendanceChart')?.getContext('2d');
         if (!ctx) return;
@@ -120,7 +126,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 datasets: [{ 
                     label: 'Attendance %', 
                     data: data.map(d => d.value), 
-                    backgroundColor: 'rgba(16, 185, 129, 0.3)', // لون تعبئة شفاف شيك
+                    backgroundColor: 'rgba(16, 185, 129, 0.3)', 
                     borderColor: '#10b981', 
                     borderWidth: 2,
                     borderRadius: 5
@@ -133,15 +139,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 scales: {
                     y: { 
                         beginAtZero: true, 
-                        max: 100, // تثبيت الهيكل من 0 لـ 100
-                        grid: { 
-                            color: 'rgba(255, 255, 255, 0.1)', // الخطوط الخلفية (Grid Lines)
-                            drawBorder: false 
-                        },
-                        ticks: { 
-                            color: '#8e8e93', // لون الأرقام الجانبية
-                            callback: value => value + '%' // إضافة علامة النسبة المئوية
-                        }
+                        max: 100, 
+                        grid: { color: 'rgba(255, 255, 255, 0.1)', drawBorder: false },
+                        ticks: { color: '#8e8e93', callback: v => v + '%' }
                     },
                     x: {
                         grid: { display: false },
