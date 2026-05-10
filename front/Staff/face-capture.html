@@ -169,30 +169,30 @@
       <h4 class="mb-3">Face Capture & Recognition</h4>
 
       <div class="row g-3">
-        <div class="col-md-4">
-          <label class="form-label">Course</label>
-          <select class="form-select bg-dark text-light border-0">
-            <option>Mathematics</option>
-            <option>Physics</option>
-            <option>Chemistry</option>
-          </select>
-        </div>
+        
+<div class="col-md-4">
+  <label class="form-label">Course</label>
+  <select id="courseSelect" class="form-select bg-dark text-light border-0">
+    <option value="">Select Course</option>
+  </select>
+</div>
 
-        <div class="col-md-4">
-          <label class="form-label">Section</label>
-          <select class="form-select bg-dark text-light border-0">
-            <option>Section A</option>
-            <option>Section B</option>
-          </select>
-        </div>
+<div class="col-md-4">
+  <label class="form-label">Section / Group</label>
+  <select id="sectionSelect" class="form-select bg-dark text-light border-0">
+    <option value="">Select Option</option>
+  </select>
+</div>
 
-        <div class="col-md-4">
-          <label class="form-label">Session Type</label>
-          <select class="form-select bg-dark text-light border-0">
-            <option>Lecture</option>
-            <option>Lab</option>
-          </select>
-        </div>
+<div class="col-md-4">
+  <label class="form-label">Session Type</label>
+  <select id="sessionTypeSelect" class="form-select bg-dark text-light border-0">
+    <option value="">Select Session Type</option>
+    <option value="section">Section</option>
+    <option value="lecture">Lecture</option>
+  </select>
+</div>
+
       </div>
     </div>
 
@@ -309,9 +309,11 @@ const canvas = document.getElementById("canvas");
 const logoutBtn = document.getElementById("logoutBtn");
 const usernameEl = document.getElementById("username");
 
-const courseSelect = document.querySelectorAll(".form-select")[0];
-const sectionSelect = document.querySelectorAll(".form-select")[1];
-const sessionTypeSelect = document.querySelectorAll(".form-select")[2];
+const courseSelect = document.getElementById("courseSelect");
+const sectionSelect = document.getElementById("sectionSelect");
+const sessionTypeSelect = document.getElementById("sessionTypeSelect");
+
+let staffCourses = [];
 
 let stream = null;
 
@@ -385,6 +387,107 @@ async function loadProfile() {
     redirectToLogin();
   }
 }
+//load courses
+/* ================= Load Staff Courses ================= */
+async function loadCourses() {
+
+  try {
+
+    const response = await fetch(`${API_BASE_URL}/courses`, {
+      headers: authHeaders()
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.message || "Failed to load courses");
+    }
+
+    staffCourses = result.data || [];
+
+    courseSelect.innerHTML =
+      `<option value="">Select Course</option>`;
+
+    staffCourses.forEach(course => {
+
+      const option = document.createElement("option");
+
+      option.value = course.courseId;
+
+      option.textContent =
+        `${course.name} (${course.code})`;
+
+      courseSelect.appendChild(option);
+
+    });
+
+  } catch (error) {
+
+    console.error("Courses load error:", error);
+
+    showAlert("Failed to load courses", "error");
+
+  }
+}
+
+/* ================= Course Change ================= */
+function loadSectionOrLectureOptions() {
+
+  const selectedCourseId = Number(courseSelect.value);
+
+  const sessionType = sessionTypeSelect.value;
+
+  const course = staffCourses.find(
+    c => Number(c.courseId) === selectedCourseId
+  );
+
+  sectionSelect.innerHTML =
+    `<option value="">Select Option</option>`;
+
+  if (!course || !sessionType) return;
+
+  /* ================= SECTION ================= */
+
+  if (sessionType === "section") {
+
+    const sectionsCount = Number(course.sections) || 0;
+
+    for (let i = 1; i <= sectionsCount; i++) {
+
+      const option = document.createElement("option");
+
+      option.value = i;
+
+      option.textContent = `Section ${i}`;
+
+      sectionSelect.appendChild(option);
+    }
+  }
+
+  /* ================= LECTURE ================= */
+
+  if (sessionType === "lecture") {
+
+    const groups = ["A", "B", "C", "D"];
+
+    groups.forEach(group => {
+
+      const option = document.createElement("option");
+
+      option.value = group;
+
+      option.textContent = `Group ${group}`;
+
+      sectionSelect.appendChild(option);
+    });
+  }
+}
+
+/* لما يختار كورس */
+courseSelect.addEventListener("change", loadSectionOrLectureOptions);
+
+/* لما يختار Session Type */
+sessionTypeSelect.addEventListener("change", loadSectionOrLectureOptions);
 
 logoutBtn.addEventListener('click', function () {
   localStorage.removeItem('token');
@@ -488,6 +591,7 @@ stopBtn.addEventListener("click", function () {
 });
 
 async function uploadCapturedImage(blob) {
+
   const token = getToken();
 
   if (!token) {
@@ -496,40 +600,140 @@ async function uploadCapturedImage(blob) {
     return;
   }
 
-  const formData = new FormData();
-  formData.append("image", blob, "face_capture.png");
-  formData.append("course", courseSelect.value);
-  formData.append("section", sectionSelect.value);
-  formData.append("sessionType", sessionTypeSelect.value);
+  // validation
+  if (
+    !courseSelect.value ||
+    !sectionSelect.value ||
+    !sessionTypeSelect.value
+  ) {
+    showAlert(
+      "Please select course, section/group and session type",
+      "error"
+    );
+    return;
+  }
 
   try {
-    // غيّر endpoint ده لو المسار الحقيقي مختلف
-    const response = await fetch(`${API_BASE_URL}/face-capture/recognize`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      },
-      body: formData
-    });
+
+    // convert image -> base64
+    const base64Image = await blobToBase64(blob);
+
+    // payload
+    const payload = {
+
+      imageBase64: base64Image,
+
+      // IMPORTANT
+      sectionId:
+        sessionTypeSelect.value === "section"
+          ? `SEC_${sectionSelect.value}`
+          : `GRP_${sectionSelect.value}`,
+
+      // unique session id
+      sessionId: `SES_${Date.now()}`,
+
+      courseId: Number(courseSelect.value),
+
+      // MUST BE UPPERCASE
+      sessionType:
+        sessionTypeSelect.value === "lecture"
+          ? "LECTURE"
+          : "SECTION",
+
+      room: "Room 301",
+
+      confidenceThreshold: 0.7,
+
+      processingTimeMs: 150
+    };
+
+    console.log("Sending payload:", payload);
+
+    const response = await fetch(
+      `${API_BASE_URL}/vision/recognize`,
+      {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      }
+    );
 
     const data = await response.json();
-    console.log("Face capture response:", data);
+
+    console.log("Recognition response:", data);
 
     if (!response.ok) {
-      throw new Error(data.message || "Failed to upload captured image");
+
+      throw new Error(
+        data.message ||
+        data.error ||
+        "Recognition failed"
+      );
     }
 
-    showAlert("Image uploaded successfully", "success");
+    // SUCCESS
+    Swal.fire({
+      icon: "success",
+      title: "Attendance Marked",
+      text:
+        data.message ||
+        "Face recognized successfully",
+      background: "#1a1a3a",
+      color: "#fff",
+      confirmButtonColor: "#3060ff"
+    });
+
   } catch (error) {
-    console.error("Face capture upload error:", error);
-    showAlert("Face capture API not found yet or failed. Image captured locally only.", "error");
+
+    console.error("Recognition error:", error);
+
+    Swal.fire({
+      icon: "error",
+      title: "Recognition Failed",
+      text: error.message,
+      background: "#1a1a3a",
+      color: "#fff",
+      confirmButtonColor: "#3060ff"
+    });
   }
 }
+function blobToBase64(blob) {
 
+  return new Promise((resolve, reject) => {
+
+    const reader = new FileReader();
+
+    reader.onloadend = () => {
+      resolve(reader.result);
+    };
+
+    reader.onerror = reject;
+
+    reader.readAsDataURL(blob);
+  });
+}
+//initialize page
 shotBtn.addEventListener("click", async function () {
   if (!video.videoWidth || !video.videoHeight) {
     showAlert("Camera is not ready yet", "error");
     return;
+    if (!courseSelect.value) {
+  showAlert("Please select course", "error");
+  return;
+}
+
+if (!sessionTypeSelect.value) {
+  showAlert("Please select session type", "error");
+  return;
+}
+
+if (!sectionSelect.value) {
+  showAlert("Please select section/group", "error");
+  return;
+}
   }
 
   canvas.width = video.videoWidth;
@@ -548,8 +752,15 @@ shotBtn.addEventListener("click", async function () {
   }, "image/png");
 });
 
-loadProfile();
-initCameraPermissions();
+(async function initPage() {
+
+  await loadProfile();
+
+  await loadCourses();
+
+  await initCameraPermissions();
+
+})();
 </script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
