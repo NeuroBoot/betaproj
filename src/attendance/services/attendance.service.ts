@@ -23,7 +23,7 @@ export class AttendanceService {
     // 1. Verify Student exists and is actually a student
     const student = await this.userRepo.findById(dto.studentId);
     if (!student || student.userType !== Role.STUDENT) {
-      throw new NotFoundException(`Student with ID ${dto.studentId} not found or is not a student`);
+      throw new NotFoundException(`Student Validation Failed: Student with ID ${dto.studentId} not found or is not registered as a student.`);
     }
 
     // 2. Verify Course exists
@@ -32,18 +32,18 @@ export class AttendanceService {
       relations: ['enrollments', 'instructor']
     });
     if (!course) {
-      throw new NotFoundException(`Course with ID ${dto.courseId} not found`);
+      throw new NotFoundException(`Course Validation Failed: Course with ID ${dto.courseId} was not found in our active records.`);
     }
 
     // 3. Permission check: Staff can only record attendance for their own courses
     if (user.userType === Role.STAFF && course.instructor?.userAccountId !== user.userAccountId) {
-      throw new ForbiddenException('You can only record attendance for your own courses');
+      throw new ForbiddenException(`Access Denied: As a Staff member, you can only record attendance for your own assigned courses. This course (${course.name}) belongs to another instructor.`);
     }
 
     // 4. Verify Student is enrolled in Course
     const isEnrolled = course.enrollments?.some(e => e.studentId === student.userAccountId);
     if (!isEnrolled) {
-      throw new ForbiddenException(`Student ${student.username} is not enrolled in course ${course.name}`);
+      throw new ForbiddenException(`Access Denied: Student ${student.username} (ID: ${student.userAccountId}) is not enrolled in course ${course.name}. Attendance cannot be recorded for non-enrolled students.`);
     }
 
     // 5. Determine and verify staffId
@@ -54,7 +54,7 @@ export class AttendanceService {
       // For Admin, verify the provided staffId exists and is a staff member
       const staff = await this.userRepo.findById(dto.staffId);
       if (!staff || staff.userType !== Role.STAFF) {
-        throw new NotFoundException(`Staff member with ID ${dto.staffId} not found`);
+        throw new NotFoundException(`Verification Failed: Staff member with ID ${dto.staffId} was not found or does not have a Staff role.`);
       }
       effectiveStaffId = dto.staffId;
     }
@@ -105,7 +105,7 @@ export class AttendanceService {
       }
     });
 
-    if (!student) throw new NotFoundException(`Student with ID ${userId} not found`);
+    if (!student) throw new NotFoundException(`Student not found: ID ${userId} does not exist.`);
 
     const enrolledCourses = (student.enrollments || []).map(e => e.course);
 
@@ -176,21 +176,21 @@ export class AttendanceService {
 
   async saveBulk(dto: BulkAttendanceDto, user: UserAccount) {
     const courseId = parseInt(dto.courseId);
-    if (isNaN(courseId)) throw new BadRequestException(`Invalid courseId: ${dto.courseId}`);
+    if (isNaN(courseId)) throw new BadRequestException(`Validation Failed: Provided courseId '${dto.courseId}' is not a valid number.`);
 
     const course = await this.courseRepo.findOne({
       where: { courseId, isDeleted: false },
       relations: ['enrollments', 'instructor']
     });
-    if (!course) throw new NotFoundException(`Course with ID ${courseId} not found`);
+    if (!course) throw new NotFoundException(`Course not found: Course with ID ${courseId} does not exist.`);
 
     // Permission check
     if (user.userType === Role.STAFF && course.instructor?.userAccountId !== user.userAccountId) {
-      throw new ForbiddenException('You can only record attendance for your own courses');
+      throw new ForbiddenException(`Access Denied: You can only record bulk attendance for your own courses. This course (${course.name}) belongs to another instructor.`);
     }
 
     const studentIds = dto.attendance.map(a => parseInt(a.studentId)).filter(id => !isNaN(id));
-    if (studentIds.length === 0) throw new BadRequestException('No valid student IDs provided in attendance list');
+    if (studentIds.length === 0) throw new BadRequestException('Validation Failed: No valid numeric student IDs were found in the provided attendance list.');
 
     const students = await this.userRepo.find({
       where: { userAccountId: In(studentIds), isDeleted: false, userType: Role.STUDENT }
@@ -206,14 +206,14 @@ export class AttendanceService {
       const student = studentMap.get(sId);
       
       if (!student) {
-        skippedStudents.push(item.studentId);
+        skippedStudents.push(`${item.studentId} (Student not found)`);
         continue;
       }
 
       // Verify enrollment
       const isEnrolled = course.enrollments?.some(e => e.studentId === student.userAccountId);
       if (!isEnrolled) {
-        skippedStudents.push(`${item.studentId} (Not enrolled)`);
+        skippedStudents.push(`${item.studentId} (Not enrolled in ${course.name})`);
         continue;
       }
 
@@ -228,7 +228,7 @@ export class AttendanceService {
         sessionType: dto.sessionType || 'SECTION',
         sessionNumber: dto.section ? String(dto.section) : '1',
         detected: true,
-        accuracy: 1.0, // Manual bulk is considered 100% accurate as it's human-verified
+        accuracy: 1.0, 
       });
       
       if (statusId === 2) {
@@ -238,22 +238,22 @@ export class AttendanceService {
     }
 
     if (recordsToSave.length === 0) {
-      throw new BadRequestException(`No records were saved. Found issues with: ${skippedStudents.join(', ')}`);
+      throw new BadRequestException(`Bulk Save Failed: No valid records could be processed. Details: ${skippedStudents.join(', ')}`);
     }
 
     const savedRecords = await this.attendanceRepo.saveMany(recordsToSave);
-// Automatic Alert Check for affected students
-processedStudentIds.forEach(sId => {
-  this.alertService.checkStudentLowAttendance(sId, course.courseId).catch(() => {});
-});
+    // Automatic Alert Check for affected students
+    processedStudentIds.forEach(sId => {
+      this.alertService.checkStudentLowAttendance(sId, course.courseId).catch(() => {});
+    });
 
-return {
-  message: `Successfully saved ${savedRecords.length} attendance records.`,
-  savedCount: savedRecords.length,
-  skippedCount: skippedStudents.length,
-  skipped: skippedStudents.length > 0 ? skippedStudents : undefined
-};
-}
+    return {
+      message: `Successfully saved ${savedRecords.length} attendance records.`,
+      savedCount: savedRecords.length,
+      skippedCount: skippedStudents.length,
+      skipped: skippedStudents.length > 0 ? skippedStudents : undefined
+    };
+  }
 
   private mapStatusToId(status: string): number {
     const map = { 'Present': 1, 'Absent': 2, 'Late': 3, 'Excused': 4 };
@@ -279,7 +279,6 @@ return {
 
     if (user.userType === Role.STAFF) {
       if (query?.courseId) {
-        // Use findAllPaginated logic instead which handles optional date.
         const result = await this.attendanceRepo.findAllWithFilters(1, 1000, {
           courseId: parseInt(query.courseId),
           session: query.session || undefined,
@@ -309,9 +308,6 @@ return {
     }));
   }
 
-  /**
-   * Internal helper to send an alert when a student is marked absent.
-   */
   private async triggerAbsenceAlert(studentId: number, courseId: number, date: string) {
     try {
       const student = await this.userRepo.findById(studentId);
@@ -331,23 +327,21 @@ return {
 
   async getStudentTracking(studentId: number, courseId: number) {
     const student = await this.userRepo.findById(studentId);
-    if (!student) throw new NotFoundException('Student not found');
+    if (!student) throw new NotFoundException(`Student not found: ID ${studentId} does not exist.`);
 
     const course = await this.courseRepo.findById(courseId);
-    if (!course) throw new NotFoundException('Course not found');
+    if (!course) throw new NotFoundException(`Course not found: ID ${courseId} does not exist.`);
 
     const records = await this.attendanceRepo.findByStudent(studentId, courseId);
     if (records.length === 0) {
-      return { student: student.username, course: course.name, status: 'No records', riskLevel: 'N/A' };
+      return { student: student.username, course: course.name, status: 'No records found', riskLevel: 'N/A' };
     }
 
-    // 1. Calculate Rate
     const presentCount = records.filter(r => r.attendanceStatusId === 1 || r.attendanceStatusId === 3).length;
     const rate = (presentCount / records.length) * 100;
 
-    // 2. Calculate Consecutive Absences (Current Streak)
     let consecutiveAbsences = 0;
-    for (const record of records) { // Records are DESC by date
+    for (const record of records) {
       if (record.attendanceStatusId === 2) {
         consecutiveAbsences++;
       } else {
@@ -355,7 +349,6 @@ return {
       }
     }
 
-    // 3. Trend Analysis (Compare last 3 sessions vs previous 3)
     let trend = 'Stable';
     if (records.length >= 6) {
       const recent = records.slice(0, 3).filter(r => r.attendanceStatusId === 1).length;
@@ -364,7 +357,6 @@ return {
       if (recent < older) trend = 'Declining';
     }
 
-    // 4. Risk Level Logic
     let riskLevel = 'Low';
     if (rate < 75 || consecutiveAbsences >= 2) riskLevel = 'Medium';
     if (rate < 60 || consecutiveAbsences >= 3) riskLevel = 'High';
@@ -401,10 +393,9 @@ return {
     if (user.userType === Role.ADMIN) {
       return this.attendanceRepo.getDetailedStatistics(courseId);
     } else if (user.userType === Role.STAFF) {
-      // If courseId is provided, check if staff is authorized
       if (courseId) {
         const isAuthorized = await this.isStaffAuthorizedForCourse(user.userAccountId, courseId);
-        if (!isAuthorized) throw new ForbiddenException('You are not authorized for this course');
+        if (!isAuthorized) throw new ForbiddenException(`Access Denied: You are not authorized for course ID ${courseId}.`);
         return this.attendanceRepo.getDetailedStatistics(courseId);
       }
       return this.attendanceRepo.statisticsByStaff(user.userAccountId);
@@ -418,12 +409,11 @@ return {
   async update(recordId: number, dto: UpdateAttendanceDto, userId: number, userRole: string) {
     const record = await this.attendanceRepo.findOneById(recordId);
     if (!record) {
-      throw new NotFoundException(`Attendance record with ID ${recordId} not found`);
+      throw new NotFoundException(`Attendance record with ID ${recordId} not found.`);
     }
     
-    // Only admin or the staff who created can update
     if (userRole !== Role.ADMIN && record.staffId !== userId) {
-      throw new ForbiddenException('You are not authorized to update this record');
+      throw new ForbiddenException('Access Denied: You can only update attendance records that you created.');
     }
     
     const updateData: any = { ...dto };
@@ -437,12 +427,11 @@ return {
   async delete(recordId: number, userRole: string) {
     const record = await this.attendanceRepo.findOneById(recordId);
     if (!record) {
-      throw new NotFoundException(`Attendance record with ID ${recordId} not found`);
+      throw new NotFoundException(`Attendance record with ID ${recordId} not found.`);
     }
     
-    // Only admin can delete
     if (userRole !== Role.ADMIN) {
-      throw new ForbiddenException('Only administrators can delete attendance records');
+      throw new ForbiddenException('Access Denied: Only administrators have permission to delete records.');
     }
     
     return this.attendanceRepo.delete(recordId);
@@ -459,42 +448,37 @@ return {
     sessionId?: string;
     processingTimeMs?: number;
   }) {
-    // 1. Verify Student exists
     const student = await this.userRepo.findById(data.studentId);
     if (!student || student.userType !== Role.STUDENT) {
-      throw new NotFoundException(`Student with ID ${data.studentId} not found or is not a student`);
+      throw new NotFoundException(`AI Recording Failed: Student with ID ${data.studentId} not found.`);
     }
 
-    // 2. Verify Course exists
     const course = await this.courseRepo.findOne({
       where: { courseId: data.courseId, isDeleted: false },
       relations: ['enrollments', 'instructor']
     });
     if (!course) {
-      throw new NotFoundException(`Course with ID ${data.courseId} not found`);
+      throw new NotFoundException(`AI Recording Failed: Course with ID ${data.courseId} not found.`);
     }
 
-    // 3. Verify Enrollment
     const isEnrolled = course.enrollments?.some(e => e.studentId === student.userAccountId);
     if (!isEnrolled) {
-      throw new ForbiddenException(`Student ${student.username} is not enrolled in course ${course.name}`);
+      throw new ForbiddenException(`AI Access Denied: Student ${student.username} is not enrolled in course ${course.name}.`);
     }
 
     const today = new Date().toISOString().split('T')[0];
     
-    // 4. Check for duplicate today
     const duplicate = await this.attendanceRepo.findDuplicate(data.studentId, data.courseId, today);
     if (duplicate) {
       return { status: 'ALREADY_RECORDED', record: duplicate };
     }
 
-    // 5. Create record
     const record = await this.attendanceRepo.create({
       student: student,
       course: course,
       recordDate: today as any,
-      attendanceStatusId: 1, // Present
-      staffId: course.instructor?.userAccountId || 0, // AI recording maps to course instructor or 0
+      attendanceStatusId: 1, 
+      staffId: course.instructor?.userAccountId || 0, 
       confidenceScore: data.confidenceScore,
       faceConfidence: data.confidenceScore,
       matchStatus: data.matchStatus,
@@ -507,7 +491,6 @@ return {
       checkInTime: new Date().toTimeString().split(' ')[0],
     });
 
-    // 6. Alert Check
     this.alertService.checkStudentLowAttendance(student.userAccountId, course.courseId).catch(() => {});
 
     return { status: 'RECORDED', record };
@@ -518,8 +501,6 @@ return {
   }
 
   private normalizeDate(dateString: string): Date {
-    // If it's already a full ISO string, just parse it and set time to 0
-    // If it's just YYYY-MM-DD, append T00:00:00Z
     if (dateString.includes('T')) {
       const date = new Date(dateString);
       date.setUTCHours(0, 0, 0, 0);

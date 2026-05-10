@@ -4,7 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
-import { ProcessUploadDto } from './dto/process-upload.dto';
+import { ProcessUploadDto, StudentUploadItemDto, BulkProcessUploadDto } from './dto/bulk-process-upload.dto';
 import { ProcessFrameDto } from './dto/process-frame.dto';
 import { AiRecognitionResultDto, MatchStatus, Model1ResponseDto, BatchUploadResultDto } from './dto/ai-recognition-result.dto';
 import { AttendanceService } from '../attendance/services/attendance.service';
@@ -90,7 +90,7 @@ export class VisionService {
         throw new NotFoundException(`Student with ID ${dto.studentId} not found in database`);
       }
 
-      student.faceEmbedding = aiResponse.embedding;
+      student.faceEmbedding = JSON.stringify(aiResponse.embedding);
       student.embeddingVersion = aiResponse.versionOfModel;
       student.embeddingCreatedAt = new Date(aiResponse.dateCreated);
       student.embeddingImagesCount = aiResponse.imagesProcessed;
@@ -114,6 +114,35 @@ export class VisionService {
       this.logger.error(`[Model 1] Error registering student ${dto.studentId}: ${error.message}`);
       throw new BadGatewayException(`AI service error: ${error.message}`);
     }
+  }
+
+  /**
+   * Bulk registers multiple students at once.
+   */
+  async registerMultipleStudents(dto: BulkProcessUploadDto): Promise<any[]> {
+    this.logger.log(`[Vision] Bulk registering ${dto.students.length} students`);
+    const results = [];
+
+    for (const studentDto of dto.students) {
+      try {
+        const result = await this.registerStudent({
+          studentId: studentDto.studentId,
+          name: studentDto.name,
+          imagesBase64: studentDto.imagesBase64,
+          confidenceThreshold: dto.confidenceThreshold
+        });
+        results.push({ studentId: studentDto.studentId, success: true, detail: result });
+      } catch (error) {
+        this.logger.error(`[Vision] Failed to register student ${studentDto.studentId}: ${error.message}`);
+        results.push({ 
+          studentId: studentDto.studentId, 
+          success: false, 
+          error: error instanceof BadGatewayException ? 'AI Service Error' : error.message 
+        });
+      }
+    }
+
+    return results;
   }
 
   /**
@@ -145,22 +174,33 @@ export class VisionService {
         this.httpService.post(`${this.aiServiceUrl}/recognize`, {
           image_base64: dto.imageBase64,
           confidence_threshold: dto.confidenceThreshold || 0.7,
-        })
+        }, { timeout: 60000 })
       );
       aiResponse = response.data;
     } catch (error) {
-      this.logger.error(`[Model 2] AI service error: ${error.message}`);
-      throw new BadGatewayException(`AI service unreachable: ${error.message}`);
+      const aiErrorDetail = error.response?.data ? JSON.stringify(error.response.data) : error.message;
+      this.logger.error(`[Model 2] AI service error: ${aiErrorDetail}`);
+      throw new BadGatewayException(`AI service unreachable: ${aiErrorDetail}`);
     }
 
     const processingTime = Date.now() - startTime;
 
     // Manual validation of AI response
-    const resultDto = plainToInstance(AiRecognitionResultDto, aiResponse);
+    let rawMatch = aiResponse['match'] ?? aiResponse['similarity'] ?? aiResponse['confidenceScore'] ?? 0;
+    // Sanitize NaN or non-number values
+    let sanitizedMatch = (typeof rawMatch === 'number' && !isNaN(rawMatch)) ? rawMatch : parseFloat(String(rawMatch));
+    if (isNaN(sanitizedMatch)) sanitizedMatch = 0;
+    // Clamp between 0 and 1
+    sanitizedMatch = Math.max(0, Math.min(1, sanitizedMatch));
+
+    const resultDto = plainToInstance(AiRecognitionResultDto, {
+      ...aiResponse,
+      match: sanitizedMatch,
+    });
     const errors = await validate(resultDto);
     if (errors.length > 0) {
       this.logger.error(`[Model 2] Invalid AI response: ${JSON.stringify(errors)}`);
-      throw new BadGatewayException('AI service returned invalid payload structure');
+      throw new BadGatewayException(`AI Response Error: The vision service returned an incompatible payload structure. Details: ${JSON.stringify(errors[0].constraints)}`);
     }
 
     // Handle different match statuses

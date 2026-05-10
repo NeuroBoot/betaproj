@@ -100,7 +100,7 @@ export class CoursesService {
 
     // Permission check
     if (user.userType === Role.STAFF && course.instructor.userAccountId !== user.userAccountId) {
-      throw new ForbiddenException('You can only access your own courses');
+      throw new ForbiddenException(`Access Denied: As an instructor, you only have access to your own courses. This course (${course.name}) is assigned to another staff member.`);
     }
 
     if (user.userType === Role.STUDENT) {
@@ -125,7 +125,7 @@ export class CoursesService {
 
     // Permission check
     if (user.userType === Role.STAFF && course.instructor.userAccountId !== user.userAccountId) {
-      throw new ForbiddenException('You can only access your own courses');
+      throw new ForbiddenException(`Access Denied: As an instructor, you only have access to your own courses. This course (${course.name}) is assigned to another staff member.`);
     }
 
     return course;
@@ -222,12 +222,12 @@ export class CoursesService {
       relations: ['instructor'],
     });
     if (!course) {
-      throw new NotFoundException(`Course with ID ${courseId} not found`);
+      throw new NotFoundException(`Course Validation Failed: No active course found with ID ${courseId}.`);
     }
 
     // Permission check: Admin or the course's Instructor
     if (user.userType === Role.STAFF && course.instructor.userAccountId !== user.userAccountId) {
-      throw new ForbiddenException('You can only enroll students in your own courses');
+      throw new ForbiddenException(`Access Denied: Instructors can only enroll students in courses they teach. Course '${course.name}' is managed by another instructor.`);
     }
 
     const student = await this.userRepository.findById(studentId);
@@ -259,12 +259,12 @@ export class CoursesService {
       relations: ['instructor', 'enrollments', 'enrollments.student'],
     });
     if (!course) {
-      throw new NotFoundException(`Course with ID ${courseId} not found`);
+      throw new NotFoundException(`Course Validation Failed: No active course found with ID ${courseId}.`);
     }
 
     // Permission check: Admin or the course's Instructor
     if (user.userType === Role.STAFF && course.instructor.userAccountId !== user.userAccountId) {
-      throw new ForbiddenException('You can only view students in your own courses');
+      throw new ForbiddenException(`Access Denied: You can only view enrollment lists for your own assigned courses.`);
     }
 
     return (course.enrollments || []).map(e => e.student);

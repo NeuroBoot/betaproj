@@ -40,7 +40,7 @@ export class AuthService {
       
       if (existingUser) {
         if (!existingUser.isDeleted) {
-          throw new ConflictException('Username already exists');
+          throw new ConflictException(`Registration Failed: The username '${registerDto.username}' already exists.`);
         }
         
         // Restore soft-deleted user
@@ -88,7 +88,7 @@ export class AuthService {
 
     if (!user) {
       console.log(`[AUTH DEBUG] User not found: ${username}`);
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException(`Authentication Failed: User account '${username}' does not exist.`);
     }
 
     // Check if the password matches (using Bcrypt).
@@ -106,7 +106,7 @@ export class AuthService {
 
     if (!isMatch) {
       console.log(`[AUTH DEBUG] Password mismatch for ${username}. Stored: ${user.password.substring(0, 5)}...`);
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException(`Authentication Failed: Incorrect password for account '${username}'.`);
     }
 
     // Optional: Verify role if provided in LoginDto

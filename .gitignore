@@ -1,39 +1,72 @@
+# Dependency directories
 node_modules/
+jspm_packages/
+
+# Build artifacts
 dist/
-.env
+build/
+.next/
+out/
+*.tsbuildinfo
+
+# Environment variables
+
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+
+# IDE / Editor
 .vscode/
 .idea/
+*.swp
+*.swo
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# Database & Documentation (Temporary/Backups)
 *.mwb
 *.sql
 *.docx
 *.pptx
 *.mp4
-*.txt
 *.zip
 *.rar
 *.7z
-
-# UI Folders
-front/
-betaproj/
-backend2donttakeanycodejustreview/
-
-# Development/Backups
-/w
-/w/
 src.zip
 BACKEND_HANDOVER.md
 session_audit_summary.txt
-MASTER_POSTMAN_COLLECTION.json
-MASTER_SWAGGER_OPENAPI.json
-postman_end.json
-Attendance Master Collection.postman_collection.json.bak
+*.bak
+
+# Coverage / Testing outputs
 coverage/
-*.png
-*.jpg
-*.jpeg
-*.gif
+.nyc_output/
+
+# Media / Assets (Keep folders, ignore files if large)
+*.mp4
+*.mov
+*.avi
+# Keeping images untracked to save repo space if they are test data
+# *.png
+# *.jpg
+# *.jpeg
+# *.gif
+
+# Project Specific (Kept based on your request)
+# ai-service/ is NOT ignored so your friends can see it
+# front/ is NOT ignored so your friends can see it
+# test/ is NOT ignored so your friends can see it
+
+# Legacy/Archive (Ignored to keep repo clean)
+betaproj/
+backend2donttakeanycodejustreview/
+/w/

@@ -1,5 +1,5 @@
 import { IsString, IsNumber, Min, Max, IsEnum, IsOptional, IsArray, ValidateNested } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Type, Expose } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
 export enum MatchStatus {

@@ -113,7 +113,7 @@ export class AlertService {
     
     const course = await courseRepo.findById(courseId);
     if (!course) {
-      throw new NotFoundException('Course not found');
+      throw new NotFoundException(`Operation Aborted: Course with ID ${courseId} was not found.`);
     }
     
     const enrolledStudents = await courseRepo.getEnrolledStudents(courseId);
@@ -153,7 +153,7 @@ export class AlertService {
 
   async sendBatchAlerts(userIds: number[], message: string, type: string = 'info', title: string = 'Batch Alert') {
     if (!userIds || !Array.isArray(userIds)) {
-      throw new BadRequestException('userIds must be an array of numbers');
+      throw new BadRequestException('Batch Notification Failed: The userIds parameter must be a valid array of student numeric IDs.');
     }
     
     const results = [];
@@ -177,7 +177,7 @@ export class AlertService {
     
     const course = await courseRepo.findById(courseId);
     if (!course) {
-      throw new NotFoundException('Course not found');
+      throw new NotFoundException(`Operation Aborted: Course with ID ${courseId} was not found.`);
     }
     
     const enrolledStudents = await courseRepo.getEnrolledStudents(courseId);

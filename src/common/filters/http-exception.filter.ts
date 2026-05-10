@@ -27,8 +27,9 @@ export class HttpExceptionFilter implements ExceptionFilter {
       status = HttpStatus.BAD_REQUEST; // Or CONFLICT depending on the error
       const driverError = (exception as any).driverError;
       message = {
-        message: 'Database query failed',
+        message: 'Database operation failed: An integrity constraint or data format issue occurred.',
         detail: exception.message,
+        hint: 'Check for duplicate entries or missing required fields.',
         code: (exception as any).code || driverError?.code,
         statusCode: status
       };

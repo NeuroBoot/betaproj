@@ -76,7 +76,7 @@ export class UsersService {
   async findOneByUsername(username: string): Promise<Omit<UserAccount, 'password'>> {
     const user = await this.userRepository.findByUsername(username);
     if (!user) {
-      throw new NotFoundException(`User with username ${username} not found`);
+      throw new NotFoundException(`Search Failed: User account with username '${username}' was not found.`);
     }
     const { password, ...result } = user;
     return result;
@@ -85,7 +85,7 @@ export class UsersService {
   async updateByUsername(username: string, userData: Partial<UserAccount>): Promise<Omit<UserAccount, 'password'>> {
     const user = await this.userRepository.findByUsername(username);
     if (!user) {
-      throw new NotFoundException(`User with username ${username} not found`);
+      throw new NotFoundException(`Search Failed: User account with username '${username}' was not found.`);
     }
     return this.update(user.userAccountId, userData);
   }
@@ -138,7 +138,7 @@ export class UsersService {
   async removeByUsername(username: string, isHard: boolean = false): Promise<void> {
     const user = await this.userRepository.findByUsernameAll(username);
     if (!user) {
-      throw new NotFoundException(`User with username ${username} not found`);
+      throw new NotFoundException(`Account Deletion Failed: No user account found with username '${username}'.`);
     }
 
     if (isHard) {

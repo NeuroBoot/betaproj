@@ -8,9 +8,14 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import * as rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import * as dotenv from 'dotenv';
+import { json, urlencoded } from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // Increase payload limits for large Base64 images
+  app.use(json({ limit: '50mb' }));
+  app.use(urlencoded({ extended: true, limit: '50mb' }));
 
   // Security
   app.use(helmet());

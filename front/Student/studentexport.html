@@ -10,140 +10,160 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 
   <style>
-    /* ===== GLOBAL LAYOUT ===== */
-    body {
-      margin: 0;
-      display: flex; 
-      background: linear-gradient(135deg, #0b1020, #1b1f3b);
-      color: #fff;
-      min-height: 100vh;
-      font-family: "Segoe UI", sans-serif;
-    }
 
-    /* ===== SIDEBAR  ===== */
-    .sidebar {
-      width: 240px;
-      background: linear-gradient(180deg, #0c0f2d, #11164a);
-      min-height: 100vh;
-      padding: 20px;
-      flex-shrink: 0;
-    }
+/* GLOBAL */
+body{
+  margin:0;
+  display:flex;
+  background:#0f0c29;
+  color:#ffffff;
+  min-height:100vh;
+  font-family:"Segoe UI",sans-serif;
+}
 
-    .user-box {
-      background: linear-gradient(135deg, #1f2547, #2a2f5a);
-      border-radius: 14px;
-      padding: 14px;
-      margin: 18px 0 24px;
-    }
+/* SIDEBAR */
+.sidebar{
+  width:240px;
+  background:#15132b;
+  min-height:100vh;
+  padding:20px;
+  flex-shrink:0;
+  border-right:1px solid rgba(255,255,255,0.05);
+}
 
-    .user-box small { color: #aab0ff; font-size: 13px; }
-    .user-name { font-size: 16px; font-weight: 600; color: #fff; }
+.user-box{
+  background:#1a1a3a;
+  border-radius:14px;
+  padding:14px;
+  margin:18px 0 24px;
+}
 
-    .sidebar .nav-link {
-      color: #bfc4ff;
-      margin-bottom: 10px;
-      border-radius: 10px;
-      padding: 10px 14px;
-    }
+.user-box small{
+  color:#b0b0b0;
+  font-size:13px;
+}
 
-    .sidebar .nav-link.active,
-    .sidebar .nav-link:hover {
-      background: #2b5cff;
-      color: #fff;
-    }
+.user-name{
+  font-size:16px;
+  font-weight:600;
+  color:#ffffff;
+}
 
-    /* ===== CONTENT ===== */
-    .content {
-      flex: 1;
-      padding: 30px;
-    }
+.sidebar .nav-link{
+  color:#b0b0b0;
+  margin-bottom:10px;
+  border-radius:10px;
+  padding:10px 14px;
+}
 
-    .page-card {
-      background: rgba(255,255,255,0.06);
-      border-radius: 20px;
-      padding: 28px;
-      margin-bottom: 25px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.25);
-    }
+.sidebar .nav-link.active,
+.sidebar .nav-link:hover{
+  background:#3060ff;
+  color:#ffffff;
+  box-shadow:0 4px 12px rgba(48,96,255,0.2);
+}
 
-    label {
-      font-size: 14px;
-      color: #c7c9ff;
-      margin-bottom: 6px;
-    }
+/* CONTENT */
+.content{
+  flex:1;
+  padding:30px;
+}
 
-    /* ===== INPUTS & SELECT ===== */
-    .form-control,
-    .form-select {
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.15);
-      color: #fff;
-      border-radius: 12px;
-    }
+/* CARD */
+.page-card{
+  background:#1a1a3a;
+  border-radius:20px;
+  padding:28px;
+  margin-bottom:25px;
+  border:1px solid rgba(255,255,255,0.05);
+}
 
-    .form-control::placeholder {
-      color: #9aa0ff;
-    }
+/* LABEL */
+label{
+  font-size:14px;
+  color:#b0b0b0;
+  margin-bottom:6px;
+}
 
-    .form-control:focus,
-    .form-select:focus {
-      outline: none;
-      box-shadow: none;
-      border-color: #4f46e5;
-      background: rgba(255,255,255,0.1);
-      color: #fff;
-    }
+/* INPUTS */
+.form-control,
+.form-select{
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.05);
+  color:#ffffff;
+  border-radius:12px;
+}
 
-    /* ===== FIX SELECT OPTION WHITE ISSUE ===== */
-    .form-select option {
-      background-color: #1f2547;
-      color: #ffffff;
-    }
+.form-control::placeholder{
+  color:#b0b0b0;
+}
 
-    /* ===== BUTTON ===== */
-    .btn-primary {
-      background: linear-gradient(135deg, #2563eb, #3b82f6);
-      border: none;
-      border-radius: 14px;
-      padding: 12px 26px;
-    }
+.form-control:focus,
+.form-select:focus{
+  outline:none;
+  box-shadow:none;
+  border-color:#3060ff;
+  background:rgba(255,255,255,0.06);
+  color:#ffffff;
+}
 
-    /* ===== QUICK REPORTS ===== */
-    .quick-card {
-      background: rgba(255,255,255,0.07);
-      border-radius: 16px;
-      padding: 20px;
-      height: 100%;
-      transition: 0.2s;
-      cursor: pointer;
-    }
+/* SELECT OPTIONS */
+.form-select option{
+  background:#1a1a3a;
+  color:#ffffff;
+}
 
-    .quick-card:hover {
-      background: rgba(255,255,255,0.12);
-    }
+/* BUTTON */
+.btn-primary{
+  background:#3060ff;
+  border:none;
+  border-radius:14px;
+  padding:12px 26px;
+}
 
-    .quick-title {
-      font-size: 15px;
-      font-weight: 600;
-    }
+.btn-primary:hover{
+  background:#2954e6;
+}
 
-    .quick-sub {
-      font-size: 13px;
-      color: #c7c9ff;
-    }
-  </style>
+/* QUICK REPORTS */
+.quick-card{
+  background:rgba(255,255,255,0.04);
+  border-radius:16px;
+  padding:20px;
+  height:100%;
+  transition:.2s;
+  cursor:pointer;
+  border:1px solid rgba(255,255,255,0.05);
+}
+
+.quick-card:hover{
+  background:rgba(255,255,255,0.08);
+}
+
+.quick-title{
+  font-size:15px;
+  font-weight:600;
+}
+
+.quick-sub{
+  font-size:13px;
+  color:#b0b0b0;
+}
+
+</style>
+
 </head>
 
 <body>
 
-<!-- SIDEBAR -->
+  <!-- SIDEBAR -->
 <div class="sidebar">
-  <h5 class="mb-4"><i class="bi bi-eye"></i> FACEMARK</h5>
-  <p class="small text-muted">Student Portal</p>
+   <h5 class="mb-4"><img src="face.jpeg"  alt="" width="50px" height="50px"> FACEMARK</h5>
+      <p class="small text-muted " style="color:white !important">Student Portal</p>
 
   <div class="user-box">
     <small>Welcome,</small>
-    <div class="user-name">سَس</div>
+    <div class="user-name">guest</div>
     <small>Student Portal</small>
   </div>
 
@@ -157,7 +177,9 @@
   </ul>
 
   <hr class="text-secondary">
-  <a><i class="bi bi-box-arrow-right"></i> Sign Out</a>
+<button id="logoutBtn" class="btn btn-danger w-100 mt-2">
+    <i class="bi bi-box-arrow-right"></i> Sign Out
+</button>
 </div>
 
 <!-- CONTENT -->
@@ -188,7 +210,14 @@
           <option>Computer Science</option>
         </select>
       </div>
-
+<div class="col-md-6">
+  <label>Session Type</label>
+  <select class="form-select" id="sessionType">
+    <option value="all">All Sessions</option>
+    <option value="lecture">Lectures Only</option>
+    <option value="section">Sections Only</option>
+  </select>
+</div>
       <div class="col-md-6">
         <label>Format</label>
         <select class="form-select">
@@ -213,28 +242,28 @@
 
     <div class="row g-4">
       <div class="col-md-6">
-        <div class="quick-card">
+        <div class="quick-card" data-type="semester">
           <div class="quick-title">Current Semester Report</div>
           <div class="quick-sub">Complete attendance summary</div>
         </div>
       </div>
 
       <div class="col-md-6">
-        <div class="quick-card">
+        <div class="quick-card" data-type="month">
           <div class="quick-title">Monthly Report</div>
           <div class="quick-sub">Last 30 days attendance</div>
         </div>
       </div>
 
       <div class="col-md-6">
-        <div class="quick-card">
+        <div class="quick-card" data-type="course">
           <div class="quick-title">Course-wise Report</div>
           <div class="quick-sub">Individual course attendance</div>
         </div>
       </div>
 
       <div class="col-md-6">
-        <div class="quick-card">
+        <div class="quick-card" data-type="year">
           <div class="quick-title">Academic Year Report</div>
           <div class="quick-sub">Full year summary</div>
         </div>
@@ -243,120 +272,435 @@
   </div>
 
 </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
-document.addEventListener("DOMContentLoaded", function () {
+const API_BASE_URL = 'http://localhost:3000/api/v1';
 
-  const downloadBtn = document.querySelector(".btn-primary");
-  const dateInputs = document.querySelectorAll('input[type="date"]');
-  const selects = document.querySelectorAll(".form-select");
+/* ================= AUTH ================= */
+function getToken() {
+  return localStorage.getItem('token');
+}
 
-  downloadBtn.addEventListener("click", function () {
+function authHeaders() {
+  return {
+    'Authorization': `Bearer ${getToken()}`
+  };
+}
 
-    const dateFrom = dateInputs[0].value;
-    const dateTo = dateInputs[1].value;
-    const course = selects[0].value;
-    const format = selects[1].value;
+function redirectToLogin() {
+  localStorage.clear();
+  window.location.href = "./sign in/index.html";
+}
 
-    let collectedData = [];
+/* ================= PROFILE ================= */
+async function loadProfile() {
+  const token = getToken();
 
-    // LocalStorage
-    for (let i = 0; i < localStorage.length; i++) {
+  if (!token) {
+    redirectToLogin();
+    return;
+  }
 
-      const key = localStorage.key(i);
+  try {
+    const res = await fetch(`${API_BASE_URL}/auth/profile`, {
+      headers: authHeaders()
+    });
 
-      if (key.startsWith("attendance_")) {
+    const data = await res.json();
 
-        const parts = key.split("_");
-        const storedCourse = parts[1];
-        const storedDate = parts[parts.length - 1];
+    if (!res.ok) throw new Error();
 
-        const courseMatch =
-          course === "All Courses" || storedCourse === course;
+    const username =
+      data.username ||
+      data.user?.username ||
+      data.data?.username ||
+      "Student";
 
-        const dateMatch =
-          (!dateFrom || storedDate >= dateFrom) &&
-          (!dateTo || storedDate <= dateTo);
+    document.querySelector(".user-name").textContent = username;
 
-        if (courseMatch && dateMatch) {
-          const data = JSON.parse(localStorage.getItem(key));
-          collectedData = collectedData.concat(data);
-        }
+  } catch {
+    redirectToLogin();
+  }
+}
+
+/* ================= LOAD COURSES ================= */
+async function loadCourses() {
+  try {
+    const res = await fetch(`${API_BASE_URL}/courses`, {
+      headers: authHeaders()
+    });
+
+    const data = await res.json();
+
+    const courses = data.data || [];
+
+    const select = document.querySelectorAll(".form-select")[0];
+
+    select.innerHTML = `<option value="all">All Courses</option>`;
+
+    courses.forEach(c => {
+      select.innerHTML += `
+        <option value="${c.courseId}">
+          ${c.name}
+        </option>
+      `;
+    });
+
+  } catch (err) {
+    console.error("Courses error", err);
+  }
+}
+
+/* ================= EXPORT ================= */
+/* ================= UPDATE downloadReport() ================= */
+
+/* ================= REPLACE downloadReport() بالكامل ================= */
+async function downloadReport() {
+
+  const dateFrom = document.querySelectorAll("input")[0].value;
+  const dateTo = document.querySelectorAll("input")[1].value;
+  const courseId = document.querySelectorAll(".form-select")[0].value;
+  const format = document.querySelectorAll(".form-select")[2].value;
+  const sessionType = document.getElementById("sessionType").value;
+
+  try {
+
+    let records = [];
+
+    /* ================= لو All Courses ================= */
+    if (courseId === "all") {
+
+      const coursesRes = await fetch(`${API_BASE_URL}/courses`, {
+        headers: authHeaders()
+      });
+
+      const coursesData = await coursesRes.json();
+
+      if (!coursesRes.ok) throw new Error();
+
+      const courses = coursesData.data || [];
+
+      /* هات attendance لكل كورس */
+      for (const course of courses) {
+
+        const res = await fetch(
+          `${API_BASE_URL}/attendance/my?courseId=${course.courseId}`,
+          {
+            headers: authHeaders()
+          }
+        );
+
+        if (!res.ok) continue;
+
+        const data = await res.json();
+
+        const courseRecords = data.data || [];
+
+        records.push(...courseRecords);
+
       }
+
+    } else {
+
+      /* ================= كورس واحد ================= */
+      const res = await fetch(
+        `${API_BASE_URL}/attendance/my?courseId=${courseId}`,
+        {
+          headers: authHeaders()
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) throw new Error();
+
+      records = data.data || [];
     }
 
-    if (collectedData.length === 0) {
-      alert("No attendance data found");
+    /* ================= فلترة النوع ================= */
+    if (sessionType !== "all") {
+
+      records = records.filter(r => {
+
+        const type = (
+          r.sessionType ||
+          r.type ||
+          r.courseType ||
+          ""
+        ).toLowerCase();
+
+        return type === sessionType;
+
+      });
+
+    }
+
+    /* ================= فلترة التاريخ ================= */
+    records = records.filter(r => {
+
+      if (!r.recordDate) return false;
+
+      const recordDate = r.recordDate.split("T")[0];
+
+      return (!dateFrom || recordDate >= dateFrom) &&
+             (!dateTo || recordDate <= dateTo);
+
+    });
+
+    if (!records.length) {
+      showAlert("No data found", "error");
       return;
     }
 
-    // ===== CSV  =====
-    function generateCSV(data) {
-      let csv = "Student ID,Name,Status,Time\n";
-      data.forEach(row => {
-        csv += `${row.id},${row.name},${row.status},${row.time}\n`;
-      });
-      return csv;
-    }
+    /* ================= إزالة التكرار ================= */
+    const uniqueMap = new Map();
 
-    // ===== PDF  =====
-    function generatePDF(data) {
-      let content = `
-        <html>
-        <body>
-          <h2>Attendance Report</h2>
-          <table border="1" cellspacing="0" cellpadding="5">
-            <tr>
-              <th>ID</th>
-              <th>Name</th>
-              <th>Status</th>
-              <th>Time</th>
-            </tr>
+    records.forEach(r => {
+
+      const key = `
+        ${r.recordDate?.split("T")[0]}
+        _${r.checkInTime || ""}
+        _${r.course?.name || ""}
       `;
 
-      data.forEach(row => {
-        content += `
-          <tr>
-            <td>${row.id}</td>
-            <td>${row.name}</td>
-            <td>${row.status}</td>
-            <td>${row.time}</td>
-          </tr>
-        `;
-      });
+      if (!uniqueMap.has(key)) {
+        uniqueMap.set(key, r);
+      }
 
-      content += `
-          </table>
-        </body>
-        </html>
-      `;
+    });
 
-      return new Blob([content], { type: "application/pdf" });
+    records = Array.from(uniqueMap.values());
+
+    /* ================= تحويل البيانات ================= */
+    const mapped = records.map(r => ({
+
+      course: r.course?.name || "Unknown",
+
+      sessionType:
+        r.sessionType ||
+        r.type ||
+        r.courseType ||
+        "Unknown",
+
+      status:
+        r.attendanceStatusId === 1 ? "Present" :
+        r.attendanceStatusId === 2 ? "Absent" :
+        r.attendanceStatusId === 3 ? "Late" :
+        "Unknown",
+
+      date:
+        r.recordDate?.split("T")[0] || "-"
+
+    }));
+
+    /* ================= EXPORT ================= */
+    if (format.includes("CSV")) {
+      exportCSV(mapped);
+
+    } else if (format.includes("Excel")) {
+      exportExcel(mapped);
+
+    } else {
+      exportPDF(mapped);
     }
 
-   
-    if (format.includes("CSV") || format.includes("Excel")) {
+  } catch (err) {
 
-      const csvData = generateCSV(collectedData);
-      const blob = new Blob([csvData], { type: "text/csv" });
+    console.error("Export error:", err);
 
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = "my_attendance_report.csv";
-      link.click();
+    showAlert("Failed to load attendance data", "error");
 
-    } else if (format.includes("PDF")) {
+  }
+}
+/* ================= CSV ================= */
+function exportCSV(data) {
 
-      const pdfBlob = generatePDF(collectedData);
+  let csv = "Course,Session Type,Status,Date\n";
 
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(pdfBlob);
-      link.download = "my_attendance_report.pdf";
-      link.click();
-    }
-
+  data.forEach(r => {
+    csv += `${r.course},${r.sessionType},${r.status},${r.date}\n`;
   });
 
+  const blob = new Blob([csv], { type: "text/csv" });
+
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "attendance.csv";
+  link.click();
+}
+
+/* ================= EXCEL ================= */
+function exportExcel(data) {
+
+  let table = `
+    <table>
+      <tr>
+        <th>Course</th>
+        <th>Session Type</th>
+        <th>Status</th>
+        <th>Date</th>
+      </tr>
+  `;
+
+  data.forEach(r => {
+    table += `
+      <tr>
+        <td>${r.course}</td>
+        <td>${r.sessionType}</td>
+        <td>${r.status}</td>
+        <td>${r.date}</td>
+      </tr>
+    `;
+  });
+
+  table += "</table>";
+
+  const blob = new Blob([table], {
+    type: "application/vnd.ms-excel"
+  });
+
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "attendance.xls";
+  link.click();
+}
+/* ================= PDF ================= */
+function exportPDF(data) {
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  let y = 20;
+
+  doc.setFontSize(16);
+  doc.text("Attendance Report", 14, y);
+
+  y += 10;
+
+  doc.setFontSize(11);
+  doc.text("Course", 14, y);
+  doc.text("Type", 70, y);
+  doc.text("Status", 110, y);
+  doc.text("Date", 155, y);
+
+  y += 8;
+
+  doc.line(10, y, 200, y);
+
+  y += 6;
+
+  data.forEach(r => {
+
+    if (y > 280) {
+      doc.addPage();
+      y = 20;
+    }
+
+    doc.text(String(r.course || "-"), 14, y);
+    doc.text(String(r.sessionType || "-"), 70, y);
+    doc.text(String(r.status || "-"), 110, y);
+    doc.text(String(r.date || "-"), 155, y);
+
+    y += 8;
+  });
+
+  doc.save("attendance.pdf");
+}
+// ================= Quick reports================= */
+function setQuickDates(type) {
+  const fromInput = document.querySelectorAll("input")[0];
+  const toInput = document.querySelectorAll("input")[1];
+
+  const today = new Date();
+  let from = new Date();
+
+  switch (type) {
+    case "month":
+      from.setDate(today.getDate() - 30);
+      break;
+
+    case "semester":
+      from.setMonth(today.getMonth() - 4);
+      break;
+
+    case "year":
+      from.setFullYear(today.getFullYear() - 1);
+      break;
+
+    case "course":
+      from.setMonth(today.getMonth() - 6);
+      break;
+  }
+
+  fromInput.value = from.toISOString().split("T")[0];
+  toInput.value = today.toISOString().split("T")[0];
+}
+//alert
+function showAlert(message, type = "success") {
+  Swal.fire({
+    text: message,
+    icon: type, // success | error | warning | info
+    background: "#1a1a3a",
+    color: "#fff",
+    confirmButtonColor: "#3060ff",
+    confirmButtonText: "OK",
+    showClass: {
+      popup: "animate__animated animate__zoomIn"
+    },
+    hideClass: {
+      popup: "animate__animated animate__fadeOut"
+    }
+  });
+}
+/* ================= EVENTS ================= */
+document.querySelector(".btn-primary")
+  .addEventListener("click", downloadReport);
+
+document.getElementById("logoutBtn")
+  .addEventListener("click", () => {
+    document.getElementById("logoutBtn")
+?.addEventListener("click", function () {
+
+    localStorage.clear();
+
+    Swal.fire({
+        text: "Logged out successfully",
+        icon: "success",
+        background: "#1a1a3a",
+        color: "#fff",
+        confirmButtonColor: "#3060ff",
+        confirmButtonText: "OK"
+    }).then(() => {
+        window.location.href = "./sign in/index.html";
+    });
+
 });
+  });
+document.querySelectorAll(".quick-card").forEach(card => {
+  card.addEventListener("click", () => {
+
+    const type = card.dataset.type;
+
+    // حدد التاريخ تلقائي
+    setQuickDates(type);
+
+    // لو Course-wise ممكن تختار كورس معين (اختياري)
+    if (type === "course") {
+      const select = document.querySelectorAll(".form-select")[0];
+      if (select.value === "all") {
+        showAlert("Select a course first", "error");
+        return;
+      }
+    }
+
+    // نفذ التصدير
+    downloadReport();
+  });
+});
+/* ================= INIT ================= */
+loadProfile();
+loadCourses();
 </script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 </html>

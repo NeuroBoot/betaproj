@@ -39,7 +39,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"imagesBase64\": [\"{{img1}}\", \"{{img2}}\"],\n  \"studentId\": \"1\",\n  \"name\": \"Ziad Taha\"\n}"
+              "raw": "{\n  \"students\": [\n    {\n      \"studentId\": \"101\",\n      \"name\": \"Ziad Taha\",\n      \"imagesBase64\": [\"{{img1}}\", \"{{img2}}\"]\n    },\n    {\n      \"studentId\": \"102\",\n      \"name\": \"Ahmed Ali\",\n      \"imagesBase64\": [\"{{img3}}\"]\n    }\n  ],\n  \"confidenceThreshold\": 0.6\n}"
             },
             "url": {
               "raw": "{{base_url}}/vision/upload",
@@ -51,7 +51,7 @@
                 "upload"
               ]
             },
-            "description": "Model 1: Registers student face embeddings from a batch of images."
+            "description": "Model 1: Bulk registers multiple students at once. Each student gets their own face embedding saved to their database record ID."
           }
         },
         {
@@ -89,7 +89,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"imageBase64\": \"{{frame1}}\",\n  \"courseId\": 1,\n  \"sessionId\": \"LECTURE-1\",\n  \"room\": \"Hall A\"\n}"
+              "raw": "{\n  \"imageBase64\": \"{{frame1}}\",\n  \"courseId\": 1,\n  \"sessionNumber\": \"1\",\n  \"sessionType\": \"LECTURE\",\n  \"sectionId\": \"2\",\n  \"sessionId\": \"LEC-1\",\n  \"room\": \"Hall A\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/vision/recognize",
@@ -101,7 +101,7 @@
                 "recognize"
               ]
             },
-            "description": "Model 2: Processes camera frame for recognition and marks attendance if student is enrolled."
+            "description": "Model 2: Recognizes a student from a frame and marks them 'Present' in the DB if they are enrolled in the course."
           }
         }
       ]
@@ -3525,8 +3525,7 @@
               ],
               "query": [
                 {
-                  "key": "courseId",
-                  "value": "1",
+                  "key": "courseId", "value": "1", "description": "Optional",
                   "description": "Optional"
                 },
                 {
@@ -3980,8 +3979,7 @@
                   ],
                   "variable": [
                     {
-                      "key": "courseId",
-                      "value": "1",
+                      "key": "courseId", "value": "1", "description": "Optional",
                       "enabled": true
                     }
                   ]
@@ -4538,8 +4536,7 @@
                   ],
                   "variable": [
                     {
-                      "key": "courseId",
-                      "value": "1",
+                      "key": "courseId", "value": "1", "description": "Optional",
                       "enabled": true
                     }
                   ]
@@ -4650,8 +4647,7 @@
                   ],
                   "variable": [
                     {
-                      "key": "courseId",
-                      "value": "1",
+                      "key": "courseId", "value": "1", "description": "Optional",
                       "enabled": true
                     }
                   ]

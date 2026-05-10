@@ -45,7 +45,7 @@ export class AttendanceController {
     @CurrentUser() user: UserAccount,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(50), ParseIntPipe) limit: number,
-    @Query('courseId', new DefaultValuePipe(null), ParseIntPipe) courseId?: number,
+    @Query('courseId', new ParseIntPipe({ optional: true })) courseId?: number,
     @Query('session') session?: string,
     @Query('date') date?: string,
   ) {
@@ -64,7 +64,7 @@ export class AttendanceController {
   @ApiQuery({ name: 'courseId', required: false, description: 'Optional: Filter records for a specific course' })
   async getMyAttendance(
     @CurrentUser() user: UserAccount,
-    @Query('courseId', new DefaultValuePipe(null), ParseIntPipe) courseId?: number,
+    @Query('courseId', new DefaultValuePipe(undefined)) courseId?: number,
   ) {
     return this.service.getStudentAttendance(user.userAccountId, courseId);
   }
@@ -87,7 +87,7 @@ export class AttendanceController {
     if (user.userType === Role.STAFF) {
       const isAuthorized = await this.service.isStaffAuthorizedForCourse(user.userAccountId, courseId);
       if (!isAuthorized) {
-        throw new ForbiddenException('You are not authorized to view attendance for this course');
+        throw new ForbiddenException(`Access Denied: You are not authorized to view attendance records for course ID ${courseId}. Only the course instructor or admins have access.`);
       }
     }
     return this.service.getCourseAttendance(courseId, session, date);
@@ -99,7 +99,7 @@ export class AttendanceController {
   @ApiQuery({ name: 'courseId', required: false })
   async getStudentAttendanceById(
     @Param('studentId', ParseIntPipe) studentId: number,
-    @Query('courseId', new DefaultValuePipe(null), ParseIntPipe) courseId?: number
+    @Query('courseId', new DefaultValuePipe(undefined)) courseId?: number
   ) {
     return this.service.getStudentAttendance(studentId, courseId);
   }
@@ -157,7 +157,7 @@ export class AttendanceController {
   @ApiQuery({ name: 'courseId', required: false })
   statistics(
     @CurrentUser() user: UserAccount,
-    @Query('courseId', new DefaultValuePipe(null), ParseIntPipe) courseId?: number,
+    @Query('courseId', new DefaultValuePipe(undefined)) courseId?: number,
   ) {
     return this.service.statistics(user, courseId);
   }

@@ -1,7 +1,7 @@
 import { Controller, Post, Body, Get, Delete, Param, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
 import { VisionService } from './vision.service';
-import { ProcessUploadDto } from './dto/process-upload.dto';
+import { BulkProcessUploadDto } from './dto/bulk-process-upload.dto';
 import { ProcessFrameDto } from './dto/process-frame.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -17,22 +17,20 @@ export class VisionController {
   constructor(private readonly visionService: VisionService) {}
 
   /**
-   * Model 1: Register student face embeddings from multiple images
-   * Supports batch upload of multiple images for better accuracy
+   * Model 1: Bulk register student face embeddings
+   * Supports multiple students, each with multiple images
    */
   @Post('upload')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN, Role.STAFF)
   @ApiOperation({ 
-    summary: 'Model 1: Register student face embeddings from multiple images',
-    description: 'Upload multiple images of a student to create a robust face embedding for accurate recognition'
+    summary: 'Model 1: Bulk register student face embeddings',
+    description: 'Upload multiple students, each with an array of images, to create robust face embeddings'
   })
   @ApiResponse({ status: 200, description: 'Face embeddings registered successfully' })
-  @ApiResponse({ status: 400, description: 'No face detected in any image' })
-  @ApiResponse({ status: 503, description: 'AI service not available' })
-  async upload(@Body() dto: ProcessUploadDto, @CurrentUser() user: UserAccount) {
-    console.log(`[Vision] User ${user.username} uploading ${dto.imagesBase64.length} images for student ${dto.studentId}`);
-    return this.visionService.registerStudent(dto);
+  async upload(@Body() dto: BulkProcessUploadDto, @CurrentUser() user: UserAccount) {
+    console.log(`[Vision] User ${user.username} bulk uploading ${dto.students?.length || 0} students`);
+    return this.visionService.registerMultipleStudents(dto);
   }
 
   /**
@@ -77,8 +75,8 @@ export class VisionController {
    */
   @Delete('embeddings/:studentId')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
-  @ApiOperation({ summary: 'Delete student face embedding (Admin only)' })
+  @Roles(Role.ADMIN, Role.STAFF)
+  @ApiOperation({ summary: 'Delete student face embedding' })
   async deleteEmbedding(@Param('studentId') studentId: string) {
     return this.visionService.deleteEmbedding(studentId);
   }
