@@ -153,7 +153,6 @@
   <div class="page-card">
     <h4 class="mb-4">My Courses</h4>
 
-   <div class="row g-4" id="coursesContainer">
       <!-- كل الكورسات زي ما هي بالظبط -->
       
     <div class="row g-4" id="coursesContainer"></div>
@@ -303,8 +302,8 @@ function formatSchedule(course) {
 }
 
 /* ================= RENDER ================= */
-
 function renderCourses(courses) {
+
   const container = document.getElementById('coursesContainer');
 
   if (!courses || courses.length === 0) {
@@ -313,53 +312,83 @@ function renderCourses(courses) {
   }
 
   container.innerHTML = courses.map(course => {
-    const id = course.id || '';
-    const name = course.name || course.courseName || 'Course';
-    const credits = course.credits || course.creditHours || 0;
-   const instructor =
-  course.instructor?.username ||
-  course.instructor?.name ||
-  'Unknown Instructor';
 
-    const attendance = Number(
-      course.attendance || course.attendancePercentage || 0
-    );
+    const name = course.name || "Course";
 
-    const schedule = formatSchedule(course);
+    const credits = course.credits || 0;
+
+    const instructor =
+      course.instructor ||
+      "Unknown Instructor";
+
+    const attendance = Number(course.attendance || 0);
+
+    const schedule =
+      course.schedule ||
+      "Schedule Not Available";
+
+    const progressColor =
+      getProgressColor(attendance);
 
     return `
       <div class="col-md-6">
-        <div class="course-card" data-id="${id}">
-          <div class="d-flex justify-content-between mb-2">
-            <h5>${name}</h5>
-            <span class="credits-badge">${credits} Credits</span>
+
+        <div class="course-card h-100">
+
+          <div class="d-flex justify-content-between align-items-center mb-3">
+
+            <h5 class="mb-0">${name}</h5>
+
+            <span class="credits-badge">
+              ${credits} Credits
+            </span>
+
           </div>
 
-          <p class="text-soft">${instructor}</p>
+          <p class="text-soft mb-3">
+            <i class="bi bi-person"></i>
+            ${instructor}
+          </p>
 
-          <div class="d-flex justify-content-between text-soft">
-            <span>Schedule:</span>
-            <span>${schedule}</span>
+          <div class="mb-2 d-flex justify-content-between">
+            <span class="text-soft">
+              <i class="bi bi-calendar-event"></i>
+              Schedule
+            </span>
+
+            <span class="text-light small">
+              ${schedule}
+            </span>
           </div>
 
-          <div class="d-flex justify-content-between">
-            <span class="text-soft">Attendance:</span>
-            <span>${attendance}%</span>
+          <div class="mb-2 d-flex justify-content-between">
+
+            <span class="text-soft">
+              Attendance
+            </span>
+
+            <span class="fw-bold">
+              ${attendance}%
+            </span>
+
           </div>
 
-          <div class="progress">
-            <div class="progress-bar ${getProgressColor(attendance)}"
-                 style="width:${attendance}%">
+          <div class="progress mt-2">
+
+            <div
+              class="progress-bar ${progressColor}"
+              style="width:${attendance}%">
             </div>
+
           </div>
+
         </div>
+
       </div>
     `;
+
   }).join('');
 }
-
-/* ================= API ================= */
-
 /* ================= API ================= */
 
 async function loadCourses() {
@@ -409,22 +438,24 @@ async function loadCourses() {
         });
       }
 
-      return {
-        name: course.courseName || "Course",
-        credits: course.credits || 0,
+   return {
+  name: course.courseName || "Course",
 
-        /* الحضور الحقيقي */
-        attendance: Number(course.attendanceRate || 0),
+  credits: course.credits || 0,
 
-        /* مؤقتًا لحد الباك يضيف schedule واضح */
-        schedule:
-          scheduleDetails.length > 0
-            ? scheduleDetails.join(" | ")
-            : "Schedule Not Available",
+  attendance: Number(course.attendanceRate || 0),
 
-        instructor: "Staff",
-        rooms: [...new Set(rooms)]
-      };
+  schedule:
+    scheduleDetails.length > 0
+      ? scheduleDetails.join(" | ")
+      : "Schedule Not Available",
+
+instructor:
+  course.staffName ||
+  course.staff ||
+  course.instructorName ||
+  "Staff"
+};
     });
 
     renderCourses(formattedCourses);

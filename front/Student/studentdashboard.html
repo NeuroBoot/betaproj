@@ -471,7 +471,8 @@ async function loadSchedule() {
 
     try {
 
-        /* GET /api/v1/courses */
+        const userId = localStorage.getItem("userId");
+
         const res = await fetch(`${API_BASE_URL}/courses`, {
             headers: authHeaders()
         });
@@ -479,55 +480,84 @@ async function loadSchedule() {
         const response = await res.json();
         let courses = normalizeToArray(response.data);
 
+        /* فلترة كورسات الطالب فقط */
+        const myCourses = courses.filter(course => {
+
+            if (!Array.isArray(course.enrollments)) return false;
+
+            return course.enrollments.some(enrollment =>
+                Number(enrollment.studentId) === Number(userId)
+            );
+        });
+
         container.innerHTML = `<h5>Today's Schedule</h5>`;
 
-        /* لو مفيش كورسات */
-        if (!courses.length) {
+        if (!myCourses.length) {
             container.innerHTML += `<p>No courses available</p>`;
             return;
         }
 
-        /* عرض كل الكورسات */
-        courses.forEach(course => {
+        myCourses.forEach(course => {
 
-            /* اسم الكورس */
-            const courseName =
-                course.name ||
-                "Course";
+            /* enrollment الخاص بالطالب */
+            const enrollment = course.enrollments.find(e =>
+                Number(e.studentId) === Number(userId)
+            );
 
-            /* اسم الـ Staff من instructor.username */
-            const staff =
-                course.instructor?.username ||
-                "Staff N/A";
+            const courseName = course.name || "Course";
 
-            /* Schedule */
+            const code = course.code || "N/A";
+
+            const instructor =
+                course.instructor?.username || "Staff N/A";
+
+            const room = course.room || "Room N/A";
+
             const schedule =
-                course.schedule ||
-                "Schedule Not Available";
+                course.schedule || "Schedule Not Available";
 
-            /* Room */
-            const room =
-                course.room ||
-                "Room N/A";
+            /* Section + Lecture */
+            const section =
+                enrollment?.section || "N/A";
 
-            /* Code */
-            const code =
-                course.code ||
-                "N/A";
+            const lecture =
+                enrollment?.lecture || "N/A";
 
             container.insertAdjacentHTML("beforeend", `
                 <div class="schedule-row upcoming">
+
                     <div class="schedule-info">
-                        <strong>${courseName} (${code})</strong>
-                        <span>Instructor: ${staff} | ${room}</span>
+
+                        <strong>
+                            ${courseName} (${code})
+                        </strong>
+
+                        <span>
+                            Instructor: ${instructor}
+                        </span>
+
+                        <br>
+
+                        <span>
+                            Section: ${section}
+                            |
+                            Lecture Group: ${lecture}
+                        </span>
+
                     </div>
 
                     <div class="schedule-meta">
-                        <div class="time">${schedule}</div>
-                        <div class="status status-upcoming">
-                            ${course.sections} Sections
+
+                        <div class="time">
+                            ${schedule}
                         </div>
+
+                        <div class="status status-upcoming">
+                            ${room}
+                        </div>
+
                     </div>
+
                 </div>
             `);
 
@@ -539,7 +569,7 @@ async function loadSchedule() {
 
         container.innerHTML = `
             <h5>Today's Schedule</h5>
-            <p style="color:red;">Error loading courses</p>
+            <p style="color:red;">Error loading schedule</p>
         `;
     }
 }
