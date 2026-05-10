@@ -138,29 +138,11 @@
       </div>
 
       <!-- Course-wise -->
-      <div class="panel">
-        <h5 class="mb-4">Course-wise Attendance Histogram</h5>
+   <div class="panel" id="courseWisePanel">
+  <h5 class="mb-4">Course-wise Attendance </h5>
 
-        <p>Mathematics (185/201)</p>
-        <div class="progress mb-3">
-          <div class="progress-bar bg-primary" style="width:92%">92%</div>
-        </div>
-
-        <p>Physics (162/190)</p>
-        <div class="progress mb-3">
-          <div class="progress-bar bg-success" style="width:85%">85%</div>
-        </div>
-
-        <p>Chemistry (176/200)</p>
-        <div class="progress mb-3">
-          <div class="progress-bar bg-purple" style="width:88%; background:#a855f7;">88%</div>
-        </div>
-
-        <p>Computer Science (171/190)</p>
-        <div class="progress">
-          <div class="progress-bar bg-warning" style="width:90%">90%</div>
-        </div>
-      </div>
+  <div id="courseWiseContainer"></div>
+</div>
 
       <!-- Bottom section -->
       <div class="row">
@@ -176,8 +158,8 @@
         </div>
 
         <div class="col-md-6">
-          <div class="panel">
-            <h5 class="mb-3">Weekly Overview</h5>
+         <div class="panel" id="weeklyOverviewPanel">
+  <h5 class="mb-3">Weekly Overview</h5>
 
             <p>Monday</p>
             <div class="progress mb-2"><div class="progress-bar bg-primary" style="width:92%">92%</div></div>
@@ -333,24 +315,55 @@ function renderAttendanceChart(monthlyData) {
 }
 
 function renderCourseWise(courseStats) {
-  const progressBars = document.querySelectorAll('.panel .progress-bar');
-  const courseParagraphs = document.querySelectorAll('.panel p');
 
-  if (!courseStats || courseStats.length < 4) return;
+  const container =
+    document.getElementById('courseWiseContainer');
 
-  const courseStartIndex = 1;
-  for (let i = 0; i < 4; i++) {
-    const p = courseParagraphs[courseStartIndex + i];
-    const bar = progressBars[i];
+  if (!container) return;
 
-    if (!p || !bar) continue;
+  container.innerHTML = '';
 
-    p.textContent = `${courseStats[i].name} (${courseStats[i].present}/${courseStats[i].total})`;
-    bar.style.width = `${courseStats[i].percentage}%`;
-    bar.textContent = `${courseStats[i].percentage}%`;
+  if (!courseStats.length) {
+
+    container.innerHTML = `
+      <p class="text-muted">
+        No course data available
+      </p>
+    `;
+
+    return;
   }
-}
 
+  const colors = [
+    'bg-primary',
+    'bg-success',
+    'bg-warning',
+    'bg-danger',
+    'bg-info'
+  ];
+
+  courseStats.forEach((course, index) => {
+
+    const color =
+      colors[index % colors.length];
+
+    container.innerHTML += `
+      <p>
+        ${course.name}
+        (${course.present}/${course.total})
+      </p>
+
+      <div class="progress mb-3">
+        <div
+          class="progress-bar ${color}"
+          style="width:${course.percentage}%"
+        >
+          ${course.percentage}%
+        </div>
+      </div>
+    `;
+  });
+}
 function renderMetrics(metrics) {
   const metricValues = document.querySelectorAll('.metric strong');
   if (metricValues.length < 4) return;
@@ -362,13 +375,27 @@ function renderMetrics(metrics) {
 }
 
 function renderWeeklyOverview(weeklyStats) {
-  const weeklyBars = document.querySelectorAll('.col-md-6 .panel .progress-bar.bg-primary');
-  if (weeklyBars.length < 5) return;
+
+  const weeklyPanel =
+    document.getElementById('weeklyOverviewPanel');
+
+  if (!weeklyPanel) {
+    console.error("Weekly panel not found");
+    return;
+  }
+
+  const weeklyBars =
+    weeklyPanel.querySelectorAll('.progress-bar');
 
   weeklyStats.forEach((item, index) => {
+
     if (!weeklyBars[index]) return;
-    weeklyBars[index].style.width = `${item.value}%`;
-    weeklyBars[index].textContent = `${item.value}%`;
+
+    weeklyBars[index].style.width =
+      `${item.value}%`;
+
+    weeklyBars[index].textContent =
+      `${item.value}%`;
   });
 }
 //alert
@@ -389,6 +416,7 @@ function showAlert(message, type = "success") {
   });
 }
 async function loadReportsData() {
+
   const token = getToken();
 
   if (!token) {
@@ -397,60 +425,259 @@ async function loadReportsData() {
   }
 
   try {
-    // غيّر endpoint ده لو اسم route مختلف عندك
-    const response = await fetch(`${API_BASE_URL}/reports/attendance-summary`, {
-      method: 'GET',
-      headers: authHeaders()
-    });
 
-    const data = await response.json();
-    console.log("Reports response:", data);
+    // ================= GET ATTENDANCE =================
+    const response = await fetch(
+  `${API_BASE_URL}/attendance?limit=1000`,
+      {
+        method: "GET",
+        headers: authHeaders()
+      }
+    );
+
+    const result = await response.json();
+
+    console.log("Attendance API:", result);
 
     if (!response.ok) {
-      throw new Error(data.message || "Failed to load reports");
+      throw new Error(
+        result.message || "Failed to load attendance data"
+      );
     }
 
-    const monthlyData = data.monthlyAttendance || data.monthly || {
-      labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
-      values: [82, 85, 88, 86, 90, 92, 91, 89, 87, 88, 90, 93]
-    };
+    const records = result.data?.data || [];
 
-    const courseStats = data.courseWise || [
-      { name: 'Mathematics', present: 185, total: 201, percentage: 92 },
-      { name: 'Physics', present: 162, total: 190, percentage: 85 },
-      { name: 'Chemistry', present: 176, total: 200, percentage: 88 },
-      { name: 'Computer Science', present: 171, total: 190, percentage: 90 }
+    // ================= EMPTY =================
+    if (!records.length) {
+
+      showAlert("No attendance data found", "info");
+
+      return;
+    }
+
+    // ================= MONTHLY =================
+    const months = [
+      "Jan","Feb","Mar","Apr","May","Jun",
+      "Jul","Aug","Sep","Oct","Nov","Dec"
     ];
 
-    const metrics = data.metrics || {
-      averageAttendance: 87,
-      topCourse: 'Mathematics',
-      studentsAtRisk: 24,
+    const monthlyMap = {};
+
+    months.forEach(month => {
+      monthlyMap[month] = {
+        present: 0,
+        total: 0
+      };
+    });
+
+    records.forEach(record => {
+
+      const date = new Date(record.recordDate);
+
+      const monthName =
+        months[date.getMonth()];
+
+      monthlyMap[monthName].total++;
+
+      if (record.attendanceStatusId === 1) {
+        monthlyMap[monthName].present++;
+      }
+    });
+
+    const monthlyData = {
+      labels: months,
+      values: months.map(month => {
+
+        const item = monthlyMap[month];
+
+        if (!item.total) return 0;
+
+        return Math.round(
+          (item.present / item.total) * 100
+        );
+      })
+    };
+
+    // ================= COURSE STATS =================
+    const courseMap = {};
+
+    records.forEach(record => {
+
+      const courseName =
+        record.course?.name || "Unknown";
+
+      if (!courseMap[courseName]) {
+        courseMap[courseName] = {
+          name: courseName,
+          present: 0,
+          total: 0
+        };
+      }
+
+      courseMap[courseName].total++;
+
+      if (record.attendanceStatusId === 1) {
+        courseMap[courseName].present++;
+      }
+    });
+
+    const courseStats =
+      Object.values(courseMap)
+      .map(course => {
+
+        const percentage =
+          course.total
+            ? Math.round(
+                (course.present / course.total) * 100
+              )
+            : 0;
+
+        return {
+          ...course,
+          percentage
+        };
+      })
+      .slice(0, 4);
+
+    // ================= METRICS =================
+    const totalAttendance =
+      records.filter(
+        r => r.attendanceStatusId === 1
+      ).length;
+
+    const averageAttendance =
+      Math.round(
+        (totalAttendance / records.length) * 100
+      );
+
+    const topCourse =
+      [...courseStats]
+      .sort((a, b) =>
+        b.percentage - a.percentage
+      )[0]?.name || "N/A";
+
+    // students below 75%
+    const studentMap = {};
+
+    records.forEach(record => {
+
+      const studentId =
+        record.student?.userAccountId;
+
+      if (!studentId) return;
+
+      if (!studentMap[studentId]) {
+
+        studentMap[studentId] = {
+          total: 0,
+          present: 0
+        };
+      }
+
+      studentMap[studentId].total++;
+
+      if (record.attendanceStatusId === 1) {
+        studentMap[studentId].present++;
+      }
+    });
+
+    let studentsAtRisk = 0;
+
+    Object.values(studentMap).forEach(student => {
+
+      const percentage =
+        (student.present / student.total) * 100;
+
+      if (percentage < 75) {
+        studentsAtRisk++;
+      }
+    });
+
+    const metrics = {
+
+      averageAttendance,
+
+      topCourse,
+
+      studentsAtRisk,
+
       recognitionAccuracy: 98.5
     };
 
-    const weeklyStats = data.weeklyOverview || [
-      { day: 'Monday', value: 92 },
-      { day: 'Tuesday', value: 85 },
-      { day: 'Wednesday', value: 88 },
-      { day: 'Thursday', value: 90 },
-      { day: 'Friday', value: 87 }
+    // ================= WEEKLY =================
+    const weekDays = [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday"
     ];
 
+    const weeklyMap = {};
+
+    weekDays.forEach(day => {
+
+      weeklyMap[day] = {
+        present: 0,
+        total: 0
+      };
+    });
+
+    records.forEach(record => {
+
+      const day =
+        weekDays[
+          new Date(record.recordDate).getDay()
+        ];
+
+      weeklyMap[day].total++;
+
+      if (record.attendanceStatusId === 1) {
+        weeklyMap[day].present++;
+      }
+    });
+
+    const weeklyStats = [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday"
+    ].map(day => {
+
+      const item = weeklyMap[day];
+
+      return {
+
+        day,
+
+        value: item.total
+          ? Math.round(
+              (item.present / item.total) * 100
+            )
+          : 0
+      };
+    });
+
+    // ================= RENDER =================
     renderAttendanceChart(monthlyData);
+
     renderCourseWise(courseStats);
+
     renderMetrics(metrics);
+
     renderWeeklyOverview(weeklyStats);
 
   } catch (error) {
-    console.error("Reports error:", error);
 
-    const fallbackMonthly = {
-      labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
-      values: [82, 85, 88, 86, 90, 92, 91, 89, 87, 88, 90, 93]
-    };
+    console.error("Reports Error:", error);
 
-    renderAttendanceChart(fallbackMonthly);
+    showAlert(
+      error.message || "Failed to load reports",
+      "error"
+    );
   }
 }
 

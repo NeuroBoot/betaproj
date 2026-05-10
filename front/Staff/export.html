@@ -323,39 +323,51 @@ select.manual-input option:hover {
       </div>
 
       <!-- Quick Export -->
-      <div class="panel">
-        <h4 class="mb-4">Quick Export Templates</h4>
+      <!-- Quick Export -->
+<div class="panel">
+  <h4 class="mb-4">Quick Export Templates</h4>
 
-        <div class="row g-4">
-          <div class="col-md-6">
-          <div class="quick-card" onclick="quickExport('weekly')">
-              <strong>Weekly Summary</strong>
-              <small class="d-block mt-1">Last 7 days attendance report</small>
-            </div>
-          </div>
+  <div class="row g-4">
 
-          <div class="col-md-6">
-          <div class="quick-card" onclick="quickExport('monthly')">
-              <strong>Monthly Report</strong>
-              <small class="d-block mt-1">Current month detailed report</small>
-            </div>
-          </div>
-
-          <div class="col-md-6">
-            <div class="quick-card" onclick="quickExport('semester')">
-              <strong>Semester Overview</strong>
-              <small class="d-block mt-1">Complete semester statistics</small>
-            </div>
-          </div>
-
-          <div class="col-md-6">
-           <div class="quick-card" onclick="quickExport('low')">
-              <strong>Low Attendance Alert List</strong>
-              <small class="d-block mt-1">Students below 75% attendance</small>
-            </div>
-          </div>
-        </div>
+    <div class="col-md-6">
+      <div class="quick-card" onclick="quickExport('weekly')">
+        <strong>Weekly Summary</strong>
+        <small class="d-block mt-1">
+          Last 7 days attendance report
+        </small>
       </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="quick-card" onclick="quickExport('monthly')">
+        <strong>Monthly Report</strong>
+        <small class="d-block mt-1">
+          Current month detailed report
+        </small>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="quick-card" onclick="quickExport('semester')">
+        <strong>Semester Overview</strong>
+        <small class="d-block mt-1">
+          Complete semester statistics
+        </small>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="quick-card" onclick="quickExport('low')">
+        <strong>Low Attendance Alert List</strong>
+        <small class="d-block mt-1">
+          Students below 75% attendance
+        </small>
+      </div>
+    </div>
+
+  </div>
+</div>
+     
 
     </div>
   </div>
@@ -386,7 +398,24 @@ function authHeaders() {
     "Content-Type": "application/json"
   };
 }
+function loadProfile() {
+  const user = JSON.parse(localStorage.getItem("loggedUser"));
 
+  if (!user) return;
+
+  document.getElementById("username").innerText =
+    user.name || user.username || "User";
+
+  document.getElementById("userRole").innerText =
+    user.role || "Staff";
+
+  const avatar = document.getElementById("userAvatar");
+  if (avatar && user.name) {
+    avatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=2b5cff&color=fff`;
+  }
+}
+
+loadProfile();
 // ================= ALERT =================
 function showAlert(message, type = "success") {
   Swal.fire({
@@ -474,50 +503,101 @@ function generateCSV(data) {
 }
 
 // ================= PDF =================
+// ================= PDF =================
 function exportPDF(data, courseName) {
 
   const { jsPDF } = window.jspdf;
-  const doc = new jsPDF("landscape");
 
-  doc.setFontSize(16);
-  doc.text(`Attendance Report - ${courseName}`, 14, 15);
-
-  let y = 30;
-
-  // Header
-  const headers = ["ID", "Name", "Course", "Type", "Session", "Status", "Time", "Date"];
-  let xPositions = [10, 35, 75, 120, 150, 210, 240, 270];
-
-  headers.forEach((h, i) => {
-    doc.text(h, xPositions[i], y);
+  const doc = new jsPDF({
+    orientation: "landscape",
+    unit: "mm",
+    format: "a4"
   });
 
-  y += 5;
-  doc.line(10, y, 285, y);
-  y += 8;
+  // ===== TITLE =====
+  doc.setFontSize(18);
+  doc.setTextColor(40);
 
-  data.forEach(row => {
+  doc.text(
+    `Attendance Report - ${courseName}`,
+    14,
+    18
+  );
 
-    if (y > 190) {
-      doc.addPage();
-      y = 20;
+  // ===== TABLE =====
+  const tableData = data.map(row => ([
+    row.studentId,
+    row.name,
+    row.course,
+    row.type,
+    row.session,
+    row.status,
+    row.time,
+    row.date
+  ]));
+
+  doc.autoTable({
+
+    startY: 28,
+
+    head: [[
+      "ID",
+      "Name",
+      "Course",
+      "Type",
+      "Session",
+      "Status",
+      "Time",
+      "Date"
+    ]],
+
+    body: tableData,
+
+    theme: "grid",
+
+    styles: {
+      fontSize: 10,
+      cellPadding: 3,
+      overflow: "linebreak",
+      valign: "middle"
+    },
+
+    headStyles: {
+      fillColor: [43, 92, 255],
+      textColor: 255,
+      fontStyle: "bold",
+      halign: "center"
+    },
+
+    bodyStyles: {
+      textColor: 30
+    },
+
+    alternateRowStyles: {
+      fillColor: [245, 247, 250]
+    },
+
+    columnStyles: {
+      0: { cellWidth: 18 }, // ID
+      1: { cellWidth: 38 }, // Name
+      2: { cellWidth: 45 }, // Course
+      3: { cellWidth: 25 }, // Type
+      4: { cellWidth: 35 }, // Session
+      5: { cellWidth: 28 }, // Status
+      6: { cellWidth: 35 }, // Time
+      7: { cellWidth: 35 }  // Date
+    },
+
+    margin: {
+      left: 10,
+      right: 10
     }
 
-    doc.text(String(row.studentId), 10, y);
-    doc.text(String(row.name), 35, y);
-    doc.text(String(row.course), 75, y);
-    doc.text(String(row.type), 120, y);
-    doc.text(String(row.session), 150, y);
-    doc.text(String(row.status), 210, y);
-    doc.text(String(row.time), 240, y);
-    doc.text(String(row.date), 270, y);
-
-    y += 7;
   });
 
+  // ===== SAVE =====
   doc.save("attendance_report.pdf");
 }
-
 // ================= MAIN EXPORT =================
 async function exportFromApi(dateFrom, dateTo, courseId, selectedSession, format) {
 
@@ -619,7 +699,214 @@ function normalizeFormat(format) {
   if (format.includes("Excel")) return "xlsx";
   return "csv";
 }
+// ================= QUICK EXPORT =================
+// ================= QUICK EXPORT =================
+async function quickExport(type) {
 
+  const courseId = courseSelect.value;
+
+  if (!courseId) {
+    return showAlert(
+      "Please select a course first",
+      "error"
+    );
+  }
+
+  try {
+
+    const today = new Date();
+
+    let dateFrom;
+    let dateTo = today.toISOString().split("T")[0];
+
+    // ================= DATE RANGES =================
+    if (type === "weekly") {
+
+      const lastWeek = new Date();
+      lastWeek.setDate(today.getDate() - 7);
+
+      dateFrom =
+        lastWeek.toISOString().split("T")[0];
+    }
+
+    else if (type === "monthly") {
+
+      const firstDay =
+        new Date(today.getFullYear(), today.getMonth(), 1);
+
+      dateFrom =
+        firstDay.toISOString().split("T")[0];
+    }
+
+    else if (type === "semester") {
+
+      const semesterStart =
+        new Date(today.getFullYear(), 0, 1);
+
+      dateFrom =
+        semesterStart.toISOString().split("T")[0];
+    }
+
+    else if (type === "low") {
+
+      const res = await fetch(
+        `${API_BASE_URL}/attendance/course/${courseId}`,
+        {
+          headers: authHeaders()
+        }
+      );
+
+      const data = await res.json();
+
+      let records = data.data || [];
+
+      if (!records.length) {
+        return showAlert(
+          "No attendance data found",
+          "error"
+        );
+      }
+
+      // ================= STUDENT STATS =================
+      const studentMap = {};
+
+      records.forEach(r => {
+
+        const id =
+          r.student?.userAccountId;
+
+        if (!id) return;
+
+        if (!studentMap[id]) {
+
+          studentMap[id] = {
+            studentId: id,
+            name:
+              r.student?.username || "-",
+            course:
+              r.course?.name || "-",
+            total: 0,
+            present: 0
+          };
+        }
+
+        studentMap[id].total++;
+
+        if (r.attendanceStatusId === 1) {
+          studentMap[id].present++;
+        }
+      });
+
+      const lowStudents =
+        Object.values(studentMap)
+        .map(s => ({
+          ...s,
+          percentage:
+            Math.round(
+              (s.present / s.total) * 100
+            )
+        }))
+        .filter(s => s.percentage < 75);
+
+      if (!lowStudents.length) {
+        return showAlert(
+          "No low attendance students",
+          "success"
+        );
+      }
+
+      // ================= CSV =================
+ // ================= SELECTED FORMAT =================
+const selectedFormat =
+  normalizeFormat(
+    document.querySelector('[name="format"]').value
+  );
+
+// ================= CSV DATA =================
+let csv =
+  "Student ID,Name,Course,Attendance %\n";
+
+lowStudents.forEach(s => {
+
+  csv +=
+    `${s.studentId},${s.name},${s.course},${s.percentage}%\n`;
+});
+
+// ================= EXPORT =================
+if (selectedFormat === "csv") {
+
+  const blob = new Blob(
+    [csv],
+    { type: "text/csv" }
+  );
+
+  downloadBlob(
+    blob,
+    "low_attendance_students.csv"
+  );
+
+}
+
+else if (selectedFormat === "xlsx") {
+
+  const blob = new Blob(
+    [csv],
+    { type: "application/vnd.ms-excel" }
+  );
+
+  downloadBlob(
+    blob,
+    "low_attendance_students.xlsx"
+  );
+
+}
+
+else {
+
+  const pdfData = lowStudents.map(s => ({
+    studentId: s.studentId,
+    name: s.name,
+    course: s.course,
+    type: "-",
+    session: "-",
+    status: `${s.percentage}%`,
+    time: "-",
+    date: "-"
+  }));
+
+  exportPDF(pdfData, "Low Attendance");
+}
+
+return showAlert(
+  "Low attendance report exported"
+);
+    }
+
+  // ================= GET SELECTED FORMAT =================
+const selectedFormat =
+  normalizeFormat(
+    document.querySelector('[name="format"]').value
+  );
+
+// ================= NORMAL EXPORT =================
+await exportFromApi(
+  dateFrom,
+  dateTo,
+  courseId,
+  "",
+  selectedFormat
+);
+
+  } catch (err) {
+
+    console.error(err);
+
+    showAlert(
+      "Quick export failed",
+      "error"
+    );
+  }
+}
 // ================= FORM SUBMIT =================
 document.getElementById("exportForm").addEventListener("submit", async function (e) {
 
@@ -649,8 +936,63 @@ document.getElementById("exportForm").addEventListener("submit", async function 
 });
 
 // ================= INIT =================
+
+document.getElementById("logoutBtn")
+?.addEventListener("click", function () {
+
+  Swal.fire({
+    title: "Sign Out?",
+    text: "Are you sure you want to logout?",
+    icon: "warning",
+    background: "#1a1a3a",
+    color: "#fff",
+    showCancelButton: true,
+    confirmButtonColor: "#3060ff",
+    cancelButtonColor: "#d33",
+    confirmButtonText: "Yes, Sign Out",
+    cancelButtonText: "Cancel",
+    showClass: {
+      popup: "animate__animated animate__zoomIn"
+    },
+    hideClass: {
+      popup: "animate__animated animate__fadeOut"
+    }
+  }).then((result) => {
+
+    if (result.isConfirmed) {
+
+      localStorage.removeItem("token");
+      localStorage.removeItem("loggedUser");
+      localStorage.removeItem("userRole");
+
+      Swal.fire({
+        text: "Logged out successfully",
+        icon: "success",
+        background: "#1a1a3a",
+        color: "#fff",
+        confirmButtonColor: "#3060ff",
+        confirmButtonText: "OK",
+        timer: 1500,
+        showConfirmButton: false,
+        showClass: {
+          popup: "animate__animated animate__zoomIn"
+        },
+        hideClass: {
+          popup: "animate__animated animate__fadeOut"
+        }
+      });
+
+      setTimeout(() => {
+        window.location.href = "./sign in/index.html";
+      }, 1500);
+    }
+
+  });
+
+});
 loadCourses();
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
