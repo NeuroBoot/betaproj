@@ -1,0 +1,21 @@
+# ============================================
+# Face Recognition AI Service - Recommended
+# ============================================
+
+fastapi
+uvicorn[standard]
+python-multipart
+opencv-python
+mediapipe
+Pillow
+deepface==0.0.99
+tesnsorflow==2.15.0
+numpy
+scipy
+tqdm
+python-dotenv
+matplotlib
+ipython
+torch
+torchvision
+torchaudio

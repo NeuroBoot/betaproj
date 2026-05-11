@@ -1,0 +1,386 @@
+{
+  "info": {
+    "_postman_id": "ai-service-002",
+    "name": "AI Face Recognition Service",
+    "description": "FastAPI service for student face registration and recognition using MediaPipe + DeepFace (Facenet512)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "student_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "student_name",
+      "value": "Ahmed Ali",
+      "type": "string"
+    },
+    {
+      "key": "test_image_base64",
+      "value": "",
+      "type": "string",
+      "description": "Base64 encoded test image for face recognition"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Health & Status",
+      "item": [
+        {
+          "name": "Health Check",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Service is healthy\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.status).to.equal('healthy');",
+                  "});",
+                  "pm.test(\"Response has embeddings count\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('embeddings_count');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": ["{{base_url}}"],
+              "path": ["health"]
+            }
+          }
+        },
+        {
+          "name": "Root Endpoint",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/",
+              "host": ["{{base_url}}"],
+              "path": [""]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Model 1 - Registration (Upload)",
+      "item": [
+        {
+          "name": "Register Student (with face image)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response has success property\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "});",
+                  "pm.test(\"Success is true\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "pm.test(\"Response has data property\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "});",
+                  "pm.test(\"Data has studentId\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('studentId');",
+                  "});",
+                  "pm.test(\"Data has name\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('name');",
+                  "});",
+                  "pm.test(\"Data has status SUCCESS\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data.status).to.equal('SUCCESS');",
+                  "});",
+                  "pm.test(\"Data has embedding array\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('embedding');",
+                  "    pm.expect(jsonData.data.embedding).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"student_id\": \"{{student_id}}\",\n  \"name\": \"{{student_name}}\",\n  \"images_base64\": [\"{{test_image_base64}}\"],\n  \"confidence_threshold\": 0.6\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/upload",
+              "host": ["{{base_url}}"],
+              "path": ["upload"]
+            }
+          }
+        },
+        {
+          "name": "Register Student (with multiple images)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response has success property\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "});",
+                  "pm.test(\"Response has data property\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "});",
+                  "pm.test(\"Data has totalImages\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('totalImages');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"student_id\": \"{{student_id}}\",\n  \"name\": \"{{student_name}}\",\n  \"images_base64\": [\"{{test_image_base64}}\", \"{{test_image_base64}}\"],\n  \"confidence_threshold\": 0.6\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/upload",
+              "host": ["{{base_url}}"],
+              "path": ["upload"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Model 2 - Recognition",
+      "item": [
+        {
+          "name": "Recognize Face",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response has status\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('status');",
+                  "});",
+                  "pm.test(\"Status is valid\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    const validStatuses = ['MATCH', 'NO_MATCH', 'NO_FACE_DETECTED', 'MULTIPLE_FACES', 'ERROR'];",
+                  "    pm.expect(validStatuses).to.include(jsonData.status);",
+                  "});",
+                  "if (pm.response.json().status === 'MATCH') {",
+                  "    pm.test(\"Has student_id\", function () {",
+                  "        pm.expect(pm.response.json()).to.have.property('student_id');",
+                  "    });",
+                  "    pm.test(\"Has name\", function () {",
+                  "        pm.expect(pm.response.json()).to.have.property('name');",
+                  "    });",
+                  "    pm.test(\"Has confidenceScore\", function () {",
+                  "        pm.expect(pm.response.json()).to.have.property('confidenceScore');",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"image_base64\": \"{{test_image_base64}}\",\n  \"confidence_threshold\": 0.7\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/recognize",
+              "host": ["{{base_url}}"],
+              "path": ["recognize"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Embeddings Management",
+      "item": [
+        {
+          "name": "List All Students",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response has count property\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('count');",
+                  "});",
+                  "pm.test(\"Response has students array\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('students');",
+                  "    pm.expect(jsonData.students).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/embeddings",
+              "host": ["{{base_url}}"],
+              "path": ["embeddings"]
+            }
+          }
+        },
+        {
+          "name": "Get Student by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response has exists property\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('exists');",
+                  "});",
+                  "if (pm.response.json().exists === true) {",
+                  "    pm.test(\"Response has name\", function () {",
+                  "        pm.expect(pm.response.json()).to.have.property('name');",
+                  "    });",
+                  "    pm.test(\"Response has created_at\", function () {",
+                  "        pm.expect(pm.response.json()).to.have.property('created_at');",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/embeddings/{{student_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["embeddings", "{{student_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Embedding Vector",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response has success property\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "});",
+                  "pm.test(\"Response has data with embedding\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('embedding');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/embeddings/vector/{{student_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["embeddings", "vector", "{{student_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Student",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response has success property\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/embeddings/{{student_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["embeddings", "{{student_id}}"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
