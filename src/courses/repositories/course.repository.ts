@@ -25,7 +25,7 @@ export class CourseRepository extends Repository<Course> {
   }
 
   async findAllActive(): Promise<Course[]> {
-    return this.find({ where: { isDeleted: false }, relations: ['instructor', 'admin'] });
+    return this.find({ where: { isDeleted: false }, relations: ['instructor', 'admin', 'enrollments'] });
   }
 
   async findByInstructor(instructorId: number): Promise<Course[]> {
@@ -34,7 +34,7 @@ export class CourseRepository extends Repository<Course> {
         instructor: { userAccountId: instructorId }, 
         isDeleted: false 
       }, 
-      relations: ['instructor', 'admin'] 
+      relations: ['instructor', 'admin', 'enrollments'] 
     });
   }
 

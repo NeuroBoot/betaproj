@@ -235,63 +235,32 @@
     <div class="row g-3 mb-4">
       <div class="col-md-4">
         <div class="stat-card">
-          <small>Recognition Rate</small>
-          <div class="accuracy fs-4">98.5%</div>
+          <small>Confidence Score</small>
+          <div class="accuracy fs-4" id="lastConfidence">0%</div>
         </div>
       </div>
 
       <div class="col-md-4">
         <div class="stat-card">
-          <small>Students Detected</small>
-          <div class="detected fs-4">45 / 48</div>
+          <small>Student Matched</small>
+          <div class="detected fs-4" id="lastMatch">None</div>
         </div>
       </div>
 
       <div class="col-md-4">
         <div class="stat-card">
           <small>Processing Time</small>
-          <div class="time fs-4">1.8s</div>
+          <div class="time fs-4" id="lastProcTime">0ms</div>
         </div>
       </div>
     </div>
 
     <!-- Recent Captures -->
     <div class="card-ui">
-      <h5 class="mb-3">Recent Captures</h5>
-
-      <div class="recent-item d-flex justify-content-between">
-        <div>
-          <strong>Mathematics</strong>
-          <div class="text-secondary small">10 mins ago</div>
-        </div>
-        <div class="text-end">
-          <div>48 / 50 detected</div>
-          <div class="accuracy">96% accuracy</div>
-        </div>
+      <h5 class="mb-3">Session Activity</h5>
+      <div id="recentActivityContainer">
+          <p class="text-secondary small">Captured faces in this session will appear here...</p>
       </div>
-
-      <div class="recent-item d-flex justify-content-between">
-        <div>
-          <strong>Physics</strong>
-          <div class="text-secondary small">2 hours ago</div>
-        </div>
-        <div class="text-end">
-          <div>42 / 45 detected</div>
-          <div class="accuracy">93% accuracy</div>
-        </div>
-      </div>
-
-      <div class="recent-item d-flex justify-content-between">
-        <div>
-          <strong>Chemistry</strong>
-          <div class="text-secondary small">1 day ago</div>
-        </div>
-        <div class="text-end">
-          <div>50 / 52 detected</div>
-          <div class="accuracy">96% accuracy</div>
-        </div>
-      </div>
-
     </div>
 
   </main>
@@ -333,7 +302,7 @@ function redirectToLogin() {
   localStorage.removeItem('token');
   localStorage.removeItem('loggedUser');
   localStorage.removeItem('userRole');
-  window.location.href = "./sign in/index.html";
+  window.location.href = "../sign-in/index.html";
 }
 
 async function loadProfile() {
@@ -450,27 +419,37 @@ function loadSectionOrLectureOptions() {
 
   if (sessionType === "section") {
 
-    const sectionsCount = Number(course.sections) || 0;
+    let sections = course.data?.sections || [];
+    
+    // If "C" is not in sections and it's specifically requested, we could add it here
+    // But since we are fetching from DB, it should come from there.
+    // For now, let's ensure we display whatever comes from DB correctly.
 
-    for (let i = 1; i <= sectionsCount; i++) {
+    sections.forEach(sec => {
 
       const option = document.createElement("option");
 
-      option.value = i;
+      option.value = sec;
 
-      option.textContent = `Section ${i}`;
+      // If it's a number, prefix with "Section", otherwise use as is (e.g. "Section C")
+      option.textContent = isNaN(sec) ? sec : `Section ${sec}`;
 
       sectionSelect.appendChild(option);
-    }
+    });
   }
 
   /* ================= LECTURE ================= */
 
   if (sessionType === "lecture") {
 
-    const groups = ["A", "B", "C", "D"];
+    let lectures = course.data?.lectures || [];
+    
+    // Fallback to A, B, C, D if no lectures in DB yet
+    if (lectures.length === 0) {
+      lectures = ["A", "B", "C", "D"];
+    }
 
-    groups.forEach(group => {
+    lectures.forEach(group => {
 
       const option = document.createElement("option");
 
@@ -501,7 +480,7 @@ logoutBtn.addEventListener('click', function () {
         confirmButtonColor: "#3060ff",
         confirmButtonText: "OK"
     }).then(() => {
-        window.location.href = "./sign in/index.html";
+        window.location.href = "../sign-in/index.html";
     });
 });
 //alert
@@ -636,9 +615,11 @@ async function uploadCapturedImage(blob) {
 
       // MUST BE UPPERCASE
       sessionType:
-        sessionTypeSelect.value === "lecture"
-          ? "LECTURE"
-          : "SECTION",
+        sessionTypeSelect.value.toUpperCase() === "SECTION"
+          ? "SECTION"
+          : "LECTURE",
+
+      sessionNumber: "1", // Required by ProcessFrameDto
 
       room: "Room 301",
 
@@ -661,30 +642,102 @@ async function uploadCapturedImage(blob) {
       }
     );
 
-    const data = await response.json();
-
-    console.log("Recognition response:", data);
+    const result = await response.json();
+    console.log("Recognition result:", result);
 
     if (!response.ok) {
-
       throw new Error(
-        data.message ||
-        data.error ||
+        result.message ||
+        result.error ||
         "Recognition failed"
       );
     }
 
-    // SUCCESS
-    Swal.fire({
-      icon: "success",
-      title: "Attendance Marked",
-      text:
-        data.message ||
-        "Face recognized successfully",
-      background: "#1a1a3a",
-      color: "#fff",
-      confirmButtonColor: "#3060ff"
-    });
+    // The response is wrapped in { success: true, data: { ... } } by the TransformInterceptor
+    const data = result.data || result;
+
+    // 1. Extract Name (Priority: record.fullName > record.username > student.name)
+    const studentName = 
+      data.record?.student?.fullName || 
+      data.record?.student?.username || 
+      data.student?.name || 
+      data.student?.username || 
+      data.studentId || 
+      "Student";
+
+    // 2. Extract Confidence
+    const confidence = data.confidenceScore ?? data.record?.faceConfidence ?? data.confidence ?? 0;
+    const confidencePercent = (confidence * 100).toFixed(1);
+    
+    // 3. Extract Processing Time
+    const procTime = data.processingTimeMs || 0;
+
+    // 4. Check Match Status
+    const isMatched = data.matched === true || 
+                      data.status === 'RECORDED' || 
+                      data.status === 'ALREADY_RECORDED' || 
+                      data.matchStatus === 'MATCH';
+
+    if (isMatched) {
+      // SUCCESS: Recognized and Recorded
+      document.getElementById('lastConfidence').textContent = `${confidencePercent}%`;
+      document.getElementById('lastMatch').textContent = studentName;
+      document.getElementById('lastProcTime').textContent = `${procTime}ms`;
+
+      // Update Activity Log
+      const activityContainer = document.getElementById('recentActivityContainer');
+      if (activityContainer.querySelector('p')) activityContainer.innerHTML = ''; // Clear placeholder
+      
+      const statusBadge = data.status === 'ALREADY_RECORDED' 
+        ? '<span class="badge bg-warning text-dark">Already Marked</span>' 
+        : '<span class="badge bg-success">Recorded</span>';
+
+      const activityHtml = `
+        <div class="recent-item d-flex justify-content-between animate__animated animate__fadeIn">
+          <div>
+            <div class="d-flex align-items-center gap-2">
+                <strong>${studentName}</strong>
+                ${statusBadge}
+            </div>
+            <div class="text-secondary small">${new Date().toLocaleTimeString()}</div>
+            <div class="text-info extra-small" style="font-size: 0.75rem;">ID: ${data.studentId || 'N/A'}</div>
+          </div>
+          <div class="text-end">
+            <div class="accuracy">${confidencePercent}% Match</div>
+            <div class="time text-secondary small">${procTime}ms</div>
+          </div>
+        </div>
+      `;
+      activityContainer.insertAdjacentHTML('afterbegin', activityHtml);
+
+      Swal.fire({
+        icon: "success",
+        title: data.status === 'ALREADY_RECORDED' ? "Already Recorded" : "Attendance Marked",
+        html: `
+            <div class="text-center">
+                <h5 class="text-success mb-2">${studentName}</h5>
+                <p class="mb-1">Confidence: <strong>${confidencePercent}%</strong></p>
+                <p class="small text-secondary">Course ID: ${data.session?.courseId || 'N/A'}</p>
+            </div>
+        `,
+        background: "#1a1a3a",
+        color: "#fff",
+        confirmButtonColor: "#3060ff"
+      });
+    } else {
+      // NOT RECOGNIZED / NO MATCH
+      document.getElementById('lastConfidence').textContent = `${confidencePercent}%`;
+      document.getElementById('lastMatch').textContent = "No Match";
+      
+      Swal.fire({
+        icon: "warning",
+        title: "Face Not Recognized",
+        text: data.message || `We couldn't match your face (Confidence: ${confidencePercent}%).`,
+        background: "#1a1a3a",
+        color: "#fff",
+        confirmButtonColor: "#3060ff"
+      });
+    }
 
   } catch (error) {
 
@@ -765,3 +818,4 @@ if (!sectionSelect.value) {
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 </html>
+

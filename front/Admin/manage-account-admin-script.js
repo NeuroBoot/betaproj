@@ -1,5 +1,16 @@
-document.addEventListener('DOMContentLoaded', function() {
-    // === 1. وظيفة التحكم في حجم السايد بار (Sidebar Resize) ===
+const API_BASE_URL = 'http://localhost:3000/api/v1';
+
+function getAuthToken() {
+    let token = localStorage.getItem('token');
+    if (!token) return "";
+    token = token.replace(/['"]+/g, '').trim();
+    if (token.toLowerCase().startsWith('bearer ')) {
+        token = token.substring(7).trim();
+    }
+    return `Bearer ${token}`;
+}
+
+document.addEventListener('DOMContentLoaded', async function() {
     const sidebar = document.querySelector('.sidebar');
     const resizer = document.querySelector('.resizer');
     
@@ -17,8 +28,6 @@ document.addEventListener('DOMContentLoaded', function() {
             let newWidth = e.clientX;
             if (newWidth >= 150 && newWidth <= 500) {
                 sidebar.style.width = newWidth + 'px';
-                
-                // تحديث الرسوم البيانية فوراً لمنع الخروج عن الحواف
                 if(enrollmentChart) enrollmentChart.resize();
                 if(roleDistributionChart) roleDistributionChart.resize();
             }
@@ -31,149 +40,200 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // === 2. إعدادات الرسوم البيانية (Charts) المحدثة ===
-    
-    // الرسم البياني الخطي (اليسار - يبدأ من الصفر)
-    const ctxLine = document.getElementById('enrollmentChart').getContext('2d');
-    enrollmentChart = new Chart(ctxLine, {
-        type: 'line',
-        data: {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-            datasets: [{
-                label: 'Students',
-                data: [2100, 2250, 2350, 2410, 2450, 2520],
-                borderColor: '#3060ff',
-                backgroundColor: 'rgba(48, 96, 255, 0.1)',
-                fill: true,
-                tension: 0.4,
-                pointBackgroundColor: '#3060ff'
-            }]
-        },
-        options: { 
-            responsive: true, 
-            maintainAspectRatio: false, 
-            plugins: { legend: { display: false } },
-            scales: { 
-                y: { 
-                    beginAtZero: true, // التعديل المطلوب: يبدأ من 0
-                    ticks: { color: '#b0b0b0' }, 
-                    grid: { color: 'rgba(255,255,255,0.05)' } 
-                },
-                x: { 
-                    ticks: { color: '#b0b0b0' }, 
-                    grid: { display: false } 
-                }
-            }
-        }
-    });
+    await loadAccounts();
+    await initCharts();
 
-    // الرسم البياني الدائري (اليمين - مرفوع للأعلى)
-    const ctxPie = document.getElementById('roleDistributionChart').getContext('2d');
-    roleDistributionChart = new Chart(ctxPie, {
-        type: 'pie',
-        data: {
-            labels: ['Students (94.9%)', 'Staff (4.8%)', 'Admin (0.3%)'], 
-            datasets: [{
-                data: [94.9, 4.8, 0.3],
-                backgroundColor: ['#3060ff', '#2ecc71', '#9b59b6'],
-                borderWidth: 0
-            }]
-        },
-        options: { 
-            responsive: true, 
-            maintainAspectRatio: false,
-            layout: {
-                padding: {
-                    bottom: 40, // رفع الدائرة للأعلى عن طريق زيادة الهامش السفلي
-                    top: 0
-                }
-            },
-            plugins: { 
-                legend: { 
-                    position: 'bottom', 
-                    labels: { color: '#b0b0b0', boxWidth: 10, padding: 10 } 
-                } 
-            }
-        }
-    });
-
-    // === 3. منطق إدارة الحسابات (إضافة، تعديل، حذف) ===
     const modal = document.getElementById('accountModal');
     const editModal = document.getElementById('editModal');
-    const tableBody = document.getElementById('accountsTableBody');
-    let currentRow = null;
-
-    // أزرار الفتح والإغلاق
-    document.getElementById('openModalBtn').onclick = () => modal.style.display = 'flex';
+    
+    document.getElementById('openModalBtn').onclick = () => {
+        document.getElementById('accountForm').reset();
+        modal.style.display = 'flex';
+    };
     document.getElementById('closeModalBtn').onclick = () => modal.style.display = 'none';
     document.getElementById('closeEditModalBtn').onclick = () => editModal.style.display = 'none';
 
-    // وظيفة إضافة صف جديد
-    document.getElementById('accountForm').onsubmit = function(e) {
+    // Add Account
+    document.getElementById('accountForm').onsubmit = async function(e) {
         e.preventDefault();
-        addNewRow(
-            document.getElementById('idNumber').value,
-            document.getElementById('fullName').value,
-            document.getElementById('email').value,
-            document.getElementById('role').value
-        );
-        modal.style.display = 'none';
-        this.reset();
-    };
+        const userData = {
+            username: document.getElementById('username').value.trim(),
+            password: document.getElementById('password').value.trim(),
+            fullName: document.getElementById('fullName').value.trim(),
+            email: document.getElementById('email').value.trim(),
+            role: document.getElementById('role').value
+        };
 
-    // وظيفة تعديل صف موجود
-    document.getElementById('editForm').onsubmit = function(e) {
-        e.preventDefault();
-        if (currentRow) {
-            const role = document.getElementById('editRole').value;
-            currentRow.cells[0].innerText = document.getElementById('editIdNumber').value;
-            currentRow.cells[1].innerText = document.getElementById('editFullName').value;
-            currentRow.cells[2].innerText = document.getElementById('editEmail').value;
-            currentRow.cells[3].innerHTML = `<span class="badge ${role.toLowerCase()}">${role}</span>`;
-            
-            editModal.style.display = 'none';
-        }
-    };
+        try {
+            const res = await fetch(`${API_BASE_URL}/auth/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(userData)
+            });
 
-    // مراقبة أزرار الجدول (الحذف والتعديل)
-    tableBody.addEventListener('click', function(e) {
-        // حذف الصف
-        if (e.target.closest('.btn-delete')) {
-            if(confirm('Are you sure you want to delete this account?')) {
-                e.target.closest('tr').remove();
+            if (res.ok) {
+                modal.style.display = 'none';
+                await loadAccounts();
+                Swal.fire({ icon: 'success', title: 'Account Created', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });
+            } else {
+                const err = await res.json();
+                Swal.fire({ icon: 'error', title: 'Failed', text: err.message });
             }
-        }
-        
-        // فتح مودال التعديل وتعبئة البيانات
-        if (e.target.closest('.btn-edit')) {
-            currentRow = e.target.closest('tr');
-            document.getElementById('editIdNumber').value = currentRow.cells[0].innerText;
-            document.getElementById('editFullName').value = currentRow.cells[1].innerText;
-            document.getElementById('editEmail').value = currentRow.cells[2].innerText;
-            document.getElementById('editRole').value = currentRow.cells[3].innerText.trim();
-            
-            editModal.style.display = 'flex';
-        }
-    });
+        } catch (err) { console.error(err); }
+    };
 
-    function addNewRow(id, name, email, role) {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td>${id}</td>
-            <td>${name}</td>
-            <td>${email}</td>
-            <td><span class="badge ${role.toLowerCase()}">${role}</span></td>
-            <td><span class="status-active">Active</span></td>
-            <td class="actions">
-                <button class="btn-edit"><i class="fas fa-edit"></i> Edit</button>
-                <button class="btn-delete"><i class="fas fa-trash"></i></button>
-            </td>`;
-        tableBody.appendChild(tr);
-    }
+    // Edit Account
+    document.getElementById('editForm').onsubmit = async function(e) {
+        e.preventDefault();
+        const id = document.getElementById('editId').value;
+        const username = document.getElementById('editUsername').value;
+        const updateData = {
+            fullName: document.getElementById('editFullName').value.trim(),
+            email: document.getElementById('editEmail').value.trim(),
+            role: document.getElementById('editRole').value
+        };
 
-    // إغلاق المودالات عند الضغط في الخارج
+        try {
+            const res = await fetch(`${API_BASE_URL}/users/${username}`, {
+                method: 'PUT',
+                headers: { 
+                    'Authorization': getAuthToken(),
+                    'Content-Type': 'application/json' 
+                },
+                body: JSON.stringify(updateData)
+            });
+
+            if (res.ok) {
+                editModal.style.display = 'none';
+                await loadAccounts();
+                Swal.fire({ icon: 'success', title: 'Updated Successfully', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });
+            }
+        } catch (err) { console.error(err); }
+    };
+
     window.onclick = (e) => {
         if (e.target == modal) modal.style.display = 'none';
         if (e.target == editModal) editModal.style.display = 'none';
     };
 });
+
+async function loadAccounts() {
+    const tableBody = document.getElementById('accountsTableBody');
+    try {
+        const res = await fetch(`${API_BASE_URL}/users`, {
+            headers: { 'Authorization': getAuthToken() }
+        });
+        const result = await res.json();
+        const users = result.data || result;
+        tableBody.innerHTML = '';
+        if (Array.isArray(users)) {
+            users.forEach(user => {
+                const tr = document.createElement('tr');
+                const role = user.role || user.userType || 'student';
+                tr.innerHTML = `
+                    <td>${user.userAccountId || user.id}</td>
+                    <td>${user.fullName || user.username}</td>
+                    <td>${user.email || 'N/A'}</td>
+                    <td><span class="badge ${role.toLowerCase()}">${role}</span></td>
+                    <td><span class="status-active">${user.isDeleted ? 'Deleted' : 'Active'}</span></td>
+                    <td class="actions">
+                        <button class="btn-edit" onclick='openEditModal(${JSON.stringify(user)})'><i class="fas fa-edit"></i> Edit</button>
+                        <button class="btn-delete" onclick="deleteAccount('${user.username}')"><i class="fas fa-trash"></i></button>
+                    </td>`;
+                tableBody.appendChild(tr);
+            });
+        }
+    } catch (err) { console.error(err); }
+}
+
+function openEditModal(user) {
+    document.getElementById('editId').value = user.userAccountId || user.id;
+    document.getElementById('editUsername').value = user.username;
+    document.getElementById('editFullName').value = user.fullName || "";
+    document.getElementById('editEmail').value = user.email || "";
+    document.getElementById('editRole').value = user.role || user.userType || "student";
+    document.getElementById('editModal').style.display = 'flex';
+}
+
+async function deleteAccount(username) {
+    const result = await Swal.fire({
+        title: 'Delete Account?',
+        text: "This will soft-delete the user.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33'
+    });
+
+    if (result.isConfirmed) {
+        try {
+            const res = await fetch(`${API_BASE_URL}/users/${username}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': getAuthToken() }
+            });
+            if (res.ok) {
+                await loadAccounts();
+                Swal.fire('Deleted!', 'User has been removed.', 'success');
+            }
+        } catch (err) { console.error(err); }
+    }
+}
+
+async function initCharts() {
+    try {
+        const res = await fetch(`${API_BASE_URL}/users`, {
+            headers: { 'Authorization': getAuthToken() }
+        });
+        const result = await res.json();
+        const users = result.data || result;
+        
+        const students = users.filter(u => (u.role || u.userType) === 'student').length;
+        const staff = users.filter(u => (u.role || u.userType) === 'staff').length;
+        const admins = users.filter(u => (u.role || u.userType) === 'admin').length;
+        const total = users.length || 1;
+
+        // Update Stat Cards
+        if(document.getElementById('studentCount')) document.getElementById('studentCount').textContent = students;
+        if(document.getElementById('staffCount')) document.getElementById('staffCount').textContent = staff;
+        if(document.getElementById('adminCount')) document.getElementById('adminCount').textContent = admins;
+
+        const ctxPie = document.getElementById('roleDistributionChart').getContext('2d');
+        new Chart(ctxPie, {
+            type: 'pie',
+            data: {
+                labels: [`Students (${((students/total)*100).toFixed(1)}%)`, `Staff (${((staff/total)*100).toFixed(1)}%)`, `Admin (${((admins/total)*100).toFixed(1)}%)`], 
+                datasets: [{
+                    data: [students, staff, admins],
+                    backgroundColor: ['#3060ff', '#2ecc71', '#9b59b6'],
+                    borderWidth: 0
+                }]
+            },
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom', labels: { color: '#b0b0b0' } } }
+            }
+        });
+
+        // Line Chart Placeholder for Monthly Growth (would need a specific backend endpoint for history)
+        const ctxLine = document.getElementById('enrollmentChart').getContext('2d');
+        new Chart(ctxLine, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'Total Users',
+                    data: [total-5, total-3, total-2, total-1, total, total],
+                    borderColor: '#3060ff',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+    } catch (e) { console.error(e); }
+}
+
+function logout() {
+    localStorage.clear();
+    window.location.href = "../../index.html";
+}

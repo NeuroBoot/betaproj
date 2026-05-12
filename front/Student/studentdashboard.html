@@ -5,682 +5,201 @@
   <title>FaceMark | Student Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
+  <!-- CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 
 <style>
-body {
-  background: #0f0c29;
-  color: #ffffff;
-  min-height: 100vh;
-  font-family: "Segoe UI", sans-serif;
-  display: flex;
-}
-
-.sidebar {
-  width: 240px;
-  background: #15132b;
-  min-height: 100vh;
-  padding: 20px;
-}
-
-.user-box {
-  background: #1a1a3a;
-  border-radius: 14px;
-  padding: 14px;
-  margin: 18px 0 24px;
-}
-
-.user-box small {
-  color: #b0b0b0;
-  font-size: 13px;
-}
-
-.user-name {
-  font-size: 16px;
-  font-weight: 600;
-  color: #ffffff;
-}
-
-.sidebar .nav-link {
-  color: #b0b0b0;
-  margin-bottom: 10px;
-  border-radius: 10px;
-  padding: 10px 14px;
-  text-decoration: none;
-}
-
-.sidebar .nav-link.active,
-.sidebar .nav-link:hover {
-  background: #3060ff;
-  color: #ffffff;
-}
-
-.main-wrapper {
-  flex: 1;
-  margin: 16px;
-  background: #1a1a3a;
-  border-radius: 24px;
-  padding: 24px;
-  border: 1px solid rgba(255,255,255,0.05);
-}
-
-.stats-card {
-  border-radius: 18px;
-  padding: 20px;
-  background: linear-gradient(135deg, #1e3a8a, #1e40af);
-}
-
-.card-attendance {
-  background: rgba(48,96,255,0.389);
-  border-left: 4px solid #3060ff;
-}
-
-.card-classes {
-  background: rgba(46,204,112,0.377);
-  border-left: 4px solid #2ecc71;
-}
-
-.card-courses {
-  background: rgba(156,89,182,0.436);
-  border-left: 4px solid #9b59b6;
-}
-
-.stats-title {
-  color: #b0b0b0;
-  font-size: 14px;
-}
-
-.stats-value {
-  font-size: 28px;
-  font-weight: 700;
-}
-
-.stats-sub {
-  font-size: 13px;
-  margin-top: 4px;
-}
-
-.today-schedule {
-  background: #1a1a3a;
-  border-radius: 20px;
-  padding: 22px;
-  margin-bottom: 24px;
-}
-
-.today-schedule h5 {
-  margin-bottom: 18px;
-  font-weight: 600;
-  color: #ffffff;
-}
-
-.schedule-row {
-  background: rgba(255,255,255,0.04);
-  border-radius: 14px;
-  padding: 16px 18px;
-  margin-bottom: 14px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  position: relative;
-}
-
-.schedule-row::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 6px;
-  height: 100%;
-  border-radius: 14px 0 0 14px;
-  background: #2ecc71;
-}
-
-.schedule-row.in-progress::before { background: #3060ff; }
-.schedule-row.upcoming::before { background: #9b59b6; }
-
-.schedule-info strong {
-  display: block;
-  font-size: 14px;
-  color: #ffffff;
-}
-
-.schedule-info span {
-  font-size: 13px;
-  color: #b0b0b0;
-}
-
-.schedule-meta {
-  text-align: right;
-}
-
-.schedule-meta .time {
-  font-size: 13px;
-  color: #ffff;
-}
-
-.schedule-meta .status {
-  display: inline-block;
-  margin-top: 6px;
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.status-attended {
-  background: rgba(46,204,112,0.15);
-  color: #2ecc71;
-}
-
-.status-progress {
-  background: rgba(48,96,255,0.15);
-  color: #3060ff;
-}
-
-.status-upcoming {
-  background: rgba(156,89,182,0.15);
-  color: #9b59b6;
-}
-
-.attendance-history {
-  background: #1a1a3a;
-  border-radius: 18px;
-  padding: 20px;
-  margin-top: 24px;
-}
-
-.history-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.history-table th,
-.history-table td {
-  padding: 12px;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
-}
-
-.history-status {
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 12px;
-}
-
-.history-present {
-  background: rgba(46,204,112,0.15);
-  color: #2ecc71;
-}
-
-.history-present {
-    background: rgba(46,204,112,0.15);
-      color: #2ecc71;
-    }
-.history-late {
-    background: rgba(243,156,18,0.15); 
-     color: #f39c12;
-    }
-.history-absent { 
-   background: rgba(231,76,60,0.15); 
-    color: #e74c3c;
-  }
-
-.logout-link {
-  color: #fff;
-  cursor: pointer;
-  text-decoration: none;
-}
+body { background: #0f0c29; color: #ffffff; min-height: 100vh; font-family: "Segoe UI", sans-serif; display: flex; margin: 0; }
+.sidebar { width: 240px; background: #15132b; min-height: 100vh; padding: 20px; flex-shrink: 0; }
+.user-box { background: #1a1a3a; border-radius: 14px; padding: 14px; margin: 18px 0 24px; }
+.user-box small { color: #b0b0b0; font-size: 13px; }
+.user-name { font-size: 16px; font-weight: 600; color: #ffffff; }
+.sidebar .nav-link { color: #b0b0b0; margin-bottom: 10px; border-radius: 10px; padding: 10px 14px; text-decoration: none; display: block; transition: 0.2s; }
+.sidebar .nav-link.active, .sidebar .nav-link:hover { background: #3060ff; color: #ffffff; }
+.main-wrapper { flex: 1; margin: 16px; background: #1a1a3a; border-radius: 24px; padding: 24px; border: 1px solid rgba(255,255,255,0.05); overflow-y: auto; }
+.stats-card { border-radius: 18px; padding: 20px; margin-bottom: 20px; }
+.card-attendance { background: rgba(48,96,255,0.2); border-left: 4px solid #3060ff; }
+.card-classes { background: rgba(46,204,112,0.2); border-left: 4px solid #2ecc71; }
+.card-courses { background: rgba(156,89,182,0.2); border-left: 4px solid #9b59b6; }
+.stats-title { color: #b0b0b0; font-size: 14px; }
+.stats-value { font-size: 28px; font-weight: 700; }
+.today-schedule { background: rgba(255,255,255,0.02); border-radius: 20px; padding: 22px; margin-bottom: 24px; }
+.schedule-row { background: rgba(255,255,255,0.04); border-radius: 14px; padding: 16px 18px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; position: relative; }
+.schedule-row::before { content: ""; position: absolute; left: 0; top: 0; width: 6px; height: 100%; border-radius: 14px 0 0 14px; background: #3060ff; }
+.history-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+.history-table th, .history-table td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); text-align: left; }
+.history-status { padding: 4px 12px; border-radius: 12px; font-size: 12px; }
+.history-present { background: rgba(46,204,112,0.15); color: #2ecc71; }
+.history-absent { background: rgba(231,76,60,0.15); color: #e74c3c; }
 </style>
 </head>
-
 <body>
 
 <div class="sidebar">
-  <h5 class="mb-4">
-    <img src="face.jpeg" alt="" width="50" height="50"> FACEMARK
-  </h5>
-  <p class="small text-muted" style="color:white !important">Student Portal</p>
-
+  <h5 class="mb-4"><img src="face.jpeg" alt="" width="40"> FACEMARK</h5>
   <div class="user-box">
     <small>Welcome,</small>
     <div class="user-name" id="username">Loading...</div>
-    <small id="userRoleLabel">Student Portal</small>
   </div>
-
   <ul class="nav flex-column">
-    <li class="nav-item"><a class="nav-link active" href="#"><i class="bi bi-grid"></i> Dashboard</a></li>
-    <li class="nav-item"><a class="nav-link" href="viewcourse.html"><i class="fa-solid fa-book me-2"></i> View Courses</a></li>
-    <li class="nav-item"><a class="nav-link" href="studentcharts.html"><i class="bi bi-bar-chart"></i> Charts & Reports</a></li>
-    <li class="nav-item"><a class="nav-link" href="alertstudent.html"><i class="bi bi-bell"></i> Alerts</a></li>
-    <li class="nav-item"><a class="nav-link" href="studentexport.html"><i class="bi bi-download"></i> Export</a></li>
-    <li class="nav-item"><a class="nav-link" href="reportstudent.html"><i class="fa-solid fa-triangle-exclamation me-2"></i> Report a Problem</a></li>
+    <li><a class="nav-link active" href="#"><i class="bi bi-grid"></i> Dashboard</a></li>
+    <li><a class="nav-link" href="javascript:void(0)" onclick="triggerManualReg()"><i class="bi bi-camera"></i> Register Face</a></li>
+    <li><a class="nav-link" href="viewcourse.html"><i class="fa-solid fa-book"></i> Courses</a></li>
+    <li><a class="nav-link" href="alertstudent.html"><i class="bi bi-bell"></i> Alerts</a></li>
   </ul>
-
   <hr class="text-secondary">
-  <button id="logoutBtn" class="btn btn-danger w-100 mt-2">
-    <i class="bi bi-box-arrow-right"></i> Sign Out
-</button>
+  <button id="logoutBtn" class="btn btn-outline-danger w-100 mt-2">Sign Out</button>
 </div>
 
 <div class="main-wrapper">
-
-  <div class="row g-4 mb-4">
-    <div class="col-md-4">
-      <div class="stats-card card-attendance">
-        <div class="stats-title">Overall Attendance</div>
-        <div class="stats-value" id="overallAttendance">92%</div>
-        <div class="stats-sub text-success">Excellent performance</div>
-      </div>
-    </div>
-
-    <div class="col-md-4">
-      <div class="stats-card card-classes">
-        <div class="stats-title">Classes Attended</div>
-        <div class="stats-value" id="classesAttended">156/170</div>
-        <div class="stats-sub text-info">This semester</div>
-      </div>
-    </div>
-
-    <div class="col-md-4">
-      <div class="stats-card card-courses">
-        <div class="stats-title">Total Courses</div>
-        <div class="stats-value" id="totalCourses">4</div>
-        <div id="coursesStatus" style="font-size:13px; margin-top:5px;"></div>
-        <div class="stats-sub text-muted" style="color:white !important">Active courses</div>
-      </div>
-    </div>
+  <div class="row">
+    <div class="col-md-4"><div class="stats-card card-attendance"><div class="stats-title">Attendance</div><div class="stats-value" id="overallAttendance">0%</div></div></div>
+    <div class="col-md-4"><div class="stats-card card-classes"><div class="stats-title">Classes</div><div class="stats-value" id="classesAttended">0/0</div></div></div>
+    <div class="col-md-4"><div class="stats-card card-courses"><div class="stats-title">Courses</div><div class="stats-value" id="totalCourses">0</div></div></div>
   </div>
 
-  <div class="today-schedule" id="todaySchedule">
-  <h5>Today's Schedule</h5>
-</div>
+  <div class="today-schedule">
+    <h5>Today's Schedule</h5>
+    <div id="todaySchedule"></div>
+  </div>
 
   <div class="attendance-history">
-    <h5>Recent Attendance History</h5>
-
+    <h5>Recent History</h5>
     <table class="history-table">
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Course</th>
-          <th>Time</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>
-      </tbody>
+      <thead><tr><th>Date</th><th>Course</th><th>Time</th><th>Status</th></tr></thead>
+      <tbody id="historyBody"></tbody>
     </table>
   </div>
-
 </div>
+
+<!-- Modal -->
+<div class="modal fade" id="faceRegistrationModal" data-bs-backdrop="static" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="background:#1a1a3a; color:#fff; border-radius:20px; border: 1px solid #3060ff;">
+      <div class="modal-header border-0"><h5 class="modal-title">Face Registration Required</h5></div>
+      <div class="modal-body text-center">
+        <p class="small text-muted">Register your face for the AI system (3 clear images needed).</p>
+        <div style="background:#000; border-radius:12px; overflow:hidden; min-height:240px; display:flex; align-items:center; justify-content:center;">
+          <video id="regVideo" autoplay playsinline style="width:100%; display:none;"></video>
+          <div id="regPlaceholder"><i class="bi bi-camera fs-1"></i></div>
+        </div>
+        <p id="regStatusText" class="mt-3 text-info">Captured: 0 / 3</p>
+        <canvas id="regCanvas" style="display:none;"></canvas>
+      </div>
+      <div class="modal-footer border-0 justify-content-center">
+        <button class="btn btn-primary" id="startRegCameraBtn">Start Camera</button>
+        <button class="btn btn-success" id="captureRegBtn" style="display:none;">Capture Shot</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
 const API_BASE_URL = 'http://localhost:3000/api/v1';
+let regStream = null, capturedImages = [], regModal = null, userData = null;
 
-/* ================= أساسيات ================= */
-function getToken() { 
-    return localStorage.getItem('token'); 
-}
+const getToken = () => localStorage.getItem('token');
+const headers = () => ({ 'Authorization': `Bearer ${getToken()}`, 'Content-Type': 'application/json' });
 
-function authHeaders() {
-    return {
-        'Authorization': `Bearer ${getToken()}`,
-        'Content-Type': 'application/json'
-    };
-}
-
-function redirectToLogin() {
-    localStorage.clear();
-    window.location.href = './sign in/index.html';
-}
-
-function normalizeToArray(data) {
-    if (!data) return [];
-    if (Array.isArray(data)) return data;
-    return [data];
-}
-
-/* ================= تحميل البروفايل ================= */
 async function loadProfile() {
-    const token = getToken();
-    if (!token) return redirectToLogin();
-
     try {
-        const res = await fetch(`${API_BASE_URL}/auth/profile`, { 
-            headers: authHeaders() 
-        });
-
-        const response = await res.json();
-        if (!res.ok) throw new Error();
-
-        const userData = Array.isArray(response.data) 
-            ? response.data[0] 
-            : (response.data || response);
-
-        const userId = userData.userAccountId || userData.id;
-
-        localStorage.setItem("userId", userId);
-
-        document.getElementById("username").textContent = userData.username || "Student";
-
-        return userData;
-
-    } catch (error) {
-        console.error("Profile error:", error);
-        redirectToLogin();
-    }
-}
-
-/* ================= الكورسات ================= */
-async function loadCourses(userId) {
-    try {
-        const res = await fetch(`${API_BASE_URL}/courses`, { headers: authHeaders() });
-        const response = await res.json();
-
-        let courses = normalizeToArray(response.data);
-
-        const myCourses = courses.filter(course => {
-            if (Array.isArray(course.students)) {
-                return course.students.some(s => 
-                    Number(s.userAccountId) === Number(userId)
-                );
-            }
-            return true;
-        });
-
-        document.getElementById("totalCourses").textContent = myCourses.length;
-
-    } catch (error) {
-        console.error("Courses error:", error);
-    }
-}
-
-/* ================= الإحصائيات ================= */
-async function loadStats() {
-
-    try {
-
-        const res = await fetch(`${API_BASE_URL}/student/charts`, {
-            headers: authHeaders()
-        });
-
-        const response = await res.json();
-        const data = response.data;
-
-        /* Overall */
-        document.getElementById("overallAttendance").textContent =
-            data.metrics.avg || "0%";
-
-        /* Classes */
-        let attended = 0;
-        let total = 0;
-
-        data.structure.forEach(course => {
-            course.children.forEach(group => {
-                attended += Number(group.stats.attended || 0);
-                total += Number(group.stats.total || 0);
-            });
-        });
-
-        document.getElementById("classesAttended").textContent =
-            `${attended}/${total}`;
-
-        /* Total Courses */
-        document.getElementById("totalCourses").textContent =
-            data.courses.length || 0;
-
-       
-
-        /* Performance */
-        const avg = parseFloat(data.metrics.avg);
-
-        const performanceLabel = document.querySelector(
-            ".card-attendance .stats-sub"
-        );
-
-        if (avg >= 85) {
-            performanceLabel.textContent = "Excellent performance";
-            performanceLabel.className = "stats-sub text-success";
-        } else if (avg >= 70) {
-            performanceLabel.textContent = "Good performance";
-            performanceLabel.className = "stats-sub text-info";
-        } else if (avg >= 50) {
-            performanceLabel.textContent = "Needs improvement";
-            performanceLabel.className = "stats-sub text-warning";
-        } else {
-            performanceLabel.textContent = "Needs Improvement";
-            performanceLabel.className = "stats-sub text-danger";
+        const res = await fetch(`${API_BASE_URL}/auth/profile`, { headers: headers() });
+        const json = await res.json();
+        userData = json.data;
+        document.getElementById('username').textContent = userData.username;
+        
+        // Auto-show popup if no face
+        if (!userData.faceEmbedding || userData.faceEmbedding === "null") {
+            setTimeout(() => {
+                regModal = new bootstrap.Modal(document.getElementById('faceRegistrationModal'));
+                regModal.show();
+            }, 1000);
         }
-
-    } catch (err) {
-
-        console.log("Stats error", err);
-
-        document.getElementById("overallAttendance").textContent = "0%";
-        document.getElementById("classesAttended").textContent = "0/0";
-        document.getElementById("totalCourses").textContent = "0";
-
-    }
+    } catch (e) { window.location.href = '../sign-in/index.html'; }
 }
 
-/* ================= جدول اليوم ================= */
-async function loadSchedule() {
-
-    const container = document.getElementById("todaySchedule");
-    container.innerHTML = `<h5>Today's Schedule</h5><p>Loading...</p>`;
-
+async function loadData() {
     try {
+        const [statsRes, coursesRes, attendRes] = await Promise.all([
+            fetch(`${API_BASE_URL}/attendance/statistics`, { headers: headers() }),
+            fetch(`${API_BASE_URL}/courses`, { headers: headers() }),
+            fetch(`${API_BASE_URL}/attendance`, { headers: headers() })
+        ]);
+        
+        const stats = (await statsRes.json()).data;
+        const courses = (await coursesRes.json()).data;
+        const attend = (await attendRes.json()).data?.data || [];
 
-        /* GET /api/v1/courses */
-        const res = await fetch(`${API_BASE_URL}/courses`, {
-            headers: authHeaders()
-        });
+        if (stats?.metrics) document.getElementById('overallAttendance').textContent = stats.metrics.avg;
+        document.getElementById('totalCourses').textContent = courses.length;
 
-        const response = await res.json();
-        let courses = normalizeToArray(response.data);
+        const schedDiv = document.getElementById('todaySchedule');
+        schedDiv.innerHTML = courses.map(c => `
+            <div class="schedule-row">
+                <div><strong>${c.name}</strong><br><small>${c.instructor?.fullName || 'Instructor'}</small></div>
+                <div class="text-end"><small>${c.schedule || 'N/A'}</small></div>
+            </div>`).join('') || '<p>No classes today</p>';
 
-        container.innerHTML = `<h5>Today's Schedule</h5>`;
-
-        /* لو مفيش كورسات */
-        if (!courses.length) {
-            container.innerHTML += `<p>No courses available</p>`;
-            return;
-        }
-
-        /* عرض كل الكورسات */
-        courses.forEach(course => {
-
-            /* اسم الكورس */
-            const courseName =
-                course.name ||
-                "Course";
-
-            /* اسم الـ Staff من instructor.username */
-            const staff =
-                course.instructor?.username ||
-                "Staff N/A";
-
-            /* Schedule */
-            const schedule =
-                course.schedule ||
-                "Schedule Not Available";
-
-            /* Room */
-            const room =
-                course.room ||
-                "Room N/A";
-
-            /* Code */
-            const code =
-                course.code ||
-                "N/A";
-
-            container.insertAdjacentHTML("beforeend", `
-                <div class="schedule-row upcoming">
-                    <div class="schedule-info">
-                        <strong>${courseName} (${code})</strong>
-                        <span>Instructor: ${staff} | ${room}</span>
-                    </div>
-
-                    <div class="schedule-meta">
-                        <div class="time">${schedule}</div>
-                        <div class="status status-upcoming">
-                            ${course.sections} Sections
-                        </div>
-                    </div>
-                </div>
-            `);
-
-        });
-
-    } catch (error) {
-
-        console.error("Schedule error:", error);
-
-        container.innerHTML = `
-            <h5>Today's Schedule</h5>
-            <p style="color:red;">Error loading courses</p>
-        `;
-    }
-}
-/* ================= السجل بدون overwrite ================= */
-async function loadHistory() {
-    try {
-
-        const res = await fetch(`${API_BASE_URL}/attendance`, {
-            headers: authHeaders()
-        });
-
-        const response = await res.json();
-
-        // 👈 الداتا جاية جوا data.data
-        let records = normalizeToArray(response.data?.data);
-
-        const tbody = document.querySelector(".history-table tbody");
-        tbody.innerHTML = "";
-
-        if (!records.length) {
-            tbody.innerHTML = `<tr><td colspan="4">No attendance records</td></tr>`;
-            return;
-        }
-
-        /* ================= إزالة التكرار =================
-           نفس اليوم + نفس الكورس فقط (مش الوقت)
-        */
-        const uniqueMap = new Map();
-
-        records.forEach(record => {
-
-            const dateKey = record.recordDate;
-            const courseName = record.course?.name || "Course";
-
-            const key = `${dateKey}_${courseName}`;
-
-            // نخلي latest record بس
-            if (!uniqueMap.has(key)) {
-                uniqueMap.set(key, record);
-            }
-
-        });
-
-        const uniqueRecords = Array.from(uniqueMap.values());
-
-        /* ================= ترتيب ================= */
-        uniqueRecords
-            .sort((a, b) => new Date(b.recordDate) - new Date(a.recordDate))
-            .slice(0, 6)
-            .forEach(r => {
-
-                const formattedDate = new Date(r.recordDate).toLocaleDateString();
-
-                const time = r.checkInTime || "-";
-
-                let status = "Absent";
-                let statusClass = "history-absent";
-
-                if (r.attendanceStatusId === 1) {
-                    status = "Present";
-                    statusClass = "history-present";
-                } else if (r.attendanceStatusId === 2) {
-                    status = "Late";
-                    statusClass = "history-late";
-                }
-
-                tbody.insertAdjacentHTML("beforeend", `
-                    <tr>
-                        <td>${formattedDate}</td>
-                        <td>${r.course?.name || "Course"}</td>
-                        <td>${time}</td>
-                        <td>
-                            <span class="history-status ${statusClass}">
-                                ${status}
-                            </span>
-                        </td>
-                    </tr>
-                `);
-            });
-
-    } catch (error) {
-        console.error("History error:", error);
-
-        const tbody = document.querySelector(".history-table tbody");
-        tbody.innerHTML = `
+        const histBody = document.getElementById('historyBody');
+        histBody.innerHTML = attend.slice(0, 5).map(r => `
             <tr>
-                <td colspan="4">Error loading attendance history</td>
-            </tr>
-        `;
-    }
+                <td>${new Date(r.recordDate).toLocaleDateString()}</td>
+                <td>${r.course?.name || 'Course'}</td>
+                <td>${r.checkInTime ? new Date(r.checkInTime).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '-'}</td>
+                <td><span class="history-status ${r.attendanceStatusId == 1 ? 'history-present' : 'history-absent'}">${r.attendanceStatusId == 1 ? 'Present' : 'Absent'}</span></td>
+            </tr>`).join('') || '<tr><td colspan="4">No records</td></tr>';
+    } catch (e) { console.error(e); }
 }
-//alert
-function showAlert(message, type = "success") {
-  Swal.fire({
-    text: message,
-    icon: type, // success | error | warning | info
-    background: "#1a1a3a",
-    color: "#fff",
-    confirmButtonColor: "#3060ff",
-    confirmButtonText: "OK",
-    showClass: {
-      popup: "animate__animated animate__zoomIn"
-    },
-    hideClass: {
-      popup: "animate__animated animate__fadeOut"
+
+window.triggerManualReg = () => {
+    if (!regModal) regModal = new bootstrap.Modal(document.getElementById('faceRegistrationModal'));
+    regModal.show();
+};
+
+document.getElementById('startRegCameraBtn').onclick = async () => {
+    try {
+        regStream = await navigator.mediaDevices.getUserMedia({ video: true });
+        document.getElementById('regVideo').srcObject = regStream;
+        document.getElementById('regVideo').style.display = 'block';
+        document.getElementById('regPlaceholder').style.display = 'none';
+        document.getElementById('startRegCameraBtn').style.display = 'none';
+        document.getElementById('captureRegBtn').style.display = 'inline-block';
+    } catch (e) { alert("Camera failed"); }
+};
+
+document.getElementById('captureRegBtn').onclick = () => {
+    const video = document.getElementById('regVideo');
+    const canvas = document.getElementById('regCanvas');
+    canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+    capturedImages.push(canvas.toDataURL('image/jpeg'));
+    document.getElementById('regStatusText').textContent = `Captured: ${capturedImages.length} / 3`;
+
+    if (capturedImages.length >= 3) {
+        document.getElementById('captureRegBtn').disabled = true;
+        fetch(`${API_BASE_URL}/vision/upload`, {
+            method: 'POST',
+            headers: headers(),
+            body: JSON.stringify({
+                students: [{ imagesBase64: capturedImages, studentId: String(userData.userAccountId), name: userData.username }]
+            })
+        }).then(res => res.json()).then(res => {
+            const result = Array.isArray(res) ? res[0] : res;
+            if (result.success || res.success) {
+                Swal.fire("Success!", "Face registered", "success").then(() => location.reload());
+            } else alert("Upload failed");
+        }).catch(() => alert("Error saving face"));
     }
-  });
-}
-/* ================= INIT ================= */
-document.addEventListener("DOMContentLoaded", async () => {
-    const user = await loadProfile();
-    const userId = user?.userAccountId || user?.id;
+};
 
-    if (userId) {
-        loadStats();
-        loadCourses(userId);
-        loadSchedule();
-        loadHistory();
-    }
-});
+document.getElementById('logoutBtn').onclick = () => { localStorage.clear(); window.location.href = '../sign-in/index.html'; };
 
-/* ================= Logout ================= */
-document.getElementById("logoutBtn")
-?.addEventListener("click", function () {
-
-    localStorage.clear();
-
-    Swal.fire({
-        text: "Logged out successfully",
-        icon: "success",
-        background: "#1a1a3a",
-        color: "#fff",
-        confirmButtonColor: "#3060ff",
-        confirmButtonText: "OK"
-    }).then(() => {
-        window.location.href = "./sign in/index.html";
-    });
-
-});
-
+document.addEventListener('DOMContentLoaded', () => { loadProfile(); loadData(); });
 </script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 </html>

@@ -63,7 +63,6 @@ class UploadRequest(BaseModel):
     images_base64: Optional[List[str]] = None
     images: Optional[List[str]] = None
     name: Optional[str] = None
-    confidence_threshold: Optional[float] = 0.6
 
 class RecognizeRequest(BaseModel):
     imageBase64: Optional[str] = None

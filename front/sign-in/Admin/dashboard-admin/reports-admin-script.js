@@ -78,31 +78,40 @@ async function loadRecentReports() {
     if (!container) return;
 
     try {
-        // تنبيه: هنا يتم استخدام الـ API الخاص بملفات التقارير
         const response = await fetch(`${API_BASE_URL}/attendance/statistics`, {
             headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         });
         const data = await response.json();
 
-        // فحص إذا كان هناك تقارير حقيقية راجعة من الباك
-        if (data && data.reports && data.reports.length > 0) {
+        // backend returns { total, breakdown: [{statusId, statusName, count, percentage}] }
+        if (data && data.total !== undefined) {
             container.innerHTML = ''; 
-            data.reports.forEach(report => {
-                container.innerHTML += `
-                    <div class="report-item">
-                        <div class="report-main-info">
-                            <i class="fas fa-file-alt"></i>
-                            <div>
-                                <h4>${report.name}</h4>
-                                <span>${new Date(report.date).toLocaleDateString()} • ${report.size || '0'} MB</span>
+            
+            // Create a summary display
+            let html = `
+                <div class="stats-summary" style="padding: 15px; background: rgba(255,255,255,0.05); border-radius: 8px; margin-bottom: 20px;">
+                    <h4 style="color: #fff; margin-bottom: 10px;"><i class="fas fa-chart-pie"></i> Overall Statistics</h4>
+                    <p style="font-size: 0.9rem; color: #8e8e93;">Total Records Processed: <strong>${data.total}</strong></p>
+                </div>
+            `;
+
+            if (Array.isArray(data.breakdown)) {
+                data.breakdown.forEach(stat => {
+                    html += `
+                        <div class="report-item">
+                            <div class="report-main-info">
+                                <i class="fas fa-file-alt"></i>
+                                <div>
+                                    <h4>${stat.statusName} Attendance</h4>
+                                    <span>Count: ${stat.count} • <strong>${stat.percentage}%</strong> of total</span>
+                                </div>
                             </div>
                         </div>
-                        <button class="btn-download" onclick="window.open('${report.url}')">Download</button>
-                    </div>
-                `;
-            });
+                    `;
+                });
+            }
+            container.innerHTML = html;
         } else {
-            // لو مفيش داتا من الباك إند يظهر الرسالة دي
             container.innerHTML = '<p style="text-align:center; color:var(--text-dim); margin: 20px 0;">No history found yet. Generated reports will appear here.</p>';
         }
     } catch (e) {

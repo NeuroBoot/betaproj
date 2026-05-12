@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 if (courses.data.length > 0) {
                     // نبعث الـ ID كـ String لضمان توافق الـ API
-                    const firstCourseId = String(courses.data[0].id || courses.data[0]._id);
+                    const firstCourseId = String(courses.data[0].courseId || courses.data[0].id || courses.data[0]._id);
                     loadChartData(firstCourseId, headers);
                 }
             }
@@ -101,7 +101,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             const res = await fetch(`${API_BASE_URL}/attendance/statistics?courseId=${id}`, { headers });
             const result = await res.json();
-            if (result.success) drawChart(result.data);
+            if (result.success && result.data && result.data.breakdown) {
+                const chartData = result.data.breakdown.map(b => ({
+                    label: b.statusName,
+                    value: parseFloat(b.percentage)
+                }));
+                drawChart(chartData);
+            }
         } catch (e) { console.error("Chart failed", e); }
     }
 

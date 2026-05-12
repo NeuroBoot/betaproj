@@ -311,7 +311,7 @@ justify-content:space-between;
 
 <div id="todayClassesContainer"></div>
 
-<a href="./sign in/index.html"></a>
+<a href="../sign-in/index.html"></a>
 </div>
 </div>
 </div>
@@ -334,7 +334,7 @@ function authHeaders() {
 
 function redirectToLogin() {
   localStorage.clear();
-  window.location.href = "./sign in/index.html";
+  window.location.href = "../sign-in/index.html";
 }
 // ✅ Logout
 document.getElementById('logoutBtn').addEventListener('click', function () {
@@ -351,7 +351,7 @@ document.getElementById('logoutBtn').addEventListener('click', function () {
         confirmButtonColor: "#3060ff",
         confirmButtonText: "OK"
     }).then(() => {
-        window.location.href = "./sign in/index.html";
+        window.location.href = "../sign-in/index.html";
     });
 
 });
@@ -429,6 +429,18 @@ async function loadCourses() {
     const token = localStorage.getItem('token');
 
     try {
+        // Fetch global staff statistics for the summary cards
+        const statsRes = await fetch(`${API_BASE_URL}/attendance/statistics`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const statsData = await statsRes.json();
+        
+        if (statsData.success && statsData.data) {
+            const totalRecs = statsData.data.total || 0;
+            const presentStat = (statsData.data.breakdown || []).find(b => b.statusName === 'Present');
+            const avgVal = presentStat ? presentStat.percentage : "0";
+            document.getElementById("attendanceAvg").textContent = `${avgVal}%`;
+        }
 
         const response = await fetch('http://localhost:3000/api/v1/courses', {
             headers: {
@@ -501,9 +513,7 @@ async function loadCourses() {
         // 🔥 الإحصائيات
         document.getElementById("totalStudents").textContent = totalStudents;
         document.getElementById("totalCourses").textContent = courses.length;
-
-        document.getElementById("attendanceAvg").textContent = "85%";
-        document.getElementById("pendingReviews").textContent = courses.length;
+        document.getElementById("pendingReviews").textContent = "0";
 
     } catch (error) {
         console.error("Courses error:", error);
@@ -533,34 +543,27 @@ async function loadTodayClasses() {
         const container = document.getElementById("todayClassesContainer");
         container.innerHTML = "";
 
-        const today = new Date().toISOString().split('T')[0];
-
         courses.forEach(course => {
-
-            // 🧠 حسب API بتاعك (عدل حسب البيانات)
-            if (!course.scheduleDate) return;
-
-            if (course.scheduleDate.startsWith(today)) {
-
-                const courseHTML = `
-                    <div class="today-card">
-                        <div class="today-info">
-                            <h6>${course.name}</h6>
-                            <small>
-                                ${course.schedule || "Time N/A"} 
-                                | ${course.room || "Room N/A"}
-                            </small>
-                        </div>
-
-                        <div class="today-status">
-                            <span class="status status-upcoming">Today</span>
-                            <small>${course.students?.length || 0} Students</small>
-                        </div>
+            // Displaying all active courses assigned to staff as 'Today' sessions
+            // Real-time filtering by day could be added here if 'schedule' follows a standard format
+            const courseHTML = `
+                <div class="today-card">
+                    <div class="today-info">
+                        <h6>${course.name}</h6>
+                        <small>
+                            ${course.schedule || "Time N/A"} 
+                            | ${course.room || "Room N/A"}
+                        </small>
                     </div>
-                `;
 
-                container.innerHTML += courseHTML;
-            }
+                    <div class="today-status">
+                        <span class="status status-upcoming">Live</span>
+                        <small>${course.credits || 0} Credits</small>
+                    </div>
+                </div>
+            `;
+
+            container.innerHTML += courseHTML;
         });
 
     } catch (error) {

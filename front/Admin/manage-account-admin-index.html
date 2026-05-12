@@ -54,21 +54,21 @@
                     <div class="stat-card blue">
                         <i class="fas fa-users"></i>
                         <div class="stat-info">
-                            <h3>2,450</h3>
+                            <h3 id="studentCount">0</h3>
                             <p>Student Accounts</p>
                         </div>
                     </div>
                     <div class="stat-card green">
                         <i class="fas fa-user-tie"></i>
                         <div class="stat-info">
-                            <h3>124</h3>
+                            <h3 id="staffCount">0</h3>
                             <p>Staff Accounts</p>
                         </div>
                     </div>
                     <div class="stat-card purple">
                         <i class="fas fa-user-shield"></i>
                         <div class="stat-info">
-                            <h3>8</h3>
+                            <h3 id="adminCount">0</h3>
                             <p>Admin Accounts</p>
                         </div>
                     </div>
@@ -101,17 +101,7 @@
                             </tr>
                         </thead>
                         <tbody id="accountsTableBody">
-                            <tr>
-                                <td>2021001</td>
-                                <td>Ahmed Hassan</td>
-                                <td>ahmed@university.edu</td>
-                                <td><span class="badge student">Student</span></td>
-                                <td><span class="status-active">Active</span></td>
-                                <td class="actions">
-                                    <button class="btn-edit"><i class="fas fa-edit"></i> Edit</button>
-                                    <button class="btn-delete"><i class="fas fa-trash"></i></button>
-                                </td>
-                            </tr>
+                            <!-- Loaded via JS -->
                         </tbody>
                     </table>
                 </div>
@@ -124,6 +114,10 @@
             <h3 class="modal-title">Create New Account</h3>
             <form id="accountForm">
                 <div class="form-row">
+                    <div class="form-group"><label>Username</label><input type="text" id="username" required></div>
+                    <div class="form-group"><label>Password</label><input type="password" id="password" required></div>
+                </div>
+                <div class="form-row">
                     <div class="form-group"><label>Full Name</label><input type="text" id="fullName" required></div>
                     <div class="form-group"><label>Email Address</label><input type="email" id="email" required></div>
                 </div>
@@ -131,12 +125,11 @@
                     <div class="form-group">
                         <label>Role</label>
                         <select id="role">
-                            <option value="Student">Student</option>
-                            <option value="Staff">Staff</option>
-                            <option value="Admin">Admin</option>
+                            <option value="student">Student</option>
+                            <option value="staff">Staff</option>
+                            <option value="admin">Admin</option>
                         </select>
                     </div>
-                    <div class="form-group"><label>ID Number</label><input type="text" id="idNumber" required></div>
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn-create">Create Account</button>
@@ -150,6 +143,8 @@
         <div class="modal-content">
             <h3 class="modal-title">Edit Account Details</h3>
             <form id="editForm">
+                <input type="hidden" id="editUsername">
+                <input type="hidden" id="editId">
                 <div class="form-row">
                     <div class="form-group"><label>Full Name</label><input type="text" id="editFullName" required></div>
                     <div class="form-group"><label>Email Address</label><input type="email" id="editEmail" required></div>
@@ -158,12 +153,11 @@
                     <div class="form-group">
                         <label>Role</label>
                         <select id="editRole">
-                            <option value="Student">Student</option>
-                            <option value="Staff">Staff</option>
-                            <option value="Admin">Admin</option>
+                            <option value="student">Student</option>
+                            <option value="staff">Staff</option>
+                            <option value="admin">Admin</option>
                         </select>
                     </div>
-                    <div class="form-group"><label>ID Number</label><input type="text" id="editIdNumber" required></div>
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn-create">Update Account</button>

@@ -72,20 +72,38 @@ export class CoursesService {
     return this.courseRepository.save(course);
   }
 
-  async findAll(user: UserAccount): Promise<Course[]> {
+  async findAll(user: UserAccount): Promise<any[]> {
+    let courses: Course[] = [];
     if (user.userType === Role.ADMIN) {
-      return this.courseRepository.findAllActive();
+      courses = await this.courseRepository.findAllActive();
+    } else if (user.userType === Role.STAFF) {
+      courses = await this.courseRepository.findByInstructor(user.userAccountId);
+    } else if (user.userType === Role.STUDENT) {
+      courses = await this.courseRepository.findByStudent(user.userAccountId);
+    } else {
+      return [];
     }
-    
-    if (user.userType === Role.STAFF) {
-      return this.courseRepository.findByInstructor(user.userAccountId);
-    }
-    
-    if (user.userType === Role.STUDENT) {
-      return this.courseRepository.findByStudent(user.userAccountId);
-    }
-    
-    return [];
+
+    return courses.map(course => {
+      const enrollments = course.enrollments || [];
+      const sections = [...new Set(enrollments.map(e => e.section).filter(Boolean))].sort();
+      const lectures = [...new Set(enrollments.map(e => e.lecture).filter(Boolean))].sort();
+
+      // If no sections in enrollments but course.sections > 0, fallback to numeric
+      if (sections.length === 0 && course.sections > 0) {
+        for (let i = 1; i <= course.sections; i++) {
+          sections.push(String(i));
+        }
+      }
+
+      return {
+        ...course,
+        data: {
+          sections,
+          lectures
+        }
+      };
+    });
   }
 
   async findOne(id: number, user: UserAccount): Promise<Course> {
@@ -217,21 +235,26 @@ export class CoursesService {
     section?: string,
     lecture?: string
   ): Promise<CourseEnrollment> {
+    console.log(`[Enrollment] Attempting to enroll student ${studentId} into course ${courseId} (by user ${user.userAccountId})`);
+    
     const course = await this.courseRepository.findOne({
       where: { courseId, isDeleted: false },
       relations: ['instructor'],
     });
     if (!course) {
+      console.error(`[Enrollment Failed] Course ${courseId} not found or deleted`);
       throw new NotFoundException(`Course Validation Failed: No active course found with ID ${courseId}.`);
     }
 
     // Permission check: Admin or the course's Instructor
     if (user.userType === Role.STAFF && course.instructor.userAccountId !== user.userAccountId) {
+      console.warn(`[Enrollment Forbidden] Staff ${user.userAccountId} tried to enroll student into course ${courseId} taught by ${course.instructor.userAccountId}`);
       throw new ForbiddenException(`Access Denied: Instructors can only enroll students in courses they teach. Course '${course.name}' is managed by another instructor.`);
     }
 
     const student = await this.userRepository.findById(studentId);
     if (!student || student.userType !== Role.STUDENT) {
+      console.error(`[Enrollment Failed] Student ${studentId} not found or not a student`);
       throw new NotFoundException(`Student with ID ${studentId} not found`);
     }
 
@@ -240,6 +263,7 @@ export class CoursesService {
     });
 
     if (existingEnrollment) {
+      console.warn(`[Enrollment Conflict] Student ${studentId} is already enrolled in course ${courseId}`);
       throw new ConflictException('Student already enrolled in this course');
     }
 
@@ -250,10 +274,12 @@ export class CoursesService {
       lecture,
     });
 
-    return this.enrollmentRepository.save(enrollment);
+    const saved = await this.enrollmentRepository.save(enrollment);
+    console.log(`[Enrollment Success] Student ${studentId} enrolled in course ${courseId}. Enrollment ID: ${saved.enrollmentId}`);
+    return saved;
   }
 
-  async getEnrolledStudents(courseId: number, user: UserAccount): Promise<UserAccount[]> {
+  async getEnrolledStudents(courseId: number, user: UserAccount): Promise<CourseEnrollment[]> {
     const course = await this.courseRepository.findOne({
       where: { courseId, isDeleted: false },
       relations: ['instructor', 'enrollments', 'enrollments.student'],
@@ -267,6 +293,18 @@ export class CoursesService {
       throw new ForbiddenException(`Access Denied: You can only view enrollment lists for your own assigned courses.`);
     }
 
-    return (course.enrollments || []).map(e => e.student);
+    return course.enrollments || [];
+  }
+
+  async getUniqueSectionsAndLectures(courseId: number): Promise<{ sections: string[], lectures: string[] }> {
+    const enrollments = await this.enrollmentRepository.find({
+      where: { courseId },
+      select: ['section', 'lecture'],
+    });
+
+    const sections = [...new Set(enrollments.map(e => e.section).filter(Boolean))].sort();
+    const lectures = [...new Set(enrollments.map(e => e.lecture).filter(Boolean))].sort();
+
+    return { sections, lectures };
   }
 }

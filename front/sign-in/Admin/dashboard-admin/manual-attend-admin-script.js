@@ -125,13 +125,14 @@ async function openDetails() {
         tableBody.innerHTML = ''; 
 
         if (Array.isArray(students) && students.length > 0) {
-            students.forEach(s => {
+            students.forEach(e => {
+                const s = e.student || {};
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${s.studentCode || 'N/A'}</td>
-                    <td>${s.name || s.username}</td>
+                    <td>${s.userAccountId || s.id || 'N/A'}</td>
+                    <td>${s.fullName || s.username || 'Unknown'}</td>
                     <td>
-                        <select class="status-select" data-student-id="${s.id || s._id}">
+                        <select class="status-select" data-student-id="${s.userAccountId || s.id}">
                             <option value="present">Present</option>
                             <option value="absent">Absent</option>
                             <option value="late">Late</option>
@@ -155,18 +156,19 @@ async function saveAttendance() {
     const date = document.getElementById('dateInput').value;
     
     // تجهيز الداتا بصيغة الـ JSON المطلوبة للـ API
+    // BulkAttendanceDto expects 'attendance' array
     const attendanceData = {
         courseId: courseId,
         section: sectionName,
         date: date,
-        records: Array.from(rows).map(select => ({
+        attendance: Array.from(rows).map(select => ({
             studentId: select.getAttribute('data-student-id'),
-            status: select.value
+            status: select.value.charAt(0).toUpperCase() + select.value.slice(1) // Map 'present' to 'Present'
         }))
     };
 
     try {
-        const response = await fetch(`${API_BASE_URL}/attendance/manual`, {
+        const response = await fetch(`${API_BASE_URL}/attendance`, {
             method: 'POST',
             headers: { 
                 'Authorization': getAuthToken(), 
@@ -176,12 +178,18 @@ async function saveAttendance() {
         });
 
         if (response.ok) {
-            alert("Attendance updated successfully! 🎉");
+            Swal.fire({
+                icon: 'success',
+                title: 'Attendance Saved',
+                text: 'Bulk attendance records have been processed successfully.',
+                background: '#1e1e2d',
+                color: '#fff'
+            });
             closeDetails();
             await loadRecentRecords(); // تحديث السجلات فوراً
         } else {
             const err = await response.json();
-            alert("Error: " + (err.message || "Failed to save"));
+            Swal.fire('Error', err.message || "Failed to save attendance", 'error');
         }
     } catch (e) { console.error("Save Error", e); }
 }

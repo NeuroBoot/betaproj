@@ -67,12 +67,23 @@ document.addEventListener('DOMContentLoaded', async function() {
         const tr = document.createElement('tr');
         const displayId = user.userAccountId || user.id || 'N/A';
         tr.setAttribute('data-id', displayId); 
+        
+        const isStudent = (user.userType || 'student').toLowerCase() === 'student';
+        const hasFace = user.faceEmbedding ? true : false;
+        
+        let statusHtml = '<span class="status-active">Active</span>';
+        if (isStudent) {
+            statusHtml = hasFace 
+                ? '<span class="status-active" style="background: rgba(46,204,113,0.15); color: #2ecc71; padding: 4px 10px; border-radius: 8px;">Face Registered</span>' 
+                : '<span class="status-pending" style="background: rgba(231,76,60,0.15); color: #e74c3c; padding: 4px 10px; border-radius: 8px;">No Face Data</span>';
+        }
+
         tr.innerHTML = `
             <td>${displayId}</td>
             <td>${user.fullName || user.username || 'Unknown'}</td>
             <td>${user.email || 'N/A'}</td>
             <td><span class="badge ${(user.userType || 'student').toLowerCase()}">${user.userType || 'Student'}</span></td>
-            <td><span class="status-active">Active</span></td>
+            <td>${statusHtml}</td>
             <td class="actions">
                 <button class="btn-edit"><i class="fas fa-edit"></i> Edit</button>
                 <button class="btn-delete"><i class="fas fa-trash"></i></button>
@@ -106,8 +117,10 @@ document.addEventListener('DOMContentLoaded', async function() {
     if (accountForm) {
         accountForm.onsubmit = async function(e) {
             e.preventDefault();
+            const rawName = document.getElementById('fullName').value.trim();
             const userData = {
-                username: document.getElementById('fullName').value.trim(),
+                username: rawName.replace(/\s+/g, '_').toLowerCase() + "_" + Math.floor(Math.random() * 1000),
+                fullName: rawName,
                 email: document.getElementById('email').value.trim(),
                 password: "User@123", 
                 userType: document.getElementById('role').value.toLowerCase()
@@ -122,6 +135,9 @@ document.addEventListener('DOMContentLoaded', async function() {
                     modal.style.display = 'none';
                     this.reset();
                     loadAccounts();
+                } else {
+                    const err = await response.json();
+                    alert("Error creating account: " + (err.message || "Invalid data"));
                 }
             } catch (error) { console.error("Add error:", error); }
         };
@@ -163,7 +179,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             e.preventDefault();
             const userId = currentRow.getAttribute('data-id');
             const updatedData = {
-                username: document.getElementById('editFullName').value.trim(),
+                fullName: document.getElementById('editFullName').value.trim(),
                 email: document.getElementById('editEmail').value.trim(),
                 userType: document.getElementById('editRole').value.toLowerCase()
             };

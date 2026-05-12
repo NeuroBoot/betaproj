@@ -4,13 +4,14 @@ import { CourseRepository } from '../repositories/course.repository';
 import { UserRepository } from '../../users/repositories/user.repository';
 import { CourseEnrollment } from '../entities/course-enrollment.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { ConflictException, NotFoundException } from '@nestjs/common';
+import { ConflictException, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { Role } from '../../common/enums/role.enum';
 
 describe('CoursesService', () => {
   let service: CoursesService;
   let courseRepository: any;
   let userRepository: any;
+  let enrollmentRepository: any;
 
   beforeEach(async () => {
     courseRepository = {
@@ -25,13 +26,18 @@ describe('CoursesService', () => {
     userRepository = {
       findById: jest.fn(),
     };
+    enrollmentRepository = {
+      findOne: jest.fn(),
+      create: jest.fn(),
+      save: jest.fn(),
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CoursesService,
         { provide: CourseRepository, useValue: courseRepository },
         { provide: UserRepository, useValue: userRepository },
-        { provide: getRepositoryToken(CourseEnrollment), useValue: { findOne: jest.fn(), create: jest.fn(), save: jest.fn() } },
+        { provide: getRepositoryToken(CourseEnrollment), useValue: enrollmentRepository },
       ],
     }).compile();
 
@@ -119,6 +125,51 @@ describe('CoursesService', () => {
       expect(courseToUpdate.code).toBe('NEW');
       expect(courseRepository.save).toHaveBeenCalledWith(conflictingDeletedCourse);
       expect(courseRepository.save).toHaveBeenCalledWith(courseToUpdate);
+    });
+  });
+
+  describe('enrollStudent', () => {
+    const mockAdmin = { userAccountId: 1, userType: Role.ADMIN };
+    const mockStaff = { userAccountId: 2, userType: Role.STAFF };
+    const mockStudent = { userAccountId: 3, userType: Role.STUDENT };
+    const mockCourse = { courseId: 10, instructor: { userAccountId: 2 }, isDeleted: false };
+
+    it('should successfully enroll a student', async () => {
+      courseRepository.findOne.mockResolvedValue(mockCourse);
+      userRepository.findById.mockResolvedValue(mockStudent);
+      enrollmentRepository.findOne.mockResolvedValue(null);
+      enrollmentRepository.create.mockImplementation(dto => dto);
+      enrollmentRepository.save.mockImplementation(dto => Promise.resolve({ enrollmentId: 1, ...dto }));
+
+      const result = await service.enrollStudent(10, 3, mockAdmin as any, 'S1', 'L1');
+
+      expect(result.studentId).toBe(3);
+      expect(result.section).toBe('S1');
+      expect(enrollmentRepository.save).toHaveBeenCalled();
+    });
+
+    it('should throw ForbiddenException if Staff tries to enroll in another course', async () => {
+      const otherStaff = { userAccountId: 99, userType: Role.STAFF };
+      courseRepository.findOne.mockResolvedValue(mockCourse);
+
+      await expect(service.enrollStudent(10, 3, otherStaff as any)).rejects.toThrow(ForbiddenException);
+    });
+  });
+
+  describe('getEnrolledStudents', () => {
+    it('should return students for authorized user', async () => {
+      const mockAdmin = { userAccountId: 1, userType: Role.ADMIN };
+      const course = {
+        courseId: 10,
+        isDeleted: false,
+        enrollments: [{ student: { userAccountId: 3, username: 's1' } }]
+      };
+      courseRepository.findOne.mockResolvedValue(course);
+
+      const result = await service.getEnrolledStudents(10, mockAdmin as any);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].student.username).toBe('s1');
     });
   });
 });

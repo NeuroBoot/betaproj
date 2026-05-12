@@ -219,7 +219,7 @@ function redirectToLogin() {
   localStorage.removeItem('token');
   localStorage.removeItem('loggedUser');
   localStorage.removeItem('userRole');
-  window.location.href = "./sign in/index.html";
+  window.location.href = "../sign-in/index.html";
 }
 
 async function loadProfile() {
@@ -286,7 +286,7 @@ document.getElementById('logoutBtn').addEventListener('click', function () {
         confirmButtonColor: "#3060ff",
         confirmButtonText: "OK"
     }).then(() => {
-        window.location.href = "./sign in/index.html";
+        window.location.href = "../sign-in/index.html";
     });
 });
 
@@ -460,3 +460,4 @@ loadReportsData();
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 </html>
+

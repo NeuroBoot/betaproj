@@ -22,10 +22,10 @@ export class VisionController {
    */
   @Post('upload')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.STAFF)
+  @Roles(Role.ADMIN, Role.STAFF, Role.STUDENT)
   @ApiOperation({ 
-    summary: 'Model 1: Bulk register student face embeddings',
-    description: 'Upload multiple students, each with an array of images, to create robust face embeddings'
+    summary: 'Model 1: Register face embeddings',
+    description: 'Upload images to create robust face embeddings'
   })
   @ApiResponse({ status: 200, description: 'Face embeddings registered successfully' })
   async upload(@Body() dto: BulkProcessUploadDto, @CurrentUser() user: UserAccount) {

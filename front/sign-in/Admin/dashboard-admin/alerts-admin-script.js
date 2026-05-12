@@ -1,4 +1,5 @@
 const API_BASE_URL = 'http://localhost:3000/api/v1';
+let globalUsersList = [];
 
 function getAuthToken() {
     let token = localStorage.getItem('token');
@@ -145,7 +146,35 @@ async function handleAlertDispatch() {
 
     const payload = { title: `System Alert`, message: message, type: type.toLowerCase() };
     let url = `${API_BASE_URL}/alerts/batch`;
-    if (!['all', 'students', 'staff', 'course'].includes(recipient)) {
+    
+    // logic to determine if it is a role-based batch or individual send
+    if (['all', 'students', 'staff', 'course'].includes(recipient)) {
+        let targetUserIds = [];
+        if (recipient === 'all') {
+            targetUserIds = globalUsersList.map(u => u.userAccountId || u.id);
+        } else if (recipient === 'students') {
+            targetUserIds = globalUsersList
+                .filter(u => (u.userType || u.role || '').toLowerCase() === 'student')
+                .map(u => u.userAccountId || u.id);
+        } else if (recipient === 'staff') {
+            targetUserIds = globalUsersList
+                .filter(u => (u.userType || u.role || '').toLowerCase() === 'staff')
+                .map(u => u.userAccountId || u.id);
+        } else if (recipient === 'course') {
+            Swal.fire('Info', 'Course-wide alerts are handled via individual student enrollment lists.', 'info');
+            sendBtn.disabled = false;
+            sendBtn.textContent = 'Send Alert';
+            return;
+        }
+
+        if (targetUserIds.length === 0) {
+            Swal.fire('Info', 'No users found in the selected category.', 'info');
+            sendBtn.disabled = false;
+            sendBtn.textContent = 'Send Alert';
+            return;
+        }
+        payload.userIds = targetUserIds;
+    } else {
         url = `${API_BASE_URL}/alerts/send/${recipient}`;
     }
 
@@ -170,7 +199,8 @@ async function handleAlertDispatch() {
             messageField.value = '';
             await loadAlertsFromServer();
         } else {
-            Swal.fire('Error', 'Failed to dispatch alert.', 'error');
+            const err = await response.json();
+            Swal.fire('Error', err.message || 'Failed to dispatch alert.', 'error');
         }
     } catch (e) {
         Swal.fire('Error', 'Server error.', 'error');
@@ -209,6 +239,7 @@ async function fillRecipients() {
         const result = await response.json();
         const users = result.data || result;
         if (Array.isArray(users)) {
+            globalUsersList = users;
             const group = document.createElement('optgroup');
             group.label = "Individual Users";
             users.forEach(u => {

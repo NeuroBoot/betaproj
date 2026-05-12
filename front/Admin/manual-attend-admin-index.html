@@ -148,39 +148,43 @@
                         <th>Student ID</th>
                         <th>Student Name</th>
                         <th>Status</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody id="attendanceTableBody">
-                    <tr>
-                        <td>2021001</td>
-                        <td>Ahmed Hassan Mohamed</td>
-                        <td><span class="status-badge present">Present</span></td>
-                    </tr>
-                    <tr>
-                        <td>2021002</td>
-                        <td>Sara Mohamed Ali</td>
-                        <td><span class="status-badge present">Present</span></td>
-                    </tr>
-                    <tr>
-                        <td>2021003</td>
-                        <td>Omar Ali Khaled</td>
-                        <td><span class="status-badge absent">Absent</span></td>
-                    </tr>
-                    <tr>
-                        <td>2021005</td>
-                        <td>Khaled Ibrahim Nasser</td>
-                        <td><span class="status-badge late">Late</span></td>
-                    </tr>
-                    <tr>
-                        <td>2021008</td>
-                        <td>Nour Adel Mohamed</td>
-                        <td><span class="status-badge excused">Excused</span></td>
-                    </tr>
+                    <!-- Loaded via JS -->
                 </tbody>
             </table>
         </div>
     </div>
 </div>
+
+<!-- AI Verify Modal (Admin Access) -->
+<div id="aiVerifyModal" class="modal-overlay" style="z-index: 10001;">
+    <div class="details-popup-large" style="width: 500px; text-align: center;">
+        <div class="popup-header">
+            <h3>AI Face Verification</h3>
+            <span class="close-popup" id="closeAiModal">&times;</span>
+        </div>
+        <div class="popup-body">
+            <p style="color: #8e8e93; margin-bottom: 20px;">Verifying student ID: <span id="verifyStudentId" style="color: #3060ff; font-weight: bold;"></span></p>
+            <div style="position:relative; width: 100%; border-radius: 12px; overflow: hidden; border: 2px dashed rgba(255,255,255,0.2); background: #000; margin-bottom: 20px;">
+                <video id="verifyVideo" autoplay playsinline style="width: 100%; display: none;"></video>
+                <div id="verifyPlaceholder" style="padding: 60px 0;">
+                    <i class="fas fa-camera" style="font-size: 3rem; color: #3060ff; margin-bottom: 15px;"></i>
+                    <p>Camera ready</p>
+                </div>
+            </div>
+            <canvas id="verifyCanvas" style="display:none;"></canvas>
+            <div style="display: flex; gap: 15px; justify-content: center;">
+                <button class="btn-view-details" id="startVerifyCameraBtn" style="background: #3060ff; border: none;">Start Camera</button>
+                <button class="btn-view-details" id="captureVerifyBtn" style="background: #2ecc71; border: none; display: none;">Verify Face</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="manual-attend-admin-script.js"></script>
 </body>
 </html>

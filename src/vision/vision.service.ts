@@ -58,7 +58,6 @@ export class VisionService {
           images_base64: dto.imagesBase64,
           student_id: dto.studentId,
           name: dto.name,
-          confidence_threshold: dto.confidenceThreshold || 0.6,
         })
       );
 
@@ -129,7 +128,6 @@ export class VisionService {
           studentId: studentDto.studentId,
           name: studentDto.name,
           imagesBase64: studentDto.imagesBase64,
-          confidenceThreshold: dto.confidenceThreshold
         });
         results.push({ studentId: studentDto.studentId, success: true, detail: result });
       } catch (error) {
@@ -187,15 +185,23 @@ export class VisionService {
 
     // Manual validation of AI response
     let rawMatch = aiResponse['match'] ?? aiResponse['similarity'] ?? aiResponse['confidenceScore'] ?? 0;
+    let rawConfidence = aiResponse['confidenceScore'] ?? aiResponse['confidence'] ?? rawMatch ?? 0;
+
     // Sanitize NaN or non-number values
     let sanitizedMatch = (typeof rawMatch === 'number' && !isNaN(rawMatch)) ? rawMatch : parseFloat(String(rawMatch));
     if (isNaN(sanitizedMatch)) sanitizedMatch = 0;
+    
+    let sanitizedConfidence = (typeof rawConfidence === 'number' && !isNaN(rawConfidence)) ? rawConfidence : parseFloat(String(rawConfidence));
+    if (isNaN(sanitizedConfidence)) sanitizedConfidence = 0;
+
     // Clamp between 0 and 1
     sanitizedMatch = Math.max(0, Math.min(1, sanitizedMatch));
+    sanitizedConfidence = Math.max(0, Math.min(1, sanitizedConfidence));
 
     const resultDto = plainToInstance(AiRecognitionResultDto, {
       ...aiResponse,
       match: sanitizedMatch,
+      confidenceScore: sanitizedConfidence,
     });
     const errors = await validate(resultDto);
     if (errors.length > 0) {
@@ -209,6 +215,8 @@ export class VisionService {
         status: 'NO_FACE',
         message: 'No face detected in the frame. Please ensure your face is clearly visible.',
         matchStatus: MatchStatus.NO_FACE_DETECTED,
+        matched: false,
+        studentId: null,
         processingTimeMs: processingTime,
       };
     }
@@ -218,6 +226,8 @@ export class VisionService {
         status: 'MULTIPLE_FACES',
         message: 'Multiple faces detected. Please ensure only one person is in the frame.',
         matchStatus: MatchStatus.MULTIPLE_FACES,
+        matched: false,
+        studentId: null,
         processingTimeMs: processingTime,
       };
     }
@@ -228,6 +238,8 @@ export class VisionService {
         message: `No matching student found. Confidence: ${(resultDto.confidenceScore * 100).toFixed(1)}%`,
         matchStatus: MatchStatus.NO_MATCH,
         confidence: resultDto.confidenceScore,
+        matched: false,
+        studentId: null,
         processingTimeMs: processingTime,
       };
     }
@@ -242,6 +254,8 @@ export class VisionService {
           status: 'STUDENT_NOT_FOUND',
           message: `Student with ID ${resultDto.studentId} not found in database. Please register this student first.`,
           student: { id: resultDto.studentId, name: resultDto.name },
+          matched: false,
+          studentId: resultDto.studentId,
           processingTimeMs: processingTime,
         };
       }
@@ -265,6 +279,9 @@ export class VisionService {
         message: result.status === 'RECORDED' 
           ? `✅ Attendance marked successfully for ${resultDto.name} with ${(resultDto.confidenceScore * 100).toFixed(1)}% confidence`
           : `⚠️ Attendance already marked for ${resultDto.name} today`,
+        matched: true,
+        studentId: resultDto.studentId,
+        confidenceScore: resultDto.confidenceScore,
         student: {
           id: resultDto.studentId,
           name: resultDto.name,
@@ -289,6 +306,8 @@ export class VisionService {
       return {
         status: 'ERROR',
         message: error.message,
+        matched: false,
+        studentId: resultDto.studentId,
         student: {
           id: resultDto.studentId,
           name: resultDto.name

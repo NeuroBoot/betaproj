@@ -247,7 +247,7 @@ function authHeaders() {
 
 function redirectToLogin() {
   localStorage.clear();
-  window.location.href = "./sign in/index.html";
+  window.location.href = "../sign-in/index.html";
 }
 
 /* ================= PROFILE ================= */
@@ -599,7 +599,7 @@ document.getElementById('logoutBtn').addEventListener('click', () => {
         confirmButtonColor: "#3060ff",
         confirmButtonText: "OK"
     }).then(() => {
-        window.location.href = "./sign in/index.html";
+        window.location.href = "../sign-in/index.html";
     });
 });
 
@@ -610,3 +610,4 @@ loadCharts();
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 </html>
+

@@ -40,16 +40,24 @@ export class CoursesController {
   @ApiOperation({ summary: 'Get course details by ID' })
   async findOne(@Param('id', ParseIntPipe) id: number, @CurrentUser() user: UserAccount) {
     const course = await this.coursesService.findOne(id, user);
-    const sectionList = Array.from({ length: course.sections }, (_, i) => i + 1);
-    return { ...course, data: { sections: sectionList } };
+    const { sections, lectures } = await this.coursesService.getUniqueSectionsAndLectures(id);
+    
+    // Fallback to numeric if empty
+    const finalSections = sections.length > 0 ? sections : Array.from({ length: course.sections }, (_, i) => String(i + 1));
+    
+    return { ...course, data: { sections: finalSections, lectures } };
   }
 
   @Get('code/:code')
   @ApiOperation({ summary: 'Get course details by Code' })
   async findOneByCode(@Param('code') code: string, @CurrentUser() user: UserAccount) {
     const course = await this.coursesService.findOneByCode(code, user);
-    const sectionList = Array.from({ length: course.sections }, (_, i) => i + 1);
-    return { ...course, data: { sections: sectionList } };
+    const { sections, lectures } = await this.coursesService.getUniqueSectionsAndLectures(course.courseId);
+    
+    // Fallback to numeric if empty
+    const finalSections = sections.length > 0 ? sections : Array.from({ length: course.sections }, (_, i) => String(i + 1));
+
+    return { ...course, data: { sections: finalSections, lectures } };
   }
 
   @Put(':id')

@@ -143,11 +143,11 @@ function renderTable(data) {
     `;
 
     data.forEach(item => {
-        // فحص شامل لضمان الحصول على الـ ID الصحيح (id أو _id)
-        const userId = item.id || item._id || item.userId || null;
-        const name = item.name || item.username || item.fullName || "Unknown";
+        // فحص شامل لضمان الحصول على الـ ID الصحيح (userAccountId)
+        const userId = item.userAccountId || item.id || item._id || item.userId || null;
+        const name = item.fullName || item.username || item.name || "Unknown";
         const email = item.email || "No email available";
-        const role = item.role || "User";
+        const role = item.userType || item.role || "User";
 
         html += `
             <tr>

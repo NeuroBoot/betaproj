@@ -77,7 +77,7 @@ describe('VisionService', () => {
       
       expect(result.status).toBe('SUCCESS');
       expect(userRepo.save).toHaveBeenCalledWith(expect.objectContaining({
-        faceEmbedding: 'dense_vector_xyz',
+        faceEmbedding: JSON.stringify('dense_vector_xyz'),
         embeddingVersion: 'v1.0'
       }));
     });

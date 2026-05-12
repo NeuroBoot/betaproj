@@ -180,7 +180,7 @@ function authHeaders() {
 
 function redirectToLogin() {
   localStorage.clear();
-  window.location.href = "./sign in/index.html";
+  window.location.href = "../sign-in/index.html";
 }
 
 function logout() {
@@ -197,7 +197,7 @@ function logout() {
         confirmButtonColor: "#3060ff",
         confirmButtonText: "OK"
     }).then(() => {
-        window.location.href = "./sign in/index.html";
+        window.location.href = "../sign-in/index.html";
     });
 
 });
@@ -460,3 +460,4 @@ loadCourses();
 </body>
 
 </html>
+

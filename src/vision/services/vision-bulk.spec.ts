@@ -64,8 +64,7 @@ describe('VisionService Bulk Upload', () => {
           name: 'Student Two',
           imagesBase64: ['img3']
         }
-      ],
-      confidenceThreshold: 0.6
+      ]
     };
 
     it('should process multiple students and return results', async () => {

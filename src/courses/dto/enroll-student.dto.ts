@@ -7,13 +7,13 @@ export class EnrollStudentDto {
   @IsNotEmpty()
   studentId: number;
 
-  @ApiProperty({ example: 'S1', description: 'The section identifier (e.g., S1, S2)', required: true })
+  @ApiProperty({ example: 'S1', description: 'The section identifier (e.g., S1, S2)', required: false })
   @IsString()
-  @IsNotEmpty()
-  section: string;
+  @IsOptional()
+  section?: string;
 
-  @ApiProperty({ example: 'L1', description: 'The lecture/group identifier (e.g., L1, L2)', required: true })
+  @ApiProperty({ example: 'L1', description: 'The lecture/group identifier (e.g., L1, L2)', required: false })
   @IsString()
-  @IsNotEmpty()
-  lecture: string;
+  @IsOptional()
+  lecture?: string;
 }

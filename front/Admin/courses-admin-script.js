@@ -1,9 +1,21 @@
-document.addEventListener('DOMContentLoaded', function() {
+const API_BASE_URL = 'http://localhost:3000/api/v1';
+
+function getAuthToken() {
+    let token = localStorage.getItem('token');
+    if (!token) return "";
+    token = token.replace(/['"]+/g, '').trim();
+    if (token.toLowerCase().startsWith('bearer ')) {
+        token = token.substring(7).trim();
+    }
+    return `Bearer ${token}`;
+}
+
+document.addEventListener('DOMContentLoaded', async function() {
     const sidebar = document.getElementById('resizableSidebar');
     const resizer = document.getElementById('sidebarResizer');
     const mainContent = document.getElementById('mainContent');
 
-    // 1. منطق الريسايز (شغال 100% وبيفرد الجدول)
+    // 1. Sidebar Resizer
     if (resizer) {
         resizer.addEventListener('mousedown', (e) => {
             e.preventDefault();
@@ -22,68 +34,171 @@ document.addEventListener('DOMContentLoaded', function() {
         function stop() { document.removeEventListener('mousemove', move); }
     }
 
-    // 2. وظائف المودال (فتح/إغلاق)
-    window.openModal = function() {
-        document.getElementById('addCourseForm').reset();
-        document.getElementById('modalTitle').innerText = "Add New Course";
-        document.getElementById('submitBtn').innerText = "Add Course";
-        document.getElementById('addCourseForm').removeAttribute('data-edit-row');
-        document.getElementById('courseModal').style.display = 'flex';
-    };
+    // 2. Initial Data Loading
+    await loadInstructors();
+    await loadCourses();
 
-    window.closeModal = function() {
-        document.getElementById('courseModal').style.display = 'none';
-    };
-
-    // 3. وظيفة التعديل (Edit) - بتجيب الداتا من الجدول للفورم
-    window.editCourse = function(btn) {
-        const row = btn.closest('tr');
-        const cells = row.cells;
-
-        document.getElementById('courseCode').value = cells[0].innerText;
-        document.getElementById('courseName').value = cells[1].innerText;
-        document.getElementById('instructor').value = cells[2].innerText;
-        document.getElementById('sections').value = cells[4].innerText;
-
-        document.getElementById('modalTitle').innerText = "Edit Course";
-        document.getElementById('submitBtn').innerText = "Update Course";
-        
-        // ربط الفورم بالسطر ده عشان يتعدل
-        document.getElementById('addCourseForm').setAttribute('data-edit-row', row.rowIndex);
-        document.getElementById('courseModal').style.display = 'flex';
-    };
-
-    // 4. الحفظ النهائي (إضافة أو تعديل)
-    document.getElementById('addCourseForm').onsubmit = function(e) {
+    // 3. Form Submission
+    document.getElementById('addCourseForm').onsubmit = async function(e) {
         e.preventDefault();
-        const editIndex = this.getAttribute('data-edit-row');
-        const code = document.getElementById('courseCode').value;
-        const name = document.getElementById('courseName').value;
-        const inst = document.getElementById('instructor').value;
-        const sect = document.getElementById('sections').value;
+        
+        const courseId = document.getElementById('courseId').value;
+        const courseData = {
+            name: document.getElementById('courseName').value.trim(),
+            code: document.getElementById('courseCode').value.trim(),
+            instructorId: parseInt(document.getElementById('instructorSelect').value),
+            sections: parseInt(document.getElementById('sections').value),
+            credits: parseInt(document.getElementById('credits').value),
+            schedule: document.getElementById('schedule').value.trim()
+        };
 
-        if (editIndex) {
-            // تحديث السطر
-            const row = document.getElementById('coursesTable').rows[editIndex];
-            row.cells[0].innerText = code;
-            row.cells[1].innerText = name;
-            row.cells[2].innerText = inst;
-            row.cells[4].innerText = sect;
-        } else {
-            // إضافة جديد
-            const tbody = document.querySelector('#coursesTable tbody');
-            const row = tbody.insertRow();
-            row.innerHTML = `
-                <td>${code}</td>
-                <td>${name}</td>
-                <td>${inst}</td>
-                <td>0</td>
-                <td>${sect}</td>
-                <td class="action-btns">
-                    <button class="btn-edit" onclick="editCourse(this)">Edit</button>
-                    <button class="btn-delete" onclick="this.closest('tr').remove()">🗑️</button>
-                </td>`;
+        try {
+            const method = courseId ? 'PUT' : 'POST';
+            const url = courseId ? `${API_BASE_URL}/courses/${courseId}` : `${API_BASE_URL}/courses`;
+            
+            const res = await fetch(url, {
+                method: method,
+                headers: { 
+                    'Authorization': getAuthToken(),
+                    'Content-Type': 'application/json' 
+                },
+                body: JSON.stringify(courseData)
+            });
+
+            if (res.ok) {
+                Swal.fire({
+                    icon: 'success',
+                    title: courseId ? 'Course Updated' : 'Course Added',
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000
+                });
+                closeModal();
+                await loadCourses();
+            } else {
+                const err = await res.json();
+                Swal.fire('Error', err.message || 'Operation failed', 'error');
+            }
+        } catch (err) {
+            console.error(err);
+            Swal.fire('Error', 'Connection failed', 'error');
         }
-        closeModal();
     };
 });
+
+async function loadInstructors() {
+    const select = document.getElementById('instructorSelect');
+    try {
+        const res = await fetch(`${API_BASE_URL}/users`, {
+            headers: { 'Authorization': getAuthToken() }
+        });
+        const result = await res.json();
+        const users = result.data || result;
+        
+        select.innerHTML = '<option value="" hidden>Select Instructor</option>';
+        if (Array.isArray(users)) {
+            const staff = users.filter(u => (u.role || u.userType) === 'staff');
+            staff.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.userAccountId || s.id;
+                opt.textContent = s.fullName || s.username;
+                select.appendChild(opt);
+            });
+        }
+    } catch (e) {
+        console.error(e);
+        select.innerHTML = '<option value="">Error loading staff</option>';
+    }
+}
+
+async function loadCourses() {
+    const tbody = document.getElementById('coursesTableBody');
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Loading courses...</td></tr>';
+
+    try {
+        const res = await fetch(`${API_BASE_URL}/courses`, {
+            headers: { 'Authorization': getAuthToken() }
+        });
+        const result = await res.json();
+        const courses = result.data || result;
+
+        tbody.innerHTML = '';
+        if (Array.isArray(courses)) {
+            courses.forEach(c => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${c.code}</td>
+                    <td>${c.name}</td>
+                    <td>${c.instructor?.fullName || c.instructor?.username || 'N/A'}</td>
+                    <td>${c.credits || 0}</td>
+                    <td>${c.sections || 1}</td>
+                    <td class="action-btns">
+                        <button class="btn-edit" onclick='openEditModal(${JSON.stringify(c)})'><i class="fas fa-edit"></i></button>
+                        <button class="btn-delete" onclick="deleteCourse(${c.courseId})"><i class="fas fa-trash"></i></button>
+                    </td>`;
+                tbody.appendChild(tr);
+            });
+            if (courses.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No courses found.</td></tr>';
+            }
+        }
+    } catch (e) {
+        console.error(e);
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color: red;">Error loading courses.</td></tr>';
+    }
+}
+
+window.openModal = function() {
+    document.getElementById('addCourseForm').reset();
+    document.getElementById('courseId').value = '';
+    document.getElementById('modalTitle').innerText = "Add New Course";
+    document.getElementById('submitBtn').innerText = "Add Course";
+    document.getElementById('courseModal').style.display = 'flex';
+};
+
+window.closeModal = function() {
+    document.getElementById('courseModal').style.display = 'none';
+};
+
+window.openEditModal = function(course) {
+    document.getElementById('courseId').value = course.courseId;
+    document.getElementById('courseName').value = course.name;
+    document.getElementById('courseCode').value = course.code;
+    document.getElementById('instructorSelect').value = course.instructor?.userAccountId || course.instructor?.id || '';
+    document.getElementById('sections').value = course.sections;
+    document.getElementById('credits').value = course.credits;
+    document.getElementById('schedule').value = course.schedule || '';
+
+    document.getElementById('modalTitle').innerText = "Edit Course";
+    document.getElementById('submitBtn').innerText = "Update Course";
+    document.getElementById('courseModal').style.display = 'flex';
+};
+
+window.deleteCourse = async function(id) {
+    const result = await Swal.fire({
+        title: 'Delete Course?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!'
+    });
+
+    if (result.isConfirmed) {
+        try {
+            const res = await fetch(`${API_BASE_URL}/courses/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': getAuthToken() }
+            });
+            if (res.ok) {
+                Swal.fire('Deleted!', 'Course has been removed.', 'success');
+                await loadCourses();
+            } else {
+                Swal.fire('Error', 'Failed to delete course', 'error');
+            }
+        } catch (e) {
+            Swal.fire('Error', 'Connection failed', 'error');
+        }
+    }
+};

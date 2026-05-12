@@ -24,14 +24,7 @@ export class StudentUploadItemDto {
   name: string;
 }
 
-export class ProcessUploadDto extends StudentUploadItemDto {
-  @ApiProperty({ example: 0.6, description: 'Minimum confidence threshold', required: false, default: 0.6 })
-  @IsNumber()
-  @IsOptional()
-  @Min(0)
-  @Max(1)
-  confidenceThreshold?: number;
-}
+export class ProcessUploadDto extends StudentUploadItemDto {}
 
 export class BulkProcessUploadDto {
   @ApiProperty({ 
@@ -42,11 +35,4 @@ export class BulkProcessUploadDto {
   @ValidateNested({ each: true })
   @Type(() => StudentUploadItemDto)
   students: StudentUploadItemDto[];
-
-  @ApiProperty({ example: 0.6, description: 'Minimum confidence threshold', required: false, default: 0.6 })
-  @IsNumber()
-  @IsOptional()
-  @Min(0)
-  @Max(1)
-  confidenceThreshold?: number;
 }
