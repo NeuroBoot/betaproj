@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, ConflictException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { CourseRepository } from '../repositories/course.repository';
 import { UserRepository } from '../../users/repositories/user.repository';
 import { CreateCourseDto } from '../dto/create-course.dto';
@@ -46,8 +46,13 @@ export class CoursesService {
         throw new NotFoundException(`Staff with ID ${createCourseDto.instructorId} not found`);
       }
 
-      existingCourse.enrollments = [];
-      return this.courseRepository.save(existingCourse);
+      const savedRestore = await this.courseRepository.save(existingCourse);
+      
+      if (createCourseDto.studentIds) {
+        await this.syncEnrollments(savedRestore.courseId, createCourseDto.studentIds);
+      }
+
+      return this.findOne(savedRestore.courseId, existingCourse.admin || existingCourse.instructor);
     }
 
     const instructor = await this.userRepository.findById(createCourseDto.instructorId);
@@ -69,10 +74,45 @@ export class CoursesService {
       admin,
     });
 
-    return this.courseRepository.save(course);
-  }
+    const savedCourse = await this.courseRepository.save(course);
 
-  async findAll(user: UserAccount): Promise<Course[]> {
+    // Bulk enroll students if provided
+    if (createCourseDto.studentIds && createCourseDto.studentIds.length > 0) {
+      await this.syncEnrollments(savedCourse.courseId, createCourseDto.studentIds);
+    }
+
+    return this.findOne(savedCourse.courseId, admin || instructor);
+    }
+
+    private async syncEnrollments(courseId: number, studentIds: number[]): Promise<void> {
+    // 1. Get current enrollments
+    const currentEnrollments = await this.enrollmentRepository.find({ where: { courseId } });
+    const currentStudentIds = currentEnrollments.map(e => e.studentId);
+
+    // 2. Identify students to add and remove
+    const studentsToAdd = studentIds.filter(id => !currentStudentIds.includes(id));
+    const studentsToRemove = currentStudentIds.filter(id => !studentIds.includes(id));
+
+    // 3. Remove students
+    if (studentsToRemove.length > 0) {
+      await this.enrollmentRepository.delete({ courseId, studentId: In(studentsToRemove) });
+    }
+
+    // 4. Add students
+    if (studentsToAdd.length > 0) {
+      const enrollments = studentsToAdd.map(studentId => 
+        this.enrollmentRepository.create({
+          courseId,
+          studentId,
+          section: '1', // Default to section 1 for bulk enrollment
+          lecture: '1'  // Default to lecture 1 for bulk enrollment
+        })
+      );
+      await this.enrollmentRepository.save(enrollments);
+    }
+    }
+
+    async findAll(user: UserAccount): Promise<any[]> {
     if (user.userType === Role.ADMIN) {
       return this.courseRepository.findAllActive();
     }
@@ -175,7 +215,14 @@ export class CoursesService {
     }
 
     Object.assign(course, updateCourseDto);
-    return this.courseRepository.save(course);
+    const updatedCourse = await this.courseRepository.save(course);
+
+    // Bulk sync students if provided
+    if (updateCourseDto.studentIds) {
+      await this.syncEnrollments(updatedCourse.courseId, updateCourseDto.studentIds);
+    }
+
+    return this.findOne(updatedCourse.courseId, course.admin || course.instructor);
   }
 
   async remove(id: number, isHard: boolean = false): Promise<void> {

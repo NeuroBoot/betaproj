@@ -44,6 +44,11 @@ export class CreateCourseDto {
   @IsNotEmpty()
   instructorId: number;
 
+  @ApiProperty({ example: [3, 100], description: 'List of student IDs to enroll in the course', required: false })
+  @IsInt({ each: true })
+  @IsOptional()
+  studentIds?: number[];
+
   @ApiProperty({ example: 1, description: 'User ID of the admin manager', required: false })
   @IsInt()
   @IsOptional()
