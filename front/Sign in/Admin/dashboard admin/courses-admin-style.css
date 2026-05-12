@@ -352,3 +352,58 @@ tr:hover td { background-color: rgba(255, 255, 255, 0.02); }
     font-size: 0.8rem;
     color: var(--text-dim);
 }
+
+/* تنسيق رأس النافذة المنبثقة (Header) */
+.modal-header {
+    display: flex;
+    justify-content: space-between; /* يخلي العنوان في أقصى اليسار والاكس في أقصى اليمين */
+    align-items: center;            /* يوسطهم عمودياً مع بعض */
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #3f4481;
+    position: relative;
+}
+
+/* تنسيق العنوان (Add/Edit Course) */
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #272fcd;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+/* تنسيق زر الإغلاق (X) */
+.close-btn {
+    font-size: 24px;
+    color: #272fcd;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    line-height: 1;           /* يضمن إن حرف X ملوش مساحة وهمية فوقه */
+    padding: 5px;             /* يسهل الضغط عليه */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* تأثير عند الوقوف بالماوس على الاكس */
+.close-btn:hover {
+    color: #ff4d4d;          /* يقلب أحمر خفيف */
+    transform: scale(1.1);   /* يكبر حاجة بسيطة */
+}
+
+/* تنسيق الفورم نفسه عشان يكون متناسق */
+.modal-content {
+    border: 1px solid #3f4481;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5); /* ضل يدي عمق للنافذة */
+}
+/* تنسيق لون الـ placeholder ليكون متناسق مع التصميم الغامق */
+input::placeholder {
+    color: #8e94a9 !important;
+    opacity: 0.7;
+    font-size: 0.85rem;
+}
+
+/* لضمان ثبات اللون في متصفحات مختلفة */
+input::-webkit-input-placeholder { color: #8e94a9; }
+input::-moz-placeholder { color: #8e94a9; }

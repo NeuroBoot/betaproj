@@ -48,6 +48,13 @@
             color: #8e94a9;
             display: block;
         }
+        
+        /* تحسينات الـ Placeholder لتناسب الـ Dark Mode */
+        input::placeholder {
+            color: #8e94a9 !important;
+            opacity: 0.6;
+            font-size: 0.85rem;
+        }
     </style>
 </head>
 <body class="dark-mode">
@@ -115,19 +122,20 @@
 
     <div id="courseModal" class="modal">
         <div class="modal-content" style="max-width: 600px;">
-            <div class="modal-header">
-                <h3 id="modalTitle">Edit Course</h3>
-                <span class="close-btn" onclick="closeModal()">&times;</span>
+            <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 1px solid #3f4481; margin-bottom: 20px;">
+                <h3 id="modalTitle" style="margin: 0;">Add New Course</h3>
+                <span class="close-btn" onclick="closeModal()" style="font-size: 24px; cursor: pointer; color: #8e94a9;">&times;</span>
             </div>
+
             <form id="addCourseForm">
                 <div class="form-row">
                     <div class="form-group">
                         <label>Course Name</label>
-                        <input type="text" id="courseName" required>
+                        <input type="text" id="courseName" placeholder="e.g. Data Structures" required>
                     </div>
                     <div class="form-group">
                         <label>Course Code</label>
-                        <input type="text" id="courseCode" required>
+                        <input type="text" id="courseCode" placeholder="e.g. CS221" required>
                     </div>
                 </div>
                 <div class="form-row">
@@ -139,7 +147,7 @@
                     </div>
                     <div class="form-group">
                         <label>Number of Sections</label>
-                        <input type="number" id="sections" required>
+                        <input type="number" id="sections" placeholder="e.g. 2" required>
                     </div>
                 </div>
 
@@ -149,7 +157,7 @@
                         <small id="selectedCount" style="color: #4e73df;">0 selected</small>
                     </div>
                     
-                    <input type="text" id="studentSearchInside" placeholder="Filter students by ID..." 
+                    <input type="text" id="studentSearchInside" placeholder="Search by student name or ID..." 
                            style="width: 100%; padding: 8px; margin-top: 5px; background: #25284b; border: 1px solid #3f4481; border-radius: 5px; color: white; font-size: 0.9rem;">
                     
                     <div class="student-list-container">
@@ -159,7 +167,7 @@
                     </div>
                 </div>
 
-                <div class="modal-footer">
+                <div class="modal-footer" style="margin-top: 25px; display: flex; gap: 10px; justify-content: flex-end;">
                     <button type="submit" class="btn-submit" id="submitBtn">Save Changes</button>
                     <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
                 </div>
