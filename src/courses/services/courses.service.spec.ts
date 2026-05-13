@@ -60,6 +60,14 @@ describe('CoursesService', () => {
       courseRepository.findByCodeAll.mockResolvedValue(deletedCourse);
       userRepository.findById.mockResolvedValue(instructor);
       courseRepository.save.mockImplementation((course) => Promise.resolve(course));
+      courseRepository.findOne.mockResolvedValue({
+        courseId: 1,
+        code: 'CS101',
+        isDeleted: false,
+        name: 'New Name',
+        enrollments: [],
+        instructor: { userAccountId: 2, userType: Role.STAFF }
+      });
 
       const result = await service.create(createCourseDto);
 
@@ -105,13 +113,21 @@ describe('CoursesService', () => {
 
   describe('update', () => {
     it('should rename a conflicting deleted course code when updating another course', async () => {
-      const courseToUpdate = { courseId: 1, code: 'OLD', isDeleted: false };
+      const courseToUpdate = { courseId: 1, code: 'OLD', isDeleted: false, instructor: { userAccountId: 2, userType: Role.STAFF } };
       const conflictingDeletedCourse = { courseId: 2, code: 'NEW', isDeleted: true };
       const updateDto = { code: 'NEW' };
 
       courseRepository.findById.mockResolvedValue(courseToUpdate);
       courseRepository.findByCodeAll.mockResolvedValue(conflictingDeletedCourse);
       courseRepository.save.mockImplementation((c) => Promise.resolve(c));
+      courseRepository.findOne.mockResolvedValue({
+        courseId: 1,
+        code: 'NEW',
+        isDeleted: false,
+        name: 'Updated Name',
+        enrollments: [],
+        instructor: { userAccountId: 2, userType: Role.STAFF }
+      });
 
       await service.update(1, updateDto);
 

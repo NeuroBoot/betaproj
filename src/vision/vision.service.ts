@@ -85,12 +85,20 @@ export class VisionService {
 
       // Update student in database with the aggregated embedding
       const studentIdNum = parseInt(dto.studentId);
-      const student = await this.userRepo.findById(studentIdNum);
+      let student = await this.userRepo.findById(studentIdNum);
+      
+      // Fallback: search by username if ID search fails (handles ID mismatch)
       if (!student) {
-        throw new NotFoundException(`Student with ID ${dto.studentId} not found in database`);
+        student = await this.userRepo.findByUsername(dto.name);
       }
 
-      student.faceEmbedding = JSON.stringify(aiResponse.embedding);
+      if (!student) {
+        throw new NotFoundException(`Student with ID ${dto.studentId} or name ${dto.name} not found in database`);
+      }
+
+      student.faceEmbedding = typeof aiResponse.embedding === 'string' 
+        ? aiResponse.embedding 
+        : JSON.stringify(aiResponse.embedding);
       student.embeddingVersion = aiResponse.versionOfModel;
       student.embeddingCreatedAt = new Date(aiResponse.dateCreated);
       student.embeddingImagesCount = aiResponse.imagesProcessed;
