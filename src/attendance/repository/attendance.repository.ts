@@ -30,7 +30,7 @@ export class AttendanceRepository {
   async findAllWithFilters(
     page: number, 
     limit: number, 
-    filters: { courseId?: number; session?: string; date?: string }, 
+    filters: { courseId?: number; session?: string; date?: string; fromDate?: string; toDate?: string }, 
     courseIds?: number[]
   ): Promise<{ data: Attendance[]; total: number; page: number; limit: number; totalPages: number }> {
     const skip = (page - 1) * limit;
@@ -51,6 +51,8 @@ export class AttendanceRepository {
         const dateStr = date.toISOString().split('T')[0];
         where.recordDate = dateStr;
       }
+    } else if (filters.fromDate && filters.toDate) {
+      where.recordDate = Between(filters.fromDate, filters.toDate);
     }
     
     const [data, total] = await this.repo.findAndCount({
@@ -62,6 +64,20 @@ export class AttendanceRepository {
     });
     
     return { data, total, page, limit, totalPages: Math.ceil(total / limit) };
+  }
+
+  findByDateRange(courseId: number | null, fromDate: string, toDate: string) {
+    const where: any = {
+      recordDate: Between(fromDate, toDate)
+    };
+    if (courseId) {
+      where.courseId = courseId;
+    }
+    return this.repo.find({
+      where,
+      relations: ['student', 'course'],
+      order: { recordDate: 'ASC' }
+    });
   }
 
   findByStudent(studentId: number, courseId?: number) {

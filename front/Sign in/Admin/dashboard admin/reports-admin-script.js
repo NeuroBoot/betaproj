@@ -131,25 +131,87 @@ async function downloadReport() {
         return;
     }
 
-    // تأثير الـ Loading
     const originalContent = downloadBtn.innerHTML;
-    downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+    downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating PDF...';
     downloadBtn.disabled = true;
 
     try {
-        // محاكاة الطلب (سيتم استبداله برابط الـ API الفعلي للتحميل)
-        console.log(`Generating ${currentReportType} for ${courseId}`);
-        await new Promise(r => setTimeout(r, 2000));
+        const token = localStorage.getItem('token');
+        const url = `${API_BASE_URL}/attendance/report-data?courseId=${courseId}&fromDate=${fromDate}&toDate=${toDate}`;
         
-        alert("Report ready! Your download will start now.");
+        const response = await fetch(url, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!response.ok) throw new Error("Failed to fetch report data");
+        
+        const data = await response.json();
+        
+        // Handle NestJS TransformInterceptor wrapper if present
+        const reportData = data.data || data;
+
+        if (!Array.isArray(reportData) || reportData.length === 0) {
+            alert("No attendance records found for the selected criteria.");
+            return;
+        }
+
+        generatePDF(reportData, currentReportType, fromDate, toDate);
+        
+        alert("Report generated successfully!");
         closeReportModal();
-        await loadRecentReports(); // تحديث القائمة بعد الجينيريت
+        await loadRecentReports();
     } catch (e) {
-        alert("Download failed.");
+        console.error("Download failed:", e);
+        alert("Download failed: " + e.message);
     } finally {
         downloadBtn.innerHTML = originalContent;
         downloadBtn.disabled = false;
     }
+}
+
+function generatePDF(data, type, from, to) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('l', 'mm', 'a4');
+
+    // Header
+    doc.setFontSize(20);
+    doc.setTextColor(40, 44, 52);
+    doc.text(`FaceMark - ${type.charAt(0).toUpperCase() + type.slice(1)} Report`, 14, 20);
+    
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text(`Period: ${from} to ${to}`, 14, 28);
+    doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 33);
+
+    // Table
+    const tableColumn = ["Student ID", "Student Name", "Course", "Status", "Date", "Time", "Session", "Type"];
+    const tableRows = [];
+
+    data.forEach(row => {
+        const rowData = [
+            row.studentId,
+            row.name,
+            row.course,
+            row.status,
+            new Date(row.date).toLocaleDateString(),
+            row.time,
+            row.session,
+            row.type
+        ];
+        tableRows.push(rowData);
+    });
+
+    doc.autoTable({
+        head: [tableColumn],
+        body: tableRows,
+        startY: 40,
+        theme: 'grid',
+        headStyles: { fillColor: [41, 128, 185], textColor: 255 },
+        alternateRowStyles: { fillColor: [245, 245, 245] },
+        margin: { top: 40 },
+    });
+
+    doc.save(`FaceMark_${type}_Report_${from}_to_${to}.pdf`);
 }
 
 function toggleSidebar() {

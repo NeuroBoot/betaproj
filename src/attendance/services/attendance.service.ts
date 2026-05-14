@@ -406,6 +406,31 @@ export class AttendanceService {
     return [];
   }
 
+  async getReportData(user: UserAccount, courseId: number | null, fromDate: string, toDate: string) {
+    if (user.userType === Role.STAFF && courseId) {
+      const isAuthorized = await this.isStaffAuthorizedForCourse(user.userAccountId, courseId);
+      if (!isAuthorized) throw new ForbiddenException(`Access Denied: You are not authorized for course ID ${courseId}.`);
+    }
+
+    const records = await this.attendanceRepo.findByDateRange(courseId, fromDate, toDate);
+    
+    return records.map(record => ({
+      studentId: record.student.userAccountId,
+      name: record.student.username,
+      course: record.course.name,
+      status: this.mapIdToStatus(record.attendanceStatusId),
+      date: record.recordDate,
+      time: record.checkInTime || 'N/A',
+      session: record.sessionNumber || 'N/A',
+      type: record.sessionType || 'N/A'
+    }));
+  }
+
+  private mapIdToStatus(id: number): string {
+    const statuses: Record<number, string> = { 1: 'Present', 2: 'Absent', 3: 'Late', 4: 'Excused' };
+    return statuses[id] || 'Unknown';
+  }
+
   async update(recordId: number, dto: UpdateAttendanceDto, userId: number, userRole: string) {
     const record = await this.attendanceRepo.findOneById(recordId);
     if (!record) {

@@ -161,4 +161,20 @@ export class AttendanceController {
   ) {
     return this.service.statistics(user, courseId);
   }
+
+  @Get('report-data')
+  @Roles(Role.ADMIN, Role.STAFF)
+  @ApiOperation({ summary: 'Get detailed attendance data for reports' })
+  @ApiQuery({ name: 'courseId', required: false })
+  @ApiQuery({ name: 'fromDate', required: true })
+  @ApiQuery({ name: 'toDate', required: true })
+  async getReportData(
+    @CurrentUser() user: UserAccount,
+    @Query('courseId') courseIdStr?: string,
+    @Query('fromDate') fromDate?: string,
+    @Query('toDate') toDate?: string,
+  ) {
+    const courseId = courseIdStr && courseIdStr !== 'all' ? parseInt(courseIdStr) : null;
+    return this.service.getReportData(user, courseId, fromDate, toDate);
+  }
 }

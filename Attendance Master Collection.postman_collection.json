@@ -3903,6 +3903,60 @@
           ]
         },
         {
+          "name": "Get Attendance Report Data",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response is valid JSON\", function () { pm.response.to.be.json; });",
+                  "pm.test(\"Data array is returned\", function () {",
+                  "    const data = pm.response.json().data;",
+                  "    pm.expect(data).to.be.an(\"array\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/attendance/report-data?courseId=all&fromDate=2026-01-01&toDate=2026-05-14",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "attendance",
+                "report-data"
+              ],
+              "query": [
+                {
+                  "key": "courseId",
+                  "value": "all"
+                },
+                {
+                  "key": "fromDate",
+                  "value": "2026-01-01"
+                },
+                {
+                  "key": "toDate",
+                  "value": "2026-05-14"
+                }
+              ]
+            },
+            "description": "Get detailed attendance data for reports by date range and course."
+          },
+          "response": []
+        },
+        {
           "name": "Get my attendance (Student only)",
           "event": [
             {
