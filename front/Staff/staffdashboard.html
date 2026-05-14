@@ -334,7 +334,7 @@ function authHeaders() {
 
 function redirectToLogin() {
   localStorage.clear();
-  window.location.href = "./sign in/index.html";
+  window.location.href = "../Sign in/index.html";
 }
 // ✅ Logout
 document.getElementById('logoutBtn').addEventListener('click', function () {
@@ -351,7 +351,7 @@ document.getElementById('logoutBtn').addEventListener('click', function () {
         confirmButtonColor: "#3060ff",
         confirmButtonText: "OK"
     }).then(() => {
-        window.location.href = "./sign in/index.html";
+        window.location.href = "../Sign in/index.html";
     });
 
 });

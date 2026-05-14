@@ -333,7 +333,7 @@ function redirectToLogin() {
   localStorage.removeItem('token');
   localStorage.removeItem('loggedUser');
   localStorage.removeItem('userRole');
-  window.location.href = "./sign in/index.html";
+  window.location.href = "../Sign in/index.html";
 }
 
 async function loadProfile() {
@@ -501,7 +501,7 @@ logoutBtn.addEventListener('click', function () {
         confirmButtonColor: "#3060ff",
         confirmButtonText: "OK"
     }).then(() => {
-        window.location.href = "./sign in/index.html";
+        window.location.href = "../Sign in/index.html";
     });
 });
 //alert
@@ -662,25 +662,18 @@ async function uploadCapturedImage(blob) {
     );
 
     const data = await response.json();
-
     console.log("Recognition response:", data);
 
-    if (!response.ok) {
-
-      throw new Error(
-        data.message ||
-        data.error ||
-        "Recognition failed"
-      );
+    if (!response.ok || data.status === 'ERROR') {
+      const errorMsg = data.message || data.error || "Recognition failed";
+      throw new Error(Array.isArray(errorMsg) ? errorMsg.join(', ') : (typeof errorMsg === 'object' ? JSON.stringify(errorMsg) : errorMsg));
     }
 
     // SUCCESS
     Swal.fire({
       icon: "success",
       title: "Attendance Marked",
-      text:
-        data.message ||
-        "Face recognized successfully",
+      text: data.message || "Face recognized successfully",
       background: "#1a1a3a",
       color: "#fff",
       confirmButtonColor: "#3060ff"

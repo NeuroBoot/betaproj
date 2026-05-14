@@ -3313,6 +3313,10 @@
                 "value": "application/json"
               }
             ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"studentId\": 8,\n  \"section\": \"S1\",\n  \"lecture\": \"L1\"\n}"
+            },
             "url": {
               "raw": "{{base_url}}/courses/:id/students",
               "host": [
@@ -3324,7 +3328,7 @@
                 "students"
               ]
             },
-            "description": "Enroll student in course (Admin/Staff only)"
+            "description": "Enroll student in course (Admin/Staff only). Section and lecture are optional."
           },
           "response": [
             {
@@ -3334,7 +3338,7 @@
                 "header": [],
                 "body": {
                   "mode": "raw",
-                  "raw": "",
+                  "raw": "{\n  \"studentId\": 8,\n  \"section\": \"S1\",\n  \"lecture\": \"L1\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -3366,6 +3370,80 @@
               "header": [],
               "cookie": [],
               "body": "{\"success\":true,\"data\":{\"message\":\"Student enrolled successfully\",\"courseId\":3,\"studentId\":8,\"enrolledAt\":\"2026-05-02T15:59:19.642Z\"},\"timestamp\":\"2026-05-02T15:59:19.642Z\"}"
+            }
+          ]
+        },
+        {
+          "name": "Unenroll student from course (Admin/Staff only)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response indicates success\", function () { pm.expect(pm.response.json().message).to.include(\"successfully\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/courses/:id/students/:studentId",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "courses",
+                ":id",
+                "students",
+                ":studentId"
+              ]
+            },
+            "description": "Unenroll student from course (Admin/Staff only)"
+          },
+          "response": [
+            {
+              "name": "200 - Student Unenrolled",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/courses/:id/students/:studentId",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "courses",
+                    ":id",
+                    "students",
+                    ":studentId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "3"
+                    },
+                    {
+                      "key": "studentId",
+                      "value": "8"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\"message\":\"Student 8 unenrolled from course 3 successfully\"}"
             }
           ]
         },

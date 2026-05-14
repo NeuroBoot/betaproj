@@ -86,7 +86,14 @@ export class CoursesController {
 
   @Post(':id/students')
   @Roles(Role.ADMIN, Role.STAFF)
-  @ApiOperation({ summary: 'Enroll student in course (Admin/Staff only)' })
+  @ApiOperation({ 
+    summary: 'Enroll student in course (Admin/Staff only)',
+    description: 'Enrolls a student in a specific course. Section and lecture are optional.' 
+  })
+  @ApiResponse({ status: 201, description: 'Student enrolled successfully' })
+  @ApiResponse({ status: 403, description: 'Forbidden: Instructor does not teach this course' })
+  @ApiResponse({ status: 404, description: 'Course or Student not found' })
+  @ApiResponse({ status: 409, description: 'Student already enrolled' })
   async enrollStudent(
     @Param('id', ParseIntPipe) courseId: number,
     @Body() enrollDto: EnrollStudentDto,
@@ -104,7 +111,26 @@ export class CoursesController {
   @Get(':id/students')
   @Roles(Role.ADMIN, Role.STAFF)
   @ApiOperation({ summary: 'List students in course (Admin/Staff only)' })
+  @ApiResponse({ status: 200, description: 'List of enrolled student accounts' })
   async getEnrolledStudents(@Param('id', ParseIntPipe) id: number, @CurrentUser() user: UserAccount) {
     return this.coursesService.getEnrolledStudents(id, user);
+  }
+
+  @Delete(':id/students/:studentId')
+  @Roles(Role.ADMIN, Role.STAFF)
+  @ApiOperation({ 
+    summary: 'Unenroll student from course (Admin/Staff only)',
+    description: 'Removes a student enrollment record from the course.'
+  })
+  @ApiResponse({ status: 200, description: 'Student unenrolled successfully' })
+  @ApiResponse({ status: 403, description: 'Forbidden: Instructor does not teach this course' })
+  @ApiResponse({ status: 404, description: 'Enrollment record not found' })
+  async unenrollStudent(
+    @Param('id', ParseIntPipe) courseId: number,
+    @Param('studentId', ParseIntPipe) studentId: number,
+    @CurrentUser() user: UserAccount,
+  ) {
+    await this.coursesService.unenrollStudent(courseId, studentId, user);
+    return { message: `Student ${studentId} unenrolled from course ${courseId} successfully` };
   }
 }

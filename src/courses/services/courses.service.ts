@@ -316,4 +316,30 @@ export class CoursesService {
 
     return (course.enrollments || []).map(e => e.student);
   }
+
+  async unenrollStudent(courseId: number, studentId: number, user: UserAccount): Promise<void> {
+    const course = await this.courseRepository.findOne({
+      where: { courseId, isDeleted: false },
+      relations: ['instructor'],
+    });
+
+    if (!course) {
+      throw new NotFoundException(`Course Validation Failed: No active course found with ID ${courseId}.`);
+    }
+
+    // Permission check: Admin or the course's Instructor
+    if (user.userType === Role.STAFF && course.instructor.userAccountId !== user.userAccountId) {
+      throw new ForbiddenException(`Access Denied: Instructors can only unenroll students from courses they teach.`);
+    }
+
+    const enrollment = await this.enrollmentRepository.findOne({
+      where: { courseId, studentId }
+    });
+
+    if (!enrollment) {
+      throw new NotFoundException(`Enrollment Not Found: Student with ID ${studentId} is not enrolled in course ID ${courseId}.`);
+    }
+
+    await this.enrollmentRepository.remove(enrollment);
+  }
 }

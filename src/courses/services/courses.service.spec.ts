@@ -4,7 +4,7 @@ import { CourseRepository } from '../repositories/course.repository';
 import { UserRepository } from '../../users/repositories/user.repository';
 import { CourseEnrollment } from '../entities/course-enrollment.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { ConflictException, NotFoundException } from '@nestjs/common';
+import { ConflictException, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { Role } from '../../common/enums/role.enum';
 
 describe('CoursesService', () => {
@@ -135,6 +135,51 @@ describe('CoursesService', () => {
       expect(courseToUpdate.code).toBe('NEW');
       expect(courseRepository.save).toHaveBeenCalledWith(conflictingDeletedCourse);
       expect(courseRepository.save).toHaveBeenCalledWith(courseToUpdate);
+    });
+  });
+
+  describe('unenrollStudent', () => {
+    let enrollmentRepository: any;
+
+    beforeEach(() => {
+      enrollmentRepository = {
+        findOne: jest.fn(),
+        remove: jest.fn(),
+      };
+      // @ts-ignore
+      service.enrollmentRepository = enrollmentRepository;
+    });
+
+    it('should successfully unenroll a student', async () => {
+      const adminUser = { userAccountId: 1, userType: Role.ADMIN };
+      const course = { courseId: 10, isDeleted: false, instructor: { userAccountId: 2 } };
+      const enrollment = { enrollmentId: 100, courseId: 10, studentId: 5 };
+
+      courseRepository.findOne.mockResolvedValue(course);
+      enrollmentRepository.findOne.mockResolvedValue(enrollment);
+
+      await service.unenrollStudent(10, 5, adminUser as any);
+
+      expect(enrollmentRepository.remove).toHaveBeenCalledWith(enrollment);
+    });
+
+    it('should throw ForbiddenException if staff tries to unenroll from another instructor\'s course', async () => {
+      const staffUser = { userAccountId: 3, userType: Role.STAFF };
+      const course = { courseId: 10, isDeleted: false, instructor: { userAccountId: 2 } };
+
+      courseRepository.findOne.mockResolvedValue(course);
+
+      await expect(service.unenrollStudent(10, 5, staffUser as any)).rejects.toThrow(ForbiddenException);
+    });
+
+    it('should throw NotFoundException if enrollment does not exist', async () => {
+      const adminUser = { userAccountId: 1, userType: Role.ADMIN };
+      const course = { courseId: 10, isDeleted: false, instructor: { userAccountId: 2 } };
+
+      courseRepository.findOne.mockResolvedValue(course);
+      enrollmentRepository.findOne.mockResolvedValue(null);
+
+      await expect(service.unenrollStudent(10, 5, adminUser as any)).rejects.toThrow(NotFoundException);
     });
   });
 });

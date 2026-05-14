@@ -503,7 +503,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function redirectToLogin() {
     localStorage.clear();
-    window.location.href = "./sign in/index.html";
+    window.location.href = "../Sign in/index.html";
   }
 
   // ================= PROFILE (Fallback + Auth Check) =================
@@ -513,7 +513,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   if (!token) {
     showAlert("Login first", "error");
-    window.location.href = "./sign in/index.html";
+    window.location.href = "../Sign in/index.html";
     return;
   }
 
@@ -558,7 +558,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (role.toLowerCase() !== "staff") {
       showAlert("Staff only", "error");
       localStorage.clear();
-      window.location.href = "./sign in/index.html";
+      window.location.href = "../Sign in/index.html";
     }
 
   } catch (err) {
@@ -567,7 +567,7 @@ document.addEventListener("DOMContentLoaded", function () {
     showAlert(err.message, "error");
 
     localStorage.clear();
-    window.location.href = "./sign in/index.html";
+    window.location.href = "../Sign in/index.html";
   }
 }
 
@@ -861,7 +861,7 @@ await fetch(`${API_BASE_URL}/attendance/${recordId}`, {
         confirmButtonColor: "#3060ff",
         confirmButtonText: "OK"
     }).then(() => {
-        window.location.href = "./sign in/index.html";
+        window.location.href = "../Sign in/index.html";
     });
   });
 
