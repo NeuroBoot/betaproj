@@ -9,6 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="../../../Responsive/responsive.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+   
     <style>
         .photo-upload-container { margin-top: 15px; display: flex; align-items: center; gap: 15px; }
         .btn-upload { background: #4e73df; color: white; padding: 8px 15px; border-radius: 5px; cursor: pointer; border: none; font-size: 14px; transition: 0.3s; }
@@ -89,14 +90,18 @@
                     <h3>Account Analytics</h3>
                     <div class="charts-container">
                         <div class="chart-box main-chart">
-                            <p class="chart-label">Student Enrollment Trend</p>
+                            <p class="chart-label"></p>
                             <canvas id="enrollmentChart"></canvas>
                         </div>
                         <div class="chart-box pie-chart">
-                            <p class="chart-label">Account Distribution by Role</p>
+                            <p class="chart-label"></p>
                             <canvas id="roleDistributionChart"></canvas>
                         </div>
                     </div>
+                </div>
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="Search by Name or ID..." onkeyup="filterTable()">
+                    <i class="fas fa-search"></i>
                 </div>
 
                 <div class="table-container">

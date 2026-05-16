@@ -1,183 +1,191 @@
 const API_BASE_URL = 'http://localhost:3000/api/v1';
+let allData = []; // المخزن الرئيسي للبيانات
 
-// دالة لجلب التوكن والتأكد من صيغته
 function getAuthToken() {
     let token = localStorage.getItem('token');
     if (!token) return "";
     token = token.replace(/['"]+/g, '').trim();
-    return token.toLowerCase().startsWith('bearer ') ? token : `Bearer ${token}`;
+    if (token.toLowerCase().startsWith('bearer ')) {
+        token = token.substring(7).trim();
+    }
+    return `Bearer ${token}`;
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // 1. تحديث اسم المستخدم
-    const nameDisplay = document.getElementById('adminName'); 
-    const savedName = localStorage.getItem('username');
-    if (nameDisplay) {
-        nameDisplay.textContent = savedName || "Aya_allah";
-    }
+    // تحديث اسم الأدمن
+    const nameDisplay = document.getElementById('adminName');
+    if (nameDisplay) nameDisplay.textContent = localStorage.getItem('username') || "Admin";
 
-    // 2. وظيفة التحكم في حجم السايد بار (Sidebar Resizer)
-    const sidebar = document.querySelector('.sidebar');
-    const resizer = document.getElementById('sidebarResizer');
-    if (resizer && sidebar) {
-        resizer.addEventListener('mousedown', (e) => {
-            e.preventDefault();
-            document.addEventListener('mousemove', resize);
-            document.addEventListener('mouseup', stopResize);
-            document.body.style.cursor = 'col-resize';
-        });
-
-        function resize(e) {
-            let newWidth = e.clientX;
-            if (newWidth > 200 && newWidth < 500) {
-                sidebar.style.width = newWidth + 'px';
-            }
-        }
-
-        function stopResize() {
-            document.removeEventListener('mousemove', resize);
-            document.removeEventListener('mouseup', stopResize);
-            document.body.style.cursor = 'default';
-        }
-    }
-
-    // 3. تحميل الكورسات للفلتر فور فتح الصفحة
+    // تحميل الكورسات في القائمة المنسدلة
     await loadCoursesForFilter();
+
+    const searchInput = document.getElementById('searchInput');
+    const searchType = document.getElementById('searchType');
+    const filterCourse = document.getElementById('filterCourse');
+    const sortBy = document.getElementById('sortBy');
+
+    // المستمعات (Listeners)
+    if (searchInput) searchInput.addEventListener('input', performSearch);
+    if (searchType) searchType.addEventListener('change', performSearch);
+    if (filterCourse) filterCourse.addEventListener('change', performSearch);
+    if (sortBy) sortBy.addEventListener('change', () => sortAndRender(allData));
+
+    performSearch();
 });
 
-// دالة لجلب الكورسات من السيرفر لوضعها في القائمة المنسدلة
 async function loadCoursesForFilter() {
     const select = document.getElementById('filterCourse');
     if (!select) return;
-
     try {
         const response = await fetch(`${API_BASE_URL}/courses`, {
             headers: { 'Authorization': getAuthToken() }
         });
         const data = await response.json();
         const courses = data.data || data;
-
         if (Array.isArray(courses)) {
+            select.innerHTML = '<option value="all">All Courses</option>';
             courses.forEach(course => {
                 const opt = document.createElement('option');
-                opt.value = course.id || course._id;
+                opt.value = (course.id || course.courseId).toString(); 
                 opt.textContent = course.name;
                 select.appendChild(opt);
             });
         }
-    } catch (e) {
-        console.error("Error loading courses:", e);
-    }
+    } catch (e) { console.error("Error loading courses", e); }
 }
 
-// === وظيفة البحث الأساسية ===
 async function performSearch() {
-    const query = document.getElementById('searchInput').value.trim();
-    const type = document.getElementById('searchType').value; // student, staff, admin
+    const query = document.getElementById('searchInput').value.trim().toLowerCase();
+    const type = document.getElementById('searchType').value; 
     const courseId = document.getElementById('filterCourse').value;
     const container = document.getElementById('searchResultsContainer');
-    const resultsCount = document.getElementById('resultsCount');
 
-    // إظهار حالة التحميل
-    container.innerHTML = `
-        <div style="text-align: center; padding: 50px;">
-            <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: #4e73df;"></i>
-            <p style="margin-top: 15px; color: #888;">Searching system records...</p>
-        </div>
-    `;
+    container.innerHTML = '<div style="text-align:center; padding:50px;"><i class="fas fa-spinner fa-spin"></i> Loading Results...</div>';
 
     try {
-        // جلب جميع المستخدمين لعمل الفلترة برمجياً (لضمان الدقة في الأدوار والـ IDs)
-        const response = await fetch(`${API_BASE_URL}/users`, {
-            headers: { 'Authorization': getAuthToken() }
+        let items = [];
+
+        // سيناريو 1: فلترة الستاف بكورس محدد (بناءً على كود صفحة الكورسات بتاعك)
+        if (type === 'staff' && courseId !== 'all') {
+            const response = await fetch(`${API_BASE_URL}/courses`, { headers: { 'Authorization': getAuthToken() } });
+            const data = await response.json();
+            const courses = data.data || data;
+            
+            // البحث عن الكورس المختار واستخراج المدرس (Instructor)
+            const targetCourse = courses.find(c => (c.id || c.courseId).toString() === courseId.toString());
+            if (targetCourse && targetCourse.instructor) {
+                items = [targetCourse.instructor];
+            } else {
+                items = [];
+            }
+        } 
+        // سيناريو 2: فلترة الطلاب بكورس محدد
+        else if (type === 'student' && courseId !== 'all') {
+            const response = await fetch(`${API_BASE_URL}/courses/${courseId}/students`, { headers: { 'Authorization': getAuthToken() } });
+            const data = await response.json();
+            items = data.data || data;
+        } 
+        // سيناريو 3: البحث العام (بدون فلتر كورس أو "All Courses")
+        else {
+            const response = await fetch(`${API_BASE_URL}/users`, { headers: { 'Authorization': getAuthToken() } });
+            const data = await response.json();
+            items = data.data || data;
+        }
+
+        if (!Array.isArray(items)) items = [];
+
+        // الفلترة النهائية (النوع والبحث النصي)
+        allData = items.filter(item => {
+            const user = item.student || item.user || item;
+            if (!user) return false;
+
+            const role = (user.role || user.userType || "student").toLowerCase();
+            
+            // فلترة النوع
+            let matchesType = (role === type);
+            if (type === 'staff' && (role === 'staff' || role === 'instructor')) matchesType = true;
+
+            // فلترة البحث النصي
+            const name = (user.fullName || user.username || "").toLowerCase();
+            const email = (user.email || "").toLowerCase();
+            const idStr = (user.userAccountId || user.id || "").toString().toLowerCase();
+            const matchesQuery = query === "" || name.includes(query) || email.includes(query) || idStr.includes(query);
+
+            return matchesType && matchesQuery;
         });
 
-        if (response.status === 401) logout();
+        sortAndRender(allData);
 
-        const data = await response.json();
-        const allUsers = data.data || data;
-
-        if (Array.isArray(allUsers)) {
-            // فلترة النتائج بناءً على الاختيارات (النوع، نص البحث)
-            let results = allUsers.filter(user => {
-                const userRole = (user.role || user.userType || "").toLowerCase();
-                const matchesType = userRole === type.toLowerCase();
-                
-                const searchStr = `${user.fullName} ${user.username} ${user.email} ${user.id} ${user.userAccountId}`.toLowerCase();
-                const matchesQuery = query === "" || searchStr.includes(query.toLowerCase());
-
-                return matchesType && matchesQuery;
-            });
-
-            if (resultsCount) resultsCount.textContent = `(${results.length} results found)`;
-
-            if (results.length > 0) {
-                renderTable(results);
-            } else {
-                container.innerHTML = `
-                    <div class="empty-results" style="text-align: center; padding: 50px; opacity: 0.5;">
-                        <i class="fas fa-folder-open" style="font-size: 3rem;"></i>
-                        <p style="margin-top: 15px;">No results found for your search.</p>
-                    </div>`;
-            }
-        }
     } catch (error) {
         console.error("Search Error:", error);
-        container.innerHTML = `<div style="text-align: center; color: #ff4757; padding: 50px;"><p>Server connection error.</p></div>`;
+        container.innerHTML = `<p style="color:red; text-align:center;">Error fetching data</p>`;
     }
 }
 
-// === رسم جدول النتائج (تم حذف عمود Actions وتعديل الـ Role والـ ID) ===
+function sortAndRender(data) {
+    const sortBy = document.getElementById('sortBy').value;
+    const resultsCount = document.getElementById('resultsCount');
+
+    let sortedData = [...data];
+
+    sortedData.sort((a, b) => {
+        const uA = a.student || a.user || a;
+        const uB = b.student || b.user || b;
+        const nameA = (uA.fullName || uA.username || "").toLowerCase();
+        const nameB = (uB.fullName || uB.username || "").toLowerCase();
+
+        if (sortBy === 'name_asc') return nameA.localeCompare(nameB);
+        if (sortBy === 'name_desc') return nameB.localeCompare(nameA);
+        if (sortBy === 'recent') return (uB.id || 0) - (uA.id || 0);
+        return 0;
+    });
+
+    if (resultsCount) resultsCount.textContent = `(${sortedData.length} results found)`;
+    renderTable(sortedData);
+}
+
 function renderTable(data) {
     const container = document.getElementById('searchResultsContainer');
-    
-    let html = `
-        <div class="table-responsive">
-            <table class="search-results-table">
-                <thead>
-                    <tr>
-                        <th>User Info</th>
-                        <th>Identifier</th>
-                        <th>Role</th>
-                    </tr>
-                </thead>
-                <tbody>
-    `;
+    if (data.length === 0) {
+        container.innerHTML = `
+            <div class="empty-results" style="text-align:center; padding:40px;">
+                <i class="fas fa-search-minus" style="font-size: 3rem; opacity: 0.2; margin-bottom:15px;"></i>
+                <p>No matches found in the system</p>
+            </div>`;
+        return;
+    }
+
+    let html = `<table class="search-results-table">
+        <thead>
+            <tr>
+                <th>USER INFO</th>
+                <th>IDENTIFIER</th>
+                <th>ROLE</th>
+            </tr>
+        </thead>
+        <tbody>`;
 
     data.forEach(item => {
-        // فحص الـ ID الصحيح
-        const userId = item.id || item.userAccountId || "N/A";
-        const name = item.fullName || item.username || "Unknown";
-        const email = item.email || "No email available";
-        const role = (item.role || item.userType || "User").toLowerCase();
-
+        const u = item.student || item.user || item;
+        const role = (u.role || u.userType || "student").toLowerCase();
         html += `
             <tr>
                 <td>
                     <div class="user-cell">
                         <div class="user-icon"><i class="fas fa-user-circle"></i></div>
                         <div class="user-details">
-                            <span class="user-name">${name}</span>
-                            <span class="user-email">${email}</span>
+                            <span class="user-name">${u.fullName || u.username || "N/A"}</span>
+                            <span class="user-email">${u.email || ""}</span>
                         </div>
                     </div>
                 </td>
-                <td><span class="id-tag">ID: ${userId}</span></td>
+                <td><span class="id-tag">ID: ${u.userAccountId || u.id}</span></td>
                 <td><span class="role-badge ${role}">${role.toUpperCase()}</span></td>
-            </tr>
-        `;
+            </tr>`;
     });
 
-    html += `</tbody></table></div>`;
+    html += `</tbody></table>`;
     container.innerHTML = html;
 }
 
-// وظائف التنقل والخروج
-function toggleSidebar() {
-    document.querySelector('.sidebar').classList.toggle('active');
-}
-
-function logout() {
-    localStorage.clear();
-    window.location.href = "../../index.html";
-}
+function logout() { localStorage.clear(); window.location.href = "../../index.html"; }

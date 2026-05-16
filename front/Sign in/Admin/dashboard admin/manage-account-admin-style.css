@@ -450,3 +450,81 @@ body {
     cursor: pointer;
     font-size: 1.1rem;
 }
+/* رفع طبقة الـ SweetAlert عشان تظهر فوق أي Modal */
+.swal2-container {
+    z-index: 99999 !important;
+}
+/* تنسيق حاوية البحث */
+.search-box {
+    position: relative;
+    width: 300px; /* تقدري تتحكمي في العرض حسب الرغبة */
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+}
+
+/* تنسيق خانة الإدخال */
+.search-box input {
+    width: 100%;
+    padding: 10px 15px 10px 40px; /* مسافة 40px من الشمال عشان مكان الأيقونة */
+    background: #2c2f48; /* لون متناسق مع الداكن */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: #fff;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+/* تأثير عند الضغط على خانة البحث */
+.search-box input:focus {
+    border-color: #4e73df;
+    box-shadow: 0 0 8px rgba(78, 115, 223, 0.2);
+    background: #323552;
+}
+
+/* تنسيق أيقونة البحث */
+.search-box i {
+    position: absolute;
+    left: 15px;
+    color: #858796;
+    font-size: 14px;
+    transition: 0.3s;
+}
+
+/* تغيير لون الأيقونة لما نضغط على البحث */
+.search-box input:focus + i {
+    color: #4e73df;
+}
+
+/* لتحسين الشكل في الـ Mobile */
+@media (max-width: 768px) {
+    .search-box {
+        width: 100%; /* ياخد العرض كامل في الموبايل */
+    }
+}
+.chart-box canvas {
+    margin-top: 10px; /* بيجبر الشارت يبدأ بعد العنوان بمسافة */
+}
+/* تنسيق الكارت الكبير نفسه */
+.analytics-card {
+    padding-top: 10px; /* تقليل المسافة الداخلية من فوق لو كانت كبيرة */
+    position: relative;
+}
+
+/* تنسيق العنوان h3 */
+.analytics-card h3 {
+    margin-top: 10px; /* إلغاء أي مارجن علوي افتراضي */
+    margin-bottom: 20px; /* مسافة بين العنوان وبين الشارتات اللي تحته */
+    padding-left: 10px; /* تنسيق بسيط عشان ميبقاش لازق في الحافة الشمال */
+    font-size: 1.2rem;
+    color: #ffffff;
+    /* التحريك الفعلي للأعلى */
+    position: relative;
+    top: -5px; /* جربي تغيري الرقم ده (مثلاً -10) لحد ما يوصل للمكان اللي يريحك */
+}
+
+/* نضمن إن حاوية الشارتات واخدة مساحتها صح ومش ضاغطة لفوق */
+.charts-container {
+    margin-top: 10px;
+}

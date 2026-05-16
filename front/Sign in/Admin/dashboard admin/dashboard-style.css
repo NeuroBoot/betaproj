@@ -274,3 +274,8 @@ body {
 /* Chart Section */
 .chart-section   { margin-top: 20px; margin-bottom: 30px; }
 .chart-container { position: relative; height: 400px; width: 100%; }
+.status-badge, .badge {
+    color: #f2fdef !important; /* عشان النص يفضل أبيض دايماً */
+    font-weight: bold;
+}
+.status-badge { color: white !important; }

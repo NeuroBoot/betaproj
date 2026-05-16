@@ -2,134 +2,170 @@ document.addEventListener('DOMContentLoaded', async () => {
     const API_BASE_URL = 'http://localhost:3000/api/v1'; 
     let token = localStorage.getItem('token')?.replace(/['"]+/g, '').trim(); 
 
+    // دالة تحديث الداش بورد بالكامل
     async function updateDashboard() {
-        if (!token) return;
-
-        // --- التعديل المطلوب لإظهار الاسم ---
-        // بنستخدم الـ ID اللي موجود عندك في الـ HTML بالظبط
-        const nameElement = document.getElementById('userNameDisplay');
-        const savedName = localStorage.getItem('username'); 
-        
-        if (nameElement && savedName) {
-            // مسح علامات التنصيص الزائدة وعرض الاسم
-            nameElement.textContent = savedName.replace(/['"]+/g, ''); 
+        if (!token) {
+            window.location.href = "../../index.html";
+            return;
         }
-        // ---------------------------------------
 
-        const headers = { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' };
+        const headers = { 
+            'Authorization': `Bearer ${token}`, 
+            'Accept': 'application/json' 
+        };
 
         try {
-            // 1. تحديث حالة السيستم (System Status)
+            // 0. عرض اسم الأدمن المسجل
+            const nameDisplay = document.getElementById('adminName');
+            const savedName = localStorage.getItem('username'); // التأكد من المفتاح المستخدم في الـ Login
+            if (nameDisplay && savedName) {
+                const formattedName = savedName.charAt(0).toUpperCase() + savedName.slice(1);
+                nameDisplay.textContent = formattedName;
+            }
+
+            // 1. تحديث حالة اتصال السيرفر (Online/Offline)
             checkStatus(headers);
 
-            // 2. جلب المستخدمين والكورسات
-            const [uRes, cRes] = await Promise.all([
+            // 2. جلب البيانات في وقت واحد لسرعة الأداء
+            const [uRes, cRes, sRes, aRes] = await Promise.all([
                 fetch(`${API_BASE_URL}/users`, { headers }),
-                fetch(`${API_BASE_URL}/courses`, { headers })
+                fetch(`${API_BASE_URL}/courses`, { headers }),
+                fetch(`${API_BASE_URL}/attendance/statistics`, { headers }),
+                fetch(`${API_BASE_URL}/alerts`, { headers }) 
             ]);
 
             const users = await uRes.json();
             const courses = await cRes.json();
+            const stats = await sRes.json();
+            const alerts = await aRes.json();
 
-            // تحديث العدادات (Total Students & Staff)
+            // --- تحديث عدادات الـ Stats Cards ---
             if (users.success && Array.isArray(users.data)) {
-                const students = users.data.filter(u => 
-                    (u.role || u.userType || "").toLowerCase() === 'student'
-                ).length;
-
-                const staff = users.data.filter(u => 
-                    (u.role || u.userType || "").toLowerCase() === 'staff'
-                ).length;
-
+                const students = users.data.filter(u => (u.role || u.userType || "").toLowerCase() === 'student').length;
+                const staff = users.data.filter(u => (u.role || u.userType || "").toLowerCase() === 'staff').length;
+                
                 document.getElementById('totalStudentsCount').textContent = students;
                 document.getElementById('totalStaffCount').textContent = staff;
             }
 
-            // تحديث عداد الكورسات وجلب إحصائيات أول كورس
             if (courses.success) {
+                const courseCount = Array.isArray(courses.data) ? courses.data.length : 0;
                 const courseHeading = document.querySelector('.stat-card.purple h2');
-                if (courseHeading) courseHeading.textContent = courses.data.length;
+                if (courseHeading) courseHeading.textContent = courseCount;
+            }
 
-                if (courses.data.length > 0) {
-                    const firstCourseId = String(courses.data[0].id || courses.data[0]._id);
-                    // فحص لمنع إرسال undefined للسيرفر وحل مشكلة الـ BadRequestException
-                    if (firstCourseId && firstCourseId !== 'undefined') {
-                        loadChartData(firstCourseId, headers);
-                    }
+            // --- تحديث الـ Recent Activity (حضور + نظام) ---
+            const activityContainer = document.querySelector('.activity-list');
+            if (activityContainer) {
+                activityContainer.innerHTML = ''; 
+                let allActivities = [];
+
+                // أ. سجلات الحضور
+                const recentLogs = stats.data?.recent || stats.data?.recentAttendance || [];
+                recentLogs.forEach(log => {
+                    allActivities.push({
+                        title: `${log.student?.username || log.username || 'Student'} marked ${log.status || 'Present'}`,
+                        subtitle: log.course?.name || log.courseName || 'Attendance',
+                        time: new Date(log.attendanceDate || log.createdAt),
+                        dot: 'blue'
+                    });
+                });
+
+                // ب. تنبيهات النظام
+                if (alerts.success && Array.isArray(alerts.data)) {
+                    alerts.data.forEach(alert => {
+                        allActivities.push({
+                            title: alert.message, 
+                            subtitle: 'System Update',
+                            time: new Date(alert.createdAt),
+                            dot: 'purple'
+                        });
+                    });
+                }
+
+                allActivities.sort((a, b) => b.time - a.time);
+
+                if (allActivities.length > 0) {
+                    allActivities.slice(0, 5).forEach(act => {
+                        const item = document.createElement('div');
+                        item.className = 'activity-item';
+                        item.innerHTML = `
+                            <span class="dot-small ${act.dot}"></span>
+                            <div class="info">
+                                <p><strong>${act.title}</strong></p>
+                                <small>${act.subtitle} • ${act.time.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</small>
+                            </div>
+                        `;
+                        activityContainer.appendChild(item);
+                    });
+                } else {
+                    activityContainer.innerHTML = `<p style="text-align:center; padding:20px; color:#8e8e93;">No recent activity recorded yet.</p>`;
                 }
             }
 
-            // 3. تحديث الـ Recent Activity
-            const alertRes = await fetch(`${API_BASE_URL}/alerts`, { headers });
-            const alerts = await alertRes.json();
-            const activityContainer = document.querySelector('.activity-list');
-            
-            if (activityContainer) {
-                if (alerts.success && alerts.data.length > 0) {
-                    activityContainer.innerHTML = alerts.data.slice(0, 4).map(a => `
-                        <div class="activity-item">
-                            <span class="dot-small blue"></span>
-                            <div class="info">
-                                <p>${a.message}</p>
-                                <small>${new Date(a.createdAt).toLocaleTimeString()}</small>
-                            </div>
-                        </div>
-                    `).join('');
-                } else {
-                    activityContainer.innerHTML = `<p style="text-align:center; padding:20px; color:#8e8e93;">No recent activity</p>`;
+            // --- رسم الدياجرام ---
+            const chartData = stats.data?.chartData || stats.data?.departmentStats || [];
+            if (chartData.length > 0) {
+                drawChart(chartData);
+            } else {
+                const chartCanvas = document.getElementById('attendanceChart');
+                if (chartCanvas) {
+                    chartCanvas.style.display = 'none';
+                    const container = chartCanvas.parentElement;
+                    container.innerHTML = `<p style="text-align:center; padding:50px; color:#8e8e93;">Waiting for attendance data to generate chart...</p>`;
                 }
+            }
+
+            // تحديث نسبة الدقة
+            const accuracyHeading = document.querySelector('.stat-card.orange h2');
+            if (accuracyHeading) {
+                accuracyHeading.textContent = (stats.data?.accuracyRate || "98") + "%";
             }
 
         } catch (e) {
-            console.error("Dashboard Sync Failed", e);
+            console.error("Dashboard Sync Failed:", e);
             setUIOffline();
         }
     }
 
+    // فحص حالة السيرفر
     async function checkStatus(headers) {
         try {
             const res = await fetch(`${API_BASE_URL}/auth/profile`, { headers });
             const isOk = res.ok;
-            document.querySelectorAll('.status-panel .badge').forEach(b => {
+            document.querySelectorAll('.badge').forEach(b => {
                 b.textContent = isOk ? "Online" : "Offline";
-                b.style.color = isOk ? "#10b981" : "#ef4444";
+                b.style.background = isOk ? "#10b981" : "#ef4444";
             });
         } catch { setUIOffline(); }
     }
 
     function setUIOffline() {
-        document.querySelectorAll('.status-panel .badge').forEach(b => {
+        document.querySelectorAll('.badge').forEach(b => {
             b.textContent = "Offline";
-            b.style.color = "#ef4444";
+            b.style.background = "#ef4444";
         });
     }
 
-    async function loadChartData(id, headers) {
-        try {
-            const res = await fetch(`${API_BASE_URL}/attendance/statistics?courseId=${id}`, { headers });
-            const result = await res.json();
-            if (result.success) drawChart(result.data);
-        } catch (e) { console.error("Chart failed", e); }
-    }
-
+    // وظيفة رسم الـ Chart
     function drawChart(data) {
-        const ctx = document.getElementById('attendanceChart')?.getContext('2d');
-        if (!ctx) return;
-        
+        const canvas = document.getElementById('attendanceChart');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
         const old = Chart.getChart("attendanceChart");
         if (old) old.destroy();
 
         new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: data.map(d => d.label),
+                labels: data.map(d => d.label || d.department || d.day),
                 datasets: [{ 
-                    label: 'Attendance %', 
-                    data: data.map(d => d.value), 
-                    backgroundColor: 'rgba(16, 185, 129, 0.3)', 
-                    borderColor: '#10b981', 
-                    borderWidth: 2,
-                    borderRadius: 5
+                    label: 'Attendance Rate %', 
+                    data: data.map(d => d.value || d.rate || d.count), 
+                    backgroundColor: 'rgba(52, 152, 219, 0.7)', 
+                    borderColor: '#3498db', 
+                    borderWidth: 1,
+                    borderRadius: 4
                 }]
             },
             options: { 
@@ -137,16 +173,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
-                    y: { 
-                        beginAtZero: true, 
-                        max: 100, 
-                        grid: { color: 'rgba(255, 255, 255, 0.1)', drawBorder: false },
-                        ticks: { color: '#8e8e93', callback: v => v + '%' }
-                    },
-                    x: {
-                        grid: { display: false },
-                        ticks: { color: '#8e8e93' }
-                    }
+                    y: { beginAtZero: true, max: 100, ticks: { color: '#8e8e93' } },
+                    x: { ticks: { color: '#8e8e93' } }
                 }
             }
         });
@@ -154,3 +182,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     updateDashboard();
 });
+
+// وظيفة تسجيل الخروج
+function logout() {
+    localStorage.clear();
+    window.location.href = "../../index.html";
+}

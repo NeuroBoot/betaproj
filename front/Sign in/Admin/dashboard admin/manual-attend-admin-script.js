@@ -1,209 +1,196 @@
 const API_BASE_URL = 'http://localhost:3000/api/v1';
 
-// --- 1. الدوال المساعدة ---
-function getAuthToken() {
-    let token = localStorage.getItem('token');
-    if (!token) return "";
-    token = token.replace(/['"]+/g, '').trim();
-    return token.toLowerCase().startsWith('bearer ') ? token : `Bearer ${token}`;
+// التأكد من وجود مكتبة SweetAlert لضمان عدم حدوث Error
+if (typeof Swal === 'undefined') {
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/sweetalert2@11';
+    document.head.appendChild(script);
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // تحديث الاسم (آية الله)
-    const nameDisplay = document.getElementById('adminName') || document.getElementById('userNameDisplay');
-    const savedName = localStorage.getItem('username');
-    if (nameDisplay) nameDisplay.textContent = savedName ? savedName : "Aya_allah";
+    // 1. عرض اسم المستخدم
+    const adminName = document.getElementById('adminName');
+    if (adminName) adminName.textContent = localStorage.getItem('username') || "Aya_allah";
 
-    await loadCoursesToSelect();
-    await loadRecentRecords();
+    // 2. تحميل الكورسات فور فتح الصفحة
+    await loadCourses();
 
+    // 3. تحديث السكاشن تلقائياً عند تغيير الكورس
     const courseSelect = document.getElementById('courseSelect');
     if (courseSelect) {
         courseSelect.addEventListener('change', function() {
-            const selectedOption = this.options[this.selectedIndex];
-            // قراءة عدد السكاشن من الداتا اللي جاية من الـ API
-            const sectionCount = selectedOption.getAttribute('data-sections') || 1;
-            updateSections(sectionCount);
+            const selectedOpt = this.options[this.selectedIndex];
+            const sectionsCount = selectedOpt.getAttribute('data-sections') || 4;
+            updateSections(sectionsCount);
         });
     }
 });
 
-// --- 2. إدارة البيانات (API) ---
+// ======================== HELPER FUNCTIONS ========================
 
-async function loadCoursesToSelect() {
+function getAuthToken() {
+    let token = localStorage.getItem('token') || "";
+    token = token.replace(/['"]+/g, '').trim();
+    return token.toLowerCase().startsWith('bearer ') ? token : `Bearer ${token}`;
+}
+
+function authHeaders() {
+    return {
+        'Content-Type': 'application/json',
+        'Authorization': getAuthToken()
+    };
+}
+
+// ======================== API CALLS ========================
+
+// تحميل الكورسات من الباك-إند
+async function loadCourses() {
     const courseSelect = document.getElementById('courseSelect');
-    if (!courseSelect) return;
-
     try {
-        const res = await fetch(`${API_BASE_URL}/courses`, {
-            headers: { 'Authorization': getAuthToken() }
-        });
+        const res = await fetch(`${API_BASE_URL}/courses`, { headers: authHeaders() });
         const result = await res.json();
         const courses = result.data || result;
 
+        courseSelect.innerHTML = '<option hidden>Select Course</option>';
         if (Array.isArray(courses)) {
-            courseSelect.innerHTML = '<option value="">Select Course</option>';
             courses.forEach(c => {
                 const opt = document.createElement('option');
-                opt.value = c.id || c._id; // دعم أنواع الـ ID المختلفة
+                opt.value = c.id || c.courseId;
                 opt.textContent = c.name;
-                opt.setAttribute('data-sections', c.sectionsCount || 4); // سيكشن افتراضي لو مش موجود
+                opt.setAttribute('data-sections', c.sectionsCount || 4);
                 courseSelect.appendChild(opt);
             });
         }
-    } catch (e) { console.error("Course Load Failed", e); }
+    } catch (e) { console.error("Courses Error:", e); }
 }
 
-async function loadRecentRecords() {
-    const recordsContainer = document.querySelector('.recent-records-list');
-    if (!recordsContainer) return;
-
-    try {
-        const res = await fetch(`${API_BASE_URL}/attendance`, {
-            headers: { 'Authorization': getAuthToken() }
-        });
-        const result = await res.json();
-        const records = result.data || result;
-
-        recordsContainer.innerHTML = ''; 
-
-        if (Array.isArray(records) && records.length > 0) {
-            records.slice(0, 5).forEach(record => {
-                // حساب النسبة المئوية للحضور
-                const attendanceRate = record.totalStudents > 0 
-                    ? Math.round((record.presentCount / record.totalStudents) * 100) 
-                    : 0;
-
-                const div = document.createElement('div');
-                div.className = 'record-item'; 
-                div.innerHTML = `
-                    <div class="record-info">
-                        <h3>${record.courseName || 'Course'} - Section ${record.sectionName || 'A'}</h3>
-                        <p>${new Date(record.date).toLocaleDateString()}</p>
-                    </div>
-                    <div class="record-stats">
-                        <span>${record.presentCount || 0}/${record.totalStudents || 0} students</span>
-                        <span class="percentage" style="color: ${attendanceRate > 70 ? '#10b981' : '#f59e0b'}">
-                            ${attendanceRate}% attendance
-                        </span>
-                    </div>`;
-                recordsContainer.appendChild(div);
-            });
-        } else {
-            recordsContainer.innerHTML = '<div style="text-align:center; padding:20px; color:#8e8e93;">No recent records found.</div>';
-        }
-    } catch (e) { console.error("Records Load Failed", e); }
-}
-
-// فتح المودال وجلب الطلاب الفعليين
-async function openDetails() {
-    const courseId = document.getElementById('courseSelect').value;
-    const sectionName = document.getElementById('sectionSelect').value;
-    const date = document.getElementById('dateInput').value;
-
-    if (!courseId || !sectionName || !date) {
-        alert("Please select Course, Section, and Date!");
-        return;
-    }
-
-    // عرض بيانات البحث في المودال
-    document.getElementById('disp-course').innerText = document.getElementById('courseSelect').options[document.getElementById('courseSelect').selectedIndex].text;
-    document.getElementById('disp-section').innerText = `Section ${String.fromCharCode(64 + parseInt(sectionName))}`;
-    document.getElementById('disp-date').innerText = date;
-
-    const tableBody = document.querySelector('#detailsModal table tbody');
-    tableBody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Loading Students List...</td></tr>';
-
-    try {
-        // نستخدم API الكورسات لجلب الطلاب المسجلين فيها
-        const res = await fetch(`${API_BASE_URL}/courses/${courseId}/students`, {
-            headers: { 'Authorization': getAuthToken() }
-        });
-        const result = await res.json();
-        const students = result.data || result;
-
-        tableBody.innerHTML = ''; 
-
-        if (Array.isArray(students) && students.length > 0) {
-            students.forEach(s => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${s.studentCode || 'N/A'}</td>
-                    <td>${s.name || s.username}</td>
-                    <td>
-                        <select class="status-select" data-student-id="${s.id || s._id}">
-                            <option value="present">Present</option>
-                            <option value="absent">Absent</option>
-                            <option value="late">Late</option>
-                        </select>
-                    </td>`;
-                tableBody.appendChild(tr);
-            });
-        } else {
-            tableBody.innerHTML = '<tr><td colspan="3" style="text-align:center;">No students found for this course.</td></tr>';
-        }
-    } catch (e) { tableBody.innerHTML = '<tr><td colspan="3" style="color:#ef4444;">Error connection to server.</td></tr>'; }
-
-    document.getElementById('detailsModal').style.display = 'flex';
-}
-
-// حفظ الحضور النهائي
-async function saveAttendance() {
-    const rows = document.querySelectorAll('.status-select');
-    const courseId = document.getElementById('courseSelect').value;
-    const sectionName = document.getElementById('sectionSelect').value;
-    const date = document.getElementById('dateInput').value;
-    
-    // تجهيز الداتا بصيغة الـ JSON المطلوبة للـ API
-    const attendanceData = {
-        courseId: courseId,
-        section: sectionName,
-        date: date,
-        records: Array.from(rows).map(select => ({
-            studentId: select.getAttribute('data-student-id'),
-            status: select.value
-        }))
-    };
-
-    try {
-        const response = await fetch(`${API_BASE_URL}/attendance/manual`, {
-            method: 'POST',
-            headers: { 
-                'Authorization': getAuthToken(), 
-                'Content-Type': 'application/json' 
-            },
-            body: JSON.stringify(attendanceData)
-        });
-
-        if (response.ok) {
-            alert("Attendance updated successfully! 🎉");
-            closeDetails();
-            await loadRecentRecords(); // تحديث السجلات فوراً
-        } else {
-            const err = await response.json();
-            alert("Error: " + (err.message || "Failed to save"));
-        }
-    } catch (e) { console.error("Save Error", e); }
-}
-
-// --- 3. وظائف الواجهة ---
+// تحديث قائمة السكاشن برقم السكاشن الخاص بكل مادة
 function updateSections(count) {
     const sectionSelect = document.getElementById('sectionSelect');
     if (!sectionSelect) return;
-    sectionSelect.innerHTML = '<option value="">Select Section</option>';
+    sectionSelect.innerHTML = '<option hidden>Select Section</option>';
     for (let i = 1; i <= count; i++) {
         const opt = document.createElement('option');
-        opt.value = i;
-        opt.textContent = `Section ${String.fromCharCode(64 + i)}`;
+                opt.value = i;
+        opt.textContent = `Section ${i}`;
         sectionSelect.appendChild(opt);
+    }
+}
+
+// فتح المودال وجلب بيانات الطلاب
+async function openDetails() {
+    const courseId = document.getElementById('courseSelect').value;
+    const section = document.getElementById('sectionSelect').value;
+    const date = document.getElementById('dateInput').value;
+
+    if (!courseId || courseId === "Select Course" || !section || !date) {
+        return Swal.fire({ icon: 'warning', text: 'Please fill all fields!', background: "#1a1a3a", color: "#fff" });
+    }
+
+    // تحديث بيانات العرض في الـ Modal Header
+    document.getElementById('disp-course').textContent = document.getElementById('courseSelect').options[document.getElementById('courseSelect').selectedIndex].text;
+    document.getElementById('disp-section').textContent = section;
+    document.getElementById('disp-date').textContent = date;
+
+    document.getElementById('detailsModal').style.display = 'flex';
+    const tbody = document.getElementById('attendanceTableBody');
+    tbody.innerHTML = '<tr><td colspan="3">Searching for records...</td></tr>';
+
+    try {
+        // جلب الداتا بناءً على الـ Endpoint الخاص بالتحضير
+        const url = `${API_BASE_URL}/attendance?courseId=${courseId}&section=${section}&date=${date}&limit=100`;
+        const res = await fetch(url, { headers: authHeaders() });
+        const result = await res.json();
+        const records = result.data?.data || result.data || result;
+
+        tbody.innerHTML = '';
+        if (Array.isArray(records) && records.length > 0) {
+            records.forEach(rec => {
+                const tr = document.createElement('tr');
+                // حفظ الـ studentId عشان نبعته في الـ POST
+                tr.setAttribute('data-student-id', rec.studentId || rec.student?.id); 
+                
+                tr.innerHTML = `
+                    <td>${rec.student?.userAccountId || rec.studentId || 'N/A'}</td>
+                    <td>${rec.student?.username || rec.studentName || 'Unknown'}</td>
+                    <td>
+                        <select class="status-select">
+                            <option value="Present" ${rec.attendanceStatusId == 1 ? 'selected' : ''}>Present</option>
+                            <option value="Late" ${rec.attendanceStatusId == 2 ? 'selected' : ''}>Late</option>
+                            <option value="Absent" ${rec.attendanceStatusId == 3 ? 'selected' : ''}>Absent</option>
+                        </select>
+                    </td>`;
+                tbody.appendChild(tr);
+            });
+        } else {
+            tbody.innerHTML = '<tr><td colspan="3">No attendance records found for this selection.</td></tr>';
+        }
+    } catch (e) {
+        console.error(e);
+        tbody.innerHTML = '<tr><td colspan="3">Error loading data.</td></tr>';
+    }
+}
+
+// دالة حفظ الحضور (Bulk Save) باستخدام POST
+async function saveAttendance() {
+    const rows = document.querySelectorAll('#attendanceTableBody tr');
+    const saveBtn = document.getElementById("saveBtn"); // تأكدي إن الزرار في HTML واخد id="saveBtn"
+    
+    const courseId = document.getElementById('courseSelect').value;
+    const date = document.getElementById('dateInput').value;
+
+    // منع الخطأ في حالة عدم وجود داتا في الجدول
+    if (rows.length === 0 || rows[0].innerText.includes("No attendance records")) return;
+
+    if (saveBtn) saveBtn.disabled = true;
+
+    const attendanceRecords = [];
+    rows.forEach(row => {
+        const studentId = row.getAttribute("data-student-id");
+        const statusSelect = row.querySelector(".status-select");
+
+        // تجميع الداتا بالمسميات اللي الباك طلبها بالظبط (Present, Absent, Late)
+        if (studentId && statusSelect) {
+            attendanceRecords.push({
+                studentId: studentId,
+                status: statusSelect.value 
+            });
+        }
+    });
+
+    try {
+        // إرسال طلب POST واحد لكل السجلات
+        const res = await fetch(`${API_BASE_URL}/attendance`, {
+            method: "POST",
+            headers: authHeaders(),
+            body: JSON.stringify({
+                courseId: courseId,
+                date: date,
+                attendance: attendanceRecords // تغيير الاسم لـ attendance بدل records
+            })
+        });
+
+        if (res.ok) {
+            Swal.fire({
+                title: 'Success!',
+                text: 'Attendance saved successfully.',
+                icon: 'success',
+                background: "#1a1a3a",
+                color: "#fff"
+            });
+            closeDetails();
+        } else {
+            const errorData = await res.json();
+            Swal.fire({ icon: 'error', title: 'Failed', text: errorData.message || 'Error saving data' });
+        }
+    } catch (err) {
+        console.error("Save Error:", err);
+        Swal.fire({ icon: 'error', title: 'Network Error' });
+    } finally {
+        if (saveBtn) saveBtn.disabled = false;
     }
 }
 
 function closeDetails() {
     document.getElementById('detailsModal').style.display = 'none';
-}
-
-function logout() {
-    localStorage.clear();
-    window.location.href = "../../index.html";
 }

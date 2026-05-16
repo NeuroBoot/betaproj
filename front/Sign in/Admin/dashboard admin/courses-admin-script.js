@@ -1,6 +1,6 @@
 const API_BASE_URL = 'http://localhost:3000/api/v1';
+let originalEnrolledIds = [];
 
-// دالة جلب التوكن مع تنظيفه من أي زيادات
 function getAuthToken() {
     let token = localStorage.getItem('token');
     if (!token) return "";
@@ -12,6 +12,30 @@ function getAuthToken() {
 }
 
 document.addEventListener('DOMContentLoaded', async function() {
+    // 1. Sidebar Resizer Logic
+    const sidebar = document.getElementById('resizableSidebar');
+    const resizer = document.getElementById('sidebarResizer');
+    const mainContent = document.getElementById('mainContent');
+
+    if (resizer) {
+        resizer.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            document.addEventListener('mousemove', move);
+            document.addEventListener('mouseup', stop);
+        });
+
+        function move(e) {
+            let width = e.clientX;
+            if (width > 180 && width < 450) {
+                sidebar.style.width = width + 'px';
+                mainContent.style.marginLeft = width + 'px';
+                mainContent.style.width = `calc(100% - ${width}px)`;
+            }
+        }
+        function stop() { document.removeEventListener('mousemove', move); }
+    }
+
+    // 2. Initial Setup
     const adminName = localStorage.getItem('username');
     if (document.getElementById('adminName')) {
         document.getElementById('adminName').textContent = adminName || "Admin";
@@ -21,13 +45,12 @@ document.addEventListener('DOMContentLoaded', async function() {
     await loadCourses();
     setupStudentFilter();
 
+    // 3. Form Submission (Dynamic Admin & Instructor)
     const form = document.getElementById('addCourseForm');
     form.onsubmit = async function(e) {
         e.preventDefault();
         const editId = form.getAttribute('data-edit-id');
-        
-        // استخراج الـ IDs المختارة من الـ Checkboxes
-        const selectedStudentIds = Array.from(document.querySelectorAll('.enroll-check:checked'))
+        const currentSelectedIds = Array.from(document.querySelectorAll('.enroll-check:checked'))
                                         .map(cb => Number(cb.value));
 
         const courseData = {
@@ -35,14 +58,15 @@ document.addEventListener('DOMContentLoaded', async function() {
             code: document.getElementById('courseCode').value.trim(),
             description: "Academic Course Content", 
             sections: parseInt(document.getElementById('sections').value) || 1,
+            credits: 3, 
             instructorId: Number(document.getElementById('instructor').value),
-            adminId: 1
+            // تعديل ديناميكي: سحب ID الأدمن الحالي من التخزين
+            adminId: Number(localStorage.getItem('userId')) || 1 
         };
 
         try {
             const url = editId ? `${API_BASE_URL}/courses/${editId}` : `${API_BASE_URL}/courses`;
             const method = editId ? 'PUT' : 'POST'; 
-
             const response = await fetch(url, {
                 method: method,
                 headers: { 'Authorization': getAuthToken(), 'Content-Type': 'application/json' },
@@ -50,87 +74,61 @@ document.addEventListener('DOMContentLoaded', async function() {
             });
 
             if (response.ok) {
-                const result = await response.json();
-                const actualId = editId || result.id || result.data?.id;
+                if (editId) {
+                    const studentsToAdd = currentSelectedIds.filter(id => !originalEnrolledIds.includes(id));
+                    for (const studentId of studentsToAdd) {
+                        await fetch(`${API_BASE_URL}/courses/${editId}/students`, {
+                            method: 'POST',
+                            headers: { 'Authorization': getAuthToken(), 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ studentId: studentId, section: "1", lecture: "A" })
+                        });
+                    }
 
-                // التعديل الجوهري: ننتظر (await) تسجيل الطلاب قبل إغلاق النافذة
-                if (actualId) {
-                    await enrollStudentsToCourse(actualId, selectedStudentIds);
+                    const studentsToRemove = originalEnrolledIds.filter(id => !currentSelectedIds.includes(id));
+                    for (const studentId of studentsToRemove) {
+                        await fetch(`${API_BASE_URL}/courses/${editId}/students/${studentId}`, {
+                            method: 'DELETE',
+                            headers: { 'Authorization': getAuthToken() }
+                        });
+                    }
                 }
 
                 closeModal();
-                await loadCourses(); // تحديث الجدول فوراً بالبيانات الجديدة
-                
-                Swal.fire({
-                    icon: 'success', title: 'Saved Successfully', toast: true,
-                    position: 'top-end', showConfirmButton: false, timer: 3000
-                });
-            } else {
-                const errorData = await response.json();
-                Swal.fire({ icon: 'error', title: 'Error', text: errorData.message });
+                await loadCourses(); 
+                Swal.fire({ icon: 'success', title: 'Saved Successfully', timer: 1500 });
             }
-        } catch (error) {
-            Swal.fire({ icon: 'error', title: 'Connection Error', text: 'Server is unreachable.' });
+        } catch (error) { 
+            console.error("Form submission error:", error);
+            Swal.fire('Error', 'An error occurred while saving changes.', 'error');
         }
     };
 });
 
-// دالة تسجيل الطلاب المطورة
-async function enrollStudentsToCourse(courseId, studentIds) {
-    // نجلب الطلاب المسجلين حالياً عشان مانبعتش طلب متكرر (يتجنب 409 Conflict)
-    let alreadyEnrolled = [];
-    try {
-        const res = await fetch(`${API_BASE_URL}/courses/${courseId}/students`, {
-            headers: { 'Authorization': getAuthToken() }
-        });
-        const data = await res.json();
-        alreadyEnrolled = (data.data || data).map(s => Number(s.id || s.userAccountId || s.studentId));
-    } catch (e) { console.log("New course or error fetching existing."); }
-
-    for (const studentId of studentIds) {
-        if (!alreadyEnrolled.includes(studentId)) {
-            try {
-                await fetch(`${API_BASE_URL}/courses/${courseId}/students`, {
-                    method: 'POST',
-                    headers: { 'Authorization': getAuthToken(), 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ studentId: studentId })
-                });
-            } catch (err) { console.error(`Enrollment failed for ${studentId}`); }
-        }
-    }
-}
-
-// تحميل الكورسات وعرض العدد الحقيقي للطلاب
+// 4. Load Table Data
 async function loadCourses() {
     try {
-        const response = await fetch(`${API_BASE_URL}/courses`, {
-            headers: { 'Authorization': getAuthToken() }
-        });
+        const response = await fetch(`${API_BASE_URL}/courses`, { headers: { 'Authorization': getAuthToken() } });
         const result = await response.json();
         const courses = result.data || result;
         const tbody = document.getElementById('coursesTableBody');
-
         tbody.innerHTML = '';
+
         if (Array.isArray(courses)) {
             for (const course of courses) {
                 const courseId = course.id || course.courseId;
-                
-                // جلب عدد الطلاب الدقيق من الـ Endpoint الخاص بهم
-                let studentsCount = 0;
+                let count = 0;
                 try {
-                    const sRes = await fetch(`${API_BASE_URL}/courses/${courseId}/students`, {
-                        headers: { 'Authorization': getAuthToken() }
-                    });
+                    const sRes = await fetch(`${API_BASE_URL}/courses/${courseId}/students`, { headers: { 'Authorization': getAuthToken() } });
                     const sData = await sRes.json();
-                    studentsCount = (sData.data || sData).length || 0;
-                } catch (e) { studentsCount = 0; }
+                    count = (sData.data || sData).length || 0;
+                } catch (e) { count = 0; }
 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${course.code}</td>
                     <td>${course.name}</td>
-                    <td>${course.instructor ? (course.instructor.fullName || course.instructor.username) : 'N/A'}</td>
-                    <td>${studentsCount}</td>
+                    <td>${course.instructor?.username || 'N/A'}</td>
+                    <td><span class="student-count-badge">${count}</span></td>
                     <td>${course.sections || 1}</td> 
                     <td class="action-btns">
                         <button class="btn-edit" onclick='prepareEdit(${JSON.stringify(course)})'>Edit</button>
@@ -139,137 +137,141 @@ async function loadCourses() {
                 tbody.appendChild(tr);
             }
         }
-    } catch (error) { console.error("Load courses error:", error); }
+    } catch (error) { console.error("Loading courses error:", error); }
 }
 
-// تحضير التعديل وعرض علامات الصح
+// 5. Prepare Modal for Editing
 async function prepareEdit(course) {
-    const form = document.getElementById('addCourseForm');
     const courseId = course.id || course.courseId;
+    const form = document.getElementById('addCourseForm');
     form.setAttribute('data-edit-id', courseId);
     
-    document.getElementById('modalTitle').innerText = "Edit Course";
+    document.getElementById('modalTitle').innerText = "Edit Course & Enrollees";
     document.getElementById('courseName').value = course.name;
     document.getElementById('courseCode').value = course.code;
-    document.getElementById('instructor').value = course.instructorId || "";
+    
+    // تعديل: التأكد من اختيار المدرس الصحيح أيا كان مسمى الـ ID
+    document.getElementById('instructor').value = course.instructorId || course.instructor?.id || "";
     document.getElementById('sections').value = course.sections || 1;
     
+    const enrollSec = document.getElementById('enrollmentSection');
+    if (enrollSec) enrollSec.style.display = 'block';
+
     try {
-        // جلب قائمة الطلاب المسجلين فعلياً لتفعيل الـ Checkboxes
-        const response = await fetch(`${API_BASE_URL}/courses/${courseId}/students`, {
-            headers: { 'Authorization': getAuthToken() }
-        });
-        const result = await response.json();
-        const enrolledStudents = result.data || result;
-        await loadStudentsIntoModal(Array.isArray(enrolledStudents) ? enrolledStudents : []);
-    } catch (error) {
+        const response = await fetch(`${API_BASE_URL}/courses/${courseId}/students`, { headers: { 'Authorization': getAuthToken() } });
+        const resJson = await response.json();
+        const enrolled = resJson.data || resJson;
+        
+        originalEnrolledIds = Array.isArray(enrolled) ? enrolled.map(s => Number(s.studentId || s.id || s.userAccountId)) : [];
+        await loadStudentsIntoModal(originalEnrolledIds);
+    } catch (e) { 
+        originalEnrolledIds = []; 
         await loadStudentsIntoModal([]); 
     }
+
     document.getElementById('courseModal').style.display = 'flex';
 }
 
-// فتح المودال لإضافة جديدة (بدون علامات صح)
-async function openModal() {
-    const form = document.getElementById('addCourseForm');
-    form.reset();
-    form.removeAttribute('data-edit-id');
-    document.getElementById('modalTitle').innerText = "Add New Course";
-    await loadStudentsIntoModal([]); // مصفوفة فارغة لضمان عدم وجود علامات صح قديمة
-    document.getElementById('courseModal').style.display = 'flex';
-}
-
-// بناء قائمة الطلاب داخل المودال
-async function loadStudentsIntoModal(enrolledStudents) {
+// 6. Load Students List into Modal
+async function loadStudentsIntoModal(enrolledIds) {
     const listContainer = document.getElementById('studentListInside');
-    listContainer.innerHTML = 'Loading students...';
-
+    listContainer.innerHTML = 'Loading...';
     try {
-        const response = await fetch(`${API_BASE_URL}/users`, {
-            headers: { 'Authorization': getAuthToken() }
-        });
+        const response = await fetch(`${API_BASE_URL}/users`, { headers: { 'Authorization': getAuthToken() } });
         const result = await response.json();
-        const allUsers = result.data || result;
-        
-        const students = allUsers.filter(u => u.role?.toLowerCase() === 'student' || u.userType?.toLowerCase() === 'student');
-        
-        // استخراج الـ IDs بشكل آمن للمقارنة
-        const enrolledIds = enrolledStudents.map(s => Number(s.id || s.userAccountId || s.studentId));
+        const users = result.data || result;
+        const students = Array.isArray(users) ? users.filter(u => u.userType?.toLowerCase() === 'student') : [];
 
         listContainer.innerHTML = '';
         students.forEach(student => {
-            const studentId = Number(student.id || student.userAccountId);
-            const isChecked = enrolledIds.includes(studentId) ? 'checked' : '';
+            const sId = Number(student.id || student.userAccountId); 
+            const isChecked = enrolledIds.includes(sId) ? 'checked' : '';
             
             const div = document.createElement('div');
             div.className = 'student-item';
             div.innerHTML = `
-                <input type="checkbox" class="enroll-check" value="${studentId}" ${isChecked} onchange="updateSelectedCount()">
+                <input type="checkbox" class="enroll-check" value="${sId}" ${isChecked} onchange="updateSelectedCount()">
                 <div class="student-info">
-                    <label>${student.fullName || student.username}</label>
-                    <small>ID: ${studentId}</small>
+                    <label>${student.username}</label>
+                    <small>ID: ${sId}</small>
                 </div>`;
             listContainer.appendChild(div);
         });
         updateSelectedCount();
-    } catch (error) {
-        listContainer.innerHTML = 'Error loading students.';
-    }
+    } catch (e) { listContainer.innerHTML = 'Error loading directory.'; }
 }
 
-async function fillInstructors() {
-    try {
-        const response = await fetch(`${API_BASE_URL}/users`, {
-            headers: { 'Authorization': getAuthToken() }
-        });
-        const result = await response.json();
-        const users = result.data || result;
-        const select = document.getElementById('instructor');
-        if (Array.isArray(users)) {
-            select.innerHTML = '<option value="">Select Instructor</option>';
-            users.forEach(u => {
-                if(u.role?.toLowerCase() === 'staff' || u.userType?.toLowerCase() === 'staff') {
-                    const opt = document.createElement('option');
-                    opt.value = u.id || u.userAccountId;
-                    opt.textContent = u.fullName || u.username;
-                    select.appendChild(opt);
-                }
-            });
-        }
-    } catch (error) { console.error(error); }
-}
-
-async function deleteCourse(id) {
-    const result = await Swal.fire({
-        title: 'Are you sure?', icon: 'warning', showCancelButton: true,
-        confirmButtonColor: '#d33', confirmButtonText: 'Yes, delete it!'
-    });
-    if (result.isConfirmed) {
-        try {
-            const res = await fetch(`${API_BASE_URL}/courses/${id}`, {
-                method: 'DELETE', headers: { 'Authorization': getAuthToken() }
-            });
-            if (res.ok) await loadCourses();
-        } catch (error) { console.error(error); }
-    }
+// 7. Modal Control Functions
+function openModal() {
+    const form = document.getElementById('addCourseForm');
+    form.reset();
+    form.removeAttribute('data-edit-id');
+    originalEnrolledIds = [];
+    document.getElementById('modalTitle').innerText = "Add New Course";
+    
+    const enrollSec = document.getElementById('enrollmentSection');
+    if (enrollSec) enrollSec.style.display = 'none';
+    
+    document.getElementById('courseModal').style.display = 'flex';
 }
 
 function closeModal() { document.getElementById('courseModal').style.display = 'none'; }
-function updateSelectedCount() {
-    const count = document.querySelectorAll('.enroll-check:checked').length;
-    if (document.getElementById('selectedCount')) {
-        document.getElementById('selectedCount').textContent = `${count} selected`;
-    }
-}
+
+// 8. Utility Functions
 function setupStudentFilter() {
     const searchInput = document.getElementById('studentSearchInside');
     if (searchInput) {
         searchInput.addEventListener('input', function(e) {
             const term = e.target.value.toLowerCase();
             document.querySelectorAll('.student-item').forEach(item => {
-                const idText = item.querySelector('small').textContent.toLowerCase();
-                item.style.display = idText.includes(term) ? 'flex' : 'none';
+                const text = item.innerText.toLowerCase();
+                item.style.display = text.includes(term) ? 'flex' : 'none';
             });
         });
     }
 }
-function logout() { localStorage.clear(); window.location.href = "../../index.html"; }
+
+async function fillInstructors() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/users`, { headers: { 'Authorization': getAuthToken() } });
+        const result = await response.json();
+        const users = result.data || result;
+        const select = document.getElementById('instructor');
+        select.innerHTML = '<option value="">Select Instructor</option>';
+        if (Array.isArray(users)) {
+            users.filter(u => u.userType?.toLowerCase() === 'staff').forEach(u => {
+                const opt = document.createElement('option');
+                // تعديل ديناميكي لضمان عمل الـ ID الصحيح
+                opt.value = u.id || u.userAccountId;
+                opt.textContent = u.username;
+                select.appendChild(opt);
+            });
+        }
+    } catch (e) { console.error("Error filling instructors:", e); }
+}
+
+function updateSelectedCount() {
+    const count = document.querySelectorAll('.enroll-check:checked').length;
+    if (document.getElementById('selectedCount')) {
+        document.getElementById('selectedCount').textContent = `${count} selected`;
+    }
+}
+
+async function deleteCourse(id) {
+    const confirm = await Swal.fire({ 
+        title: 'Are you sure?', 
+        text: "This will remove the course and all its enrollees!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33'
+    });
+    if (confirm.isConfirmed) {
+        await fetch(`${API_BASE_URL}/courses/${id}`, { method: 'DELETE', headers: { 'Authorization': getAuthToken() } });
+        await loadCourses();
+    }
+}
+
+function logout() { 
+    localStorage.clear(); 
+    window.location.href = "../../index.html"; 
+}

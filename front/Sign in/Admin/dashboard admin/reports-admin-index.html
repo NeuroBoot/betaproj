@@ -23,7 +23,7 @@
             </div>
             <div class="user-profile">
                 <p class="welcome-text">Welcome,</p>
-                <h3 id="adminName">Loading...</h3> 
+                <h3 id="adminName">Aya_allah</h3> 
                 <p class="user-role">Admin Portal</p>
             </div>
 
@@ -93,26 +93,34 @@
     <div id="reportConfigModal" class="modal-overlay" style="display: none;">
         <div class="details-popup-large">
             <div class="popup-header">
-                <h3>Configure Report Settings</h3>
+                <h3 id="modalTitle">Configure Report Settings</h3>
                 <span class="close-popup" onclick="closeReportModal()">&times;</span>
             </div>
             <div class="popup-body">
-                <div class="filters-grid" style="display: grid; grid-template-columns: 1fr; gap: 20px;">
-                    <div class="input-group">
+                <p id="modalDescription" style="color: #aaa; margin-bottom: 20px; font-size: 0.9rem; text-align: center;"></p>
+                
+                <div id="filtersGrid" class="filters-grid" style="display: grid; grid-template-columns: 1fr; gap: 20px;">
+                    
+                    <div id="courseSelectGroup" class="input-group">
                         <label>Select Course</label>
                         <select class="custom-select" id="reportCourseSelect">
                             <option value="all">All Courses</option>
                         </select>
                     </div>
-                    <div class="input-group">
-                        <label>From Date</label>
-                        <input type="date" class="custom-date" id="reportFromDate">
+                    
+                    <div id="dateFiltersGroup">
+                        <div class="input-group" style="margin-bottom: 20px;">
+                            <label>From Date</label>
+                            <input type="date" class="custom-date" id="reportFromDate">
+                        </div>
+                        <div class="input-group">
+                            <label>To Date</label>
+                            <input type="date" class="custom-date" id="reportToDate">
+                        </div>
                     </div>
-                    <div class="input-group">
-                        <label>To Date</label>
-                        <input type="date" class="custom-date" id="reportToDate">
-                    </div>
+
                 </div>
+
                 <div class="popup-footer" style="display: flex; justify-content: center; gap: 15px; margin-top: 25px;">
                     <button id="downloadBtn" class="btn-gen blue" onclick="downloadReport()" style="padding: 10px 30px; border: none; border-radius: 8px; cursor: pointer; color: white;">
                         <i class="fas fa-file-download"></i> Download Report
@@ -122,7 +130,11 @@
             </div>
         </div>
     </div>
-
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    
     <script src="reports-admin-script.js"></script>
 </body>
 </html>

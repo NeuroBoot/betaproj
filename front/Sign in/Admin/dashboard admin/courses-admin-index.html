@@ -10,11 +10,12 @@
     <link rel="stylesheet" href="../../../Responsive/responsive.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        /* ستايلات مخصصة لقائمة الطلاب داخل الـ Edit Modal */
+        /* ستايلات قائمة الطلاب - هتظهر فقط في حالة الـ Edit */
         .students-enrollment-section {
             margin-top: 20px;
             padding-top: 15px;
             border-top: 1px dashed #3f4481;
+            display: none; /* مخفية افتراضياً عند الإضافة */
         }
         .student-list-container {
             background: #1a1c3a;
@@ -31,30 +32,9 @@
             border-bottom: 1px solid #25284b;
         }
         .student-item:last-child { border-bottom: none; }
-        .student-item input[type="checkbox"] {
-            margin-right: 12px;
-            width: 16px;
-            height: 16px;
-            cursor: pointer;
-        }
-        .student-info label {
-            cursor: pointer;
-            display: block;
-            margin-bottom: 0;
-            color: white;
-            font-weight: 500;
-        }
-        .student-info small {
-            color: #8e94a9;
-            display: block;
-        }
-        
-        /* تحسينات الـ Placeholder لتناسب الـ Dark Mode */
-        input::placeholder {
-            color: #8e94a9 !important;
-            opacity: 0.6;
-            font-size: 0.85rem;
-        }
+        .student-info label { color: white; font-weight: 500; cursor: pointer; }
+        .student-info small { color: #8e94a9; display: block; }
+        input::placeholder { color: #8e94a9 !important; opacity: 0.6; }
     </style>
 </head>
 <body class="dark-mode">
@@ -113,8 +93,7 @@
                             <th>Actions</th>
                         </tr>
                     </thead>
-                    <tbody id="coursesTableBody">
-                        </tbody>
+                    <tbody id="coursesTableBody"></tbody>
                 </table>
             </div>
         </main>
@@ -123,7 +102,7 @@
     <div id="courseModal" class="modal">
         <div class="modal-content" style="max-width: 600px;">
             <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 1px solid #3f4481; margin-bottom: 20px;">
-                <h3 id="modalTitle" style="margin: 0;">Add New Course</h3>
+                <h3 id="modalTitle">Add New Course</h3>
                 <span class="close-btn" onclick="closeModal()" style="font-size: 24px; cursor: pointer; color: #8e94a9;">&times;</span>
             </div>
 
@@ -151,7 +130,7 @@
                     </div>
                 </div>
 
-                <div class="students-enrollment-section">
+                <div class="students-enrollment-section" id="enrollmentSection">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <label>Enroll Students</label>
                         <small id="selectedCount" style="color: #4e73df;">0 selected</small>
@@ -161,9 +140,7 @@
                            style="width: 100%; padding: 8px; margin-top: 5px; background: #25284b; border: 1px solid #3f4481; border-radius: 5px; color: white; font-size: 0.9rem;">
                     
                     <div class="student-list-container">
-                        <div id="studentListInside">
-                            <p style="text-align: center; color: #8e94a9; padding: 10px;">Loading student directory...</p>
-                        </div>
+                        <div id="studentListInside"></div>
                     </div>
                 </div>
 

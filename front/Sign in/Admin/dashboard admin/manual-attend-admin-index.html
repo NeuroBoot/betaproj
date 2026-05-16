@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="manual-attend-admin-style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="../../../Responsive/responsive.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body class="dark-mode">
     <button class="mobile-menu-btn" onclick="toggleSidebar()">
@@ -114,9 +115,9 @@
                         </tbody>
                 </table>
                 <div class="popup-footer">
-                    <button class="btn-save-attendance" onclick="saveAttendance()">
-                    <i class="fas fa-save"></i> Save Attendance
-                    </button>
+                   <button id="saveBtn" class="btn-save-attendance" onclick="saveAttendance()">
+    <i class="fas fa-save"></i> Save Attendance
+</button>
                     <button class="btn-cancel-attendance" onclick="closeDetails()">
                             Cancel
                     </button>
