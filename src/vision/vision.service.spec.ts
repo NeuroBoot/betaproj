@@ -96,27 +96,30 @@ describe('VisionService', () => {
 
     it('should return NO_FACE if AI detects no face', async () => {
       const aiResponse = {
-        data: {
+        data: [{
           matchStatus: MatchStatus.NO_FACE_DETECTED,
-          status: 'success',
+          status: 'NO_FACE_DETECTED',
           name: 'N/A',
           match: 0,
           studentId: '0',
           confidenceScore: 0,
           versionOfModel: 'v1.0',
           embedding: ''
-        }
+        }]
       };
       httpService.get.mockReturnValue(of({ data: { status: 'ok' } }));
       httpService.post.mockReturnValue(of(aiResponse));
 
       const result = await service.processAttendanceFrame(mockDto);
-      expect(result.status).toBe('NO_FACE');
+     expect(result.processedFacesCount).toBe(1);
+      expect(result.data).toHaveLength(1);
+      expect(result.data[0].status).toBe('NO_FACE_DETECTED');
+
     });
 
     it('should record attendance if student matches and is enrolled', async () => {
       const aiResponse = {
-        data: {
+        data: [{
           matchStatus: MatchStatus.MATCH,
           studentId: '1',
           name: 'Ziad',
@@ -125,7 +128,7 @@ describe('VisionService', () => {
           versionOfModel: 'v1.0',
           embedding: 'vec123',
           status: 'success'
-        }
+        }]
       };
       httpService.get.mockReturnValue(of({ data: { status: 'ok' } }));
       httpService.post.mockReturnValue(of(aiResponse));
@@ -137,8 +140,10 @@ describe('VisionService', () => {
 
       const result = await service.processAttendanceFrame(mockDto);
       
-      expect(result.status).toBe('RECORDED');
-      expect(result.student.name).toBe('Ziad');
+      expect(result.processedFacesCount).toBe(1);
+      expect(result.data).toHaveLength(1);
+      expect(result.data[0].status).toBe('RECORDED');
+      expect(result.data[0].student.fullName).toBe('Ziad');
       expect(attendanceService.recordAiAttendance).toHaveBeenCalledWith(expect.objectContaining({
         studentId: 1,
         courseId: 101
@@ -147,7 +152,7 @@ describe('VisionService', () => {
 
     it('should return ERROR if attendance service throws (e.g. not enrolled)', async () => {
       const aiResponse = {
-        data: {
+        data: [{
           matchStatus: MatchStatus.MATCH,
           studentId: '1',
           name: 'Ziad',
@@ -156,7 +161,7 @@ describe('VisionService', () => {
           versionOfModel: 'v1.0',
           embedding: 'vec123',
           status: 'success'
-        }
+        }]
       };
       httpService.get.mockReturnValue(of({ data: { status: 'ok' } }));
       httpService.post.mockReturnValue(of(aiResponse));
@@ -165,8 +170,10 @@ describe('VisionService', () => {
 
       const result = await service.processAttendanceFrame(mockDto);
       
-      expect(result.status).toBe('ERROR');
-      expect(result.message).toBe('Student not enrolled');
+      expect(result.processedFacesCount).toBe(1);
+      expect(result.data).toHaveLength(1);
+      expect(result.data[0].status).toBe('ERROR');
+      expect(result.data[0].message).toBe('Student not enrolled');
     });
   });
 });
