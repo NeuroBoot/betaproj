@@ -313,8 +313,12 @@ export class CoursesService {
     if (user.userType === Role.STAFF && course.instructor.userAccountId !== user.userAccountId) {
       throw new ForbiddenException(`Access Denied: You can only view enrollment lists for your own assigned courses.`);
     }
-
-    return (course.enrollments || []).map(e => e.student);
+   // this  for  appear in enroll
+    return (course.enrollments || []).map(e => ({
+    ...e.student,
+    section: e.section,
+    lecture: e.lecture,
+  }));
   }
 
   async unenrollStudent(courseId: number, studentId: number, user: UserAccount): Promise<void> {
