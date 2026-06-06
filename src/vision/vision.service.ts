@@ -26,7 +26,6 @@ export class VisionService {
 
   /**
    * Model 1: Registers student face embeddings by processing multiple images.
-   * Supports batch upload of multiple images for better recognition accuracy.
    */
   async registerStudent(dto: ProcessUploadDto): Promise<BatchUploadResultDto> {
     this.logger.log(`[Model 1] Registering student ${dto.studentId} - ${dto.name} with ${dto.imagesBase64.length} images`);
@@ -156,155 +155,156 @@ export class VisionService {
   /**
    * Model 2: Processes a single camera frame for recognition and marks attendance if enrolled.
    */
-  async processAttendanceFrame(dto: ProcessFrameDto) {
-    this.logger.log(`[Model 2] Processing attendance for course ${dto.courseId}, session ${dto.sessionNumber}`);
+ async processAttendanceFrame(dto: ProcessFrameDto) {
+  this.logger.log(`[Model 2] Processing attendance for course ${dto.courseId}, session ${dto.sessionNumber}`);
 
-    let aiResponse: AiRecognitionResultDto;
-    const startTime = Date.now();
-    
+  let aiResponse: Partial<AiRecognitionResultDto>[];
+  const startTime = Date.now();
+  
+  try {
+    // Check AI service health
+    let healthCheck;
     try {
-      // Check AI service health
-      let healthCheck;
-      try {
-        const response = await firstValueFrom(
-          this.httpService.get(`${this.aiServiceUrl}/health`)
-        );
-        healthCheck = response;
-      } catch (error) {
-        healthCheck = null;
-      }
-      
-      if (!healthCheck) {
-        throw new BadGatewayException('AI service is not running. Please start the FastAPI server on port 8000');
-      }
-
       const response = await firstValueFrom(
-        this.httpService.post(`${this.aiServiceUrl}/recognize`, {
-          image_base64: dto.imageBase64,
-          confidence_threshold: dto.confidenceThreshold || 0.7,
-        }, { timeout: 60000 })
+        this.httpService.get(`${this.aiServiceUrl}/health`)
       );
-      aiResponse = response.data;
+      healthCheck = response;
     } catch (error) {
-      const aiErrorDetail = error.response?.data ? JSON.stringify(error.response.data) : error.message;
-      this.logger.error(`[Model 2] AI service error: ${aiErrorDetail}`);
-      throw new BadGatewayException(`AI service unreachable: ${aiErrorDetail}`);
+      healthCheck = null;
+    }
+    
+    if (!healthCheck) {
+      throw new BadGatewayException('AI service is not running. Please start the FastAPI server on port 8000');
     }
 
-    const processingTime = Date.now() - startTime;
+    const response = await firstValueFrom(
+      this.httpService.post(`${this.aiServiceUrl}/recognize`, {
+        image_base64: dto.imageBase64,
+        confidence_threshold: dto.confidenceThreshold || 0.7,
+      }, { timeout: 60000 })
+    );
 
-    // Manual validation of AI response
-    let rawMatch = aiResponse['match'] ?? aiResponse['similarity'] ?? aiResponse['confidenceScore'] ?? 0;
-    // Sanitize NaN or non-number values
+    aiResponse = Array.isArray(response.data) ? response.data : [response.data];
+  } catch (error) {
+    const aiErrorDetail = error.response?.data ? JSON.stringify(error.response.data) : error.message;
+    this.logger.error(`[Model 2] AI service error: ${aiErrorDetail}`);
+    throw new BadGatewayException(`AI service unreachable: ${aiErrorDetail}`);
+  }
+
+  // ─── STEP 1: VALIDATE ENTIRE INCOMING WRAPPER RESPONSE ───
+  if (!aiResponse || !Array.isArray(aiResponse)) {
+    this.logger.error(`[Model 2] Invalid AI response wrapper: ${JSON.stringify(aiResponse)}`);
+    throw new BadGatewayException(
+      `AI Response Error: The vision service returned an incompatible payload structure or failed to communicate.`
+    );
+  }
+
+  const finalResults = [];
+
+  // ─── STEP 2: MULTI-FACE ARRAYS PROCESSING LOOP ───
+  for (const face of aiResponse) {
+    let rawMatch = face['match'] ?? face['similarity'] ?? face['confidenceScore'] ?? face['confidence'] ?? 0;
     let sanitizedMatch = (typeof rawMatch === 'number' && !isNaN(rawMatch)) ? rawMatch : parseFloat(String(rawMatch));
     if (isNaN(sanitizedMatch)) sanitizedMatch = 0;
-    // Clamp between 0 and 1
     sanitizedMatch = Math.max(0, Math.min(1, sanitizedMatch));
 
     const resultDto = plainToInstance(AiRecognitionResultDto, {
-      ...aiResponse,
+      ...face,
       match: sanitizedMatch,
+      confidenceScore: sanitizedMatch, 
     });
+
     const errors = await validate(resultDto);
     if (errors.length > 0) {
-      this.logger.error(`[Model 2] Invalid AI response: ${JSON.stringify(errors)}`);
-      throw new BadGatewayException(`AI Response Error: The vision service returned an incompatible payload structure. Details: ${JSON.stringify(errors[0].constraints)}`);
+      this.logger.error(`[Model 2] Invalid face element skipped: ${JSON.stringify(errors)}`);
+      continue; 
     }
 
-    // Handle different match statuses
+    // Handle No Face Detected Case
     if (resultDto.matchStatus === MatchStatus.NO_FACE_DETECTED) {
-      return {
-        status: 'NO_FACE',
-        message: 'No face detected in the frame. Please ensure your face is clearly visible.',
+      finalResults.push({
+        status: 'NO_FACE_DETECTED',
+        message: 'No face detected in the frame.',
         matchStatus: MatchStatus.NO_FACE_DETECTED,
-        processingTimeMs: processingTime,
-      };
-    }
-
-    if (resultDto.matchStatus === MatchStatus.MULTIPLE_FACES) {
-      return {
-        status: 'MULTIPLE_FACES',
-        message: 'Multiple faces detected. Please ensure only one person is in the frame.',
-        matchStatus: MatchStatus.MULTIPLE_FACES,
-        processingTimeMs: processingTime,
-      };
-    }
-
-    if (resultDto.matchStatus === MatchStatus.NO_MATCH) {
-      return {
-        status: 'NO_MATCH',
-        message: `No matching student found. Confidence: ${(resultDto.confidenceScore * 100).toFixed(1)}%`,
-        matchStatus: MatchStatus.NO_MATCH,
-        confidence: resultDto.confidenceScore,
-        processingTimeMs: processingTime,
-      };
-    }
-
-    // If MATCH, record attendance
-    try {
-      // Verify student exists and is enrolled
-      const studentIdNum = parseInt(resultDto.studentId);
-      const student = await this.userRepo.findById(studentIdNum);
-      if (!student) {
-        return {
-          status: 'STUDENT_NOT_FOUND',
-          message: `Student with ID ${resultDto.studentId} not found in database. Please register this student first.`,
-          student: { id: resultDto.studentId, name: resultDto.name },
-          processingTimeMs: processingTime,
-        };
-      }
-
-      const result = await this.attendanceService.recordAiAttendance({
-        studentId: studentIdNum,
-        courseId: dto.courseId,
-        sessionType: dto.sessionType,
-        sessionNumber: dto.sessionNumber,
-        room: dto.room || 'AI Vision',
-        confidenceScore: resultDto.confidenceScore,
-        matchStatus: resultDto.matchStatus,
-        sessionId: dto.sessionId,
-        processingTimeMs: processingTime,
+        confidence: sanitizedMatch,
       });
+      continue;
+    }
 
-      this.logger.log(`[Model 2] Successfully processed attendance: ${result.status} for student ${resultDto.studentId}`);
+    // Handle Unknown Individual Case
+    if (resultDto.matchStatus === MatchStatus.NO_MATCH) {
+      finalResults.push({
+        status: 'NO_MATCH',
+        message: `Unknown individual. Confidence: ${(sanitizedMatch * 100).toFixed(1)}%`,
+        matchStatus: MatchStatus.NO_MATCH,
+        confidence: sanitizedMatch, 
+      });
+      continue;
+    }
 
-      return {
-        status: result.status,
-        message: result.status === 'RECORDED' 
-          ? `✅ Attendance marked successfully for ${resultDto.name} with ${(resultDto.confidenceScore * 100).toFixed(1)}% confidence`
-          : `⚠️ Attendance already marked for ${resultDto.name} today`,
-        student: {
-          id: resultDto.studentId,
-          name: resultDto.name,
-          match: resultDto.match,
-          confidence: resultDto.confidenceScore
-        },
-        session: {
+    // Handle Valid Match Cases
+    if (resultDto.matchStatus === MatchStatus.MATCH) {
+      try {
+        const studentIdNum = parseInt(resultDto.studentId);
+        const student = await this.userRepo.findById(studentIdNum);
+        
+        if (!student) {
+          finalResults.push({
+            status: 'NOT_REGISTERED',
+            message: `Student ID ${resultDto.studentId} not found in DB.`,
+            student: { id: resultDto.studentId, name: resultDto.name },
+          });
+          continue;
+        }
+
+        const currentExecutionDelta = Date.now() - startTime;
+
+        const result = await this.attendanceService.recordAiAttendance({
+          studentId: studentIdNum,
           courseId: dto.courseId,
-          type: dto.sessionType,
-          number: dto.sessionNumber,
-          room: dto.room
-        },
-        aiModel: {
-          version: resultDto.versionOfModel,
-          matchStatus: resultDto.matchStatus
-        },
-        processingTimeMs: processingTime,
-        record: result.record
-      };
-    } catch (error) {
-      this.logger.error(`[Model 2] Attendance recording error: ${error.message}`);
-      return {
-        status: 'ERROR',
-        message: error.message,
-        student: {
-          id: resultDto.studentId,
-          name: resultDto.name
-        },
-        processingTimeMs: processingTime,
-      };
+          sessionType: dto.sessionType,
+          sessionNumber: dto.sessionNumber,
+          room: dto.room || 'AI Vision',
+          confidenceScore: sanitizedMatch, 
+          matchStatus: resultDto.matchStatus,
+          sessionId: dto.sessionId,
+          processingTimeMs: currentExecutionDelta,
+        });
+
+        this.logger.log(`[Model 2] Successfully processed attendance: ${result.status} for student ${resultDto.studentId}`);
+
+        finalResults.push({
+          status: result.status.toUpperCase(),
+          message: result.status === 'RECORDED' 
+            ? `✅ Attendance marked successfully for ${resultDto.name}`
+            : `⚠️ Attendance already marked for ${resultDto.name} today`,
+          student: { 
+            id: resultDto.studentId, 
+            fullName: student.fullName || resultDto.name,
+            confidence: sanitizedMatch 
+          },
+          record: result.record
+        });
+      } catch (error) {
+        this.logger.error(`[Model 2] Error during ID verification process.for ID ${resultDto.studentId}: ${error.message}`);
+        finalResults.push({ 
+          status: 'ERROR', 
+          message: error.message, 
+          studentId: resultDto.studentId 
+        });
+      }
     }
   }
+
+  const trueTotalProcessingTime = Date.now() - startTime;
+
+  return {
+    processedFacesCount: finalResults.length,
+    processingTimeMs: trueTotalProcessingTime, 
+    data: finalResults, 
+  };
+}
+
 
   /**
    * Check if AI service is healthy
