@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Manual Attendance | FACEMARK</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+  
+  <style>
+body{
+  margin:0;
+  background:#0f0c29;
+  color:#ffffff;
+  min-height:100vh;
+  font-family:"Segoe UI",sans-serif;
+  overflow-x:hidden;
+}
+
+.sidebar{
+  background:#15132b;
+  min-height:100vh;
+  padding:20px;
+  border-right:1px solid rgba(255,255,255,0.05);
+}
+
+    .brand {
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+
+    .user-box {
+      background: linear-gradient(135deg, #1f2547, #2a2f5a);
+      border-radius: 14px;
+      padding: 14px;
+      margin: 18px 0 24px;
+    }
+
+    .user-box small {
+      color: #aab0ff;
+      font-size: 13px;
+    }
+
+    .user-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+      margin: 4px 0;
+    }
+
+    .sidebar .nav-link {
+      color: #bfc4ff;
+      margin-bottom: 10px;
+      border-radius: 10px;
+      padding: 10px 14px;
+    }
+
+    .sidebar .nav-link.active,
+    .sidebar .nav-link:hover {
+      background: #2b5cff;
+      color: #fff;
+    }
+
+    /* Panel */
+    .panel{
+      background:linear-gradient(135deg,#1e2345,#2c2f6a);
+      border-radius:24px;
+      padding:26px;
+      margin-bottom:26px;
+    }
+
+    /* Inputs */
+    .form-control,
+    .form-select{
+      background:rgba(255,255,255,0.12);
+      border:1px solid rgba(255,255,255,0.18);
+      color:#fff;
+      border-radius:12px;
+    }
+
+    .form-control::placeholder{
+      color:#c7c9ff;
+    }
+
+    .form-control:focus,
+    .form-select:focus{
+      outline:none;
+      box-shadow:none;
+      border-color:#4f46e5;
+      background:rgba(255,255,255,0.15);
+      color:#fff;
+    }
+
+    /* Header */
+    .attendance-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:18px;
+    }
+
+    .search-input{
+      background:rgba(255,255,255,0.12);
+      border:1px solid rgba(255,255,255,0.18);
+      border-radius:12px;
+      padding:8px 14px;
+      color:#fff;
+      width:220px;
+    }
+
+.dark-input {
+  background: rgba(0, 0, 0, 0.6);
+  color: #e5e7eb;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  height: 44px;
+  padding: 10px 12px;
+}
+
+.dark-input:focus {
+  outline: none;
+  box-shadow: none;
+  border-color: #4f46e5;
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.dark-input::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  opacity: 0.7;
+  cursor: pointer;
+}
+
+    /* Table */
+    .attendance-table{
+      width:100%;
+      border-collapse:collapse;
+      color:#e5e7eb;
+    }
+
+    .attendance-table thead th{
+      padding:14px 10px;
+      font-size:14px;
+      font-weight:600;
+      color:#dbe0ff;
+      border-bottom:1px solid rgba(255,255,255,0.12);
+    }
+
+    .attendance-table tbody td{
+      padding:14px 10px;
+      border-bottom:1px solid rgba(255,255,255,0.06);
+    }
+
+    .attendance-table tbody tr:hover{
+      background:rgba(255,255,255,0.03);
+    }
+
+    /* Status */
+    .status{
+      padding:6px 16px;
+      border-radius:999px;
+      font-size:13px;
+      font-weight:500;
+      display:inline-block;
+    }
+
+    .present{ background:#14532d; color:#4ade80; }
+    .absent{ background:#581c1c; color:#f87171; }
+    .late{ background:#713f12; color:#facc15; }
+
+    .action-cell{ text-align:right; }
+
+    .action-select{
+      background:rgba(255,255,255,0.12);
+      border:1px solid rgba(255,255,255,0.18);
+      border-radius:10px;
+      color:#fff;
+      padding:6px 12px;
+    }
+
+    /* Buttons */
+    .load-btn{
+      background:linear-gradient(135deg,#2563eb,#4f46e5);
+      border:none;
+      color:#fff;
+      border-radius:14px;
+      padding:10px 30px;
+      width:180px;
+    }
+
+    .save-btn{
+      margin-top:22px;
+      background:linear-gradient(135deg,#2563eb,#4f46e5);
+      border:none;
+      color:#fff;
+      border-radius:14px;
+      padding:10px 30px;
+    }
+
+    body {
+      background: #0f0c29;
+  color: #ffffff;
+       min-height: 100vh;
+  font-family: "Segoe UI", sans-serif;
+    }
+
+    /*  Manual Card  */
+    .manual-card {
+    background: #1a1a3a;
+  border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 22px;
+      padding: 26px 28px;
+      margin-bottom: 30px;
+    
+    }
+
+    .manual-card h4 {
+      margin-bottom: 22px;
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    .manual-card .form-label {
+      color: #b0b0b0;
+      font-size: 13px;
+      margin-bottom: 6px;
+      display: block;
+    }
+.attendance-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table-wrapper {
+  max-height: 350px;
+  overflow-y: auto;
+}
+    .manual-input {
+      width: 100%;
+      height: 46px;
+      padding: 10px 14px;
+      border-radius: 14px;
+     
+       background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: #ffffff;
+      font-size: 14px;
+      appearance: none;
+    }
+
+    .manual-input:focus {
+      outline: none;
+     border-color: #3060ff;
+  background: rgba(255,255,255,0.06);
+    }
+
+    /* Select arrow */
+    select.manual-input {
+      background-image:
+        linear-gradient(45deg, transparent 50%, #cbd5e1 50%),
+        linear-gradient(135deg, #cbd5e1 50%, transparent 50%);
+      background-position:
+        calc(100% - 18px) 19px,
+        calc(100% - 13px) 19px;
+      background-size: 5px 5px, 5px 5px;
+      background-repeat: no-repeat;
+    }
+.table-wrapper {
+  overflow-x: auto;
+}
+.attendance-table {
+  min-width: 700px;
+}
+@media (max-width: 768px) {
+
+  .attendance-header {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .manual-card {
+    padding: 20px;
+  }
+
+  .panel {
+    padding: 18px;
+  }
+
+}
+    select.manual-input option {
+      background-color: #1e293b;
+      color: #ffffff;
+    }
+
+    select.manual-input option:hover {
+      background-color: #312e81;
+    }
+
+    .manual-input::-webkit-calendar-picker-indicator {
+      filter: invert(1);
+      opacity: 0.7;
+      cursor: pointer;
+    }
+
+    /*  Buttons  */
+    .load-btn,
+    .save-btn {
+      background: #3060ff;
+  color: #fff;
+      border: none;
+      padding: 10px 22px;
+      border-radius: 14px;
+      font-weight: 500;
+    }
+
+    .load-btn:hover,
+    .save-btn:hover {
+       background: #244ce0;
+    }
+
+    /*  Panel & Table */
+    .panel {
+      background: #1a1a3a;
+  border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 20px;
+      padding: 22px;
+    }
+
+    .attendance-header h5 {
+      color: #ffffff;
+    }
+
+    .search-input {
+       background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: #fff;
+      border-radius: 12px;
+      padding: 8px 14px;
+    }
+
+    .attendance-table th {
+      color: #b0b0b0;
+    }
+
+    .attendance-table td {
+      color: #ffffff;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container-fluid">
+  <div class="row">
+<!-- Mobile Toggle -->
+<button class="btn btn-dark d-md-none m-3" type="button" 
+        data-bs-toggle="collapse" 
+        data-bs-target="#sidebarMenu">
+  <i class="bi bi-list"></i>
+</button>
+    <!-- Sidebar -->
+  <div class="col-md-2 collapse d-md-block sidebar" id="sidebarMenu">
+      <h5 class="mb-4"><img src="../Images/face.jpeg"  alt="" width="50px" height="50px"> FACEMARK</h5>
+      <p class="small text-muted " style="color:white !important">Staff Portal</p>
+
+      <div class="user-box">
+        <small>Welcome,</small>
+         <div class="user-name">guest1</div>
+        <small>Staff Portal</small>
+      </div>
+
+      <ul class="nav flex-column">
+        <li class="nav-item"><a class="nav-link" href="staffdashboard.html"><i class="bi bi-grid"></i> Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link active" href="#"><i class="bi bi-person-check"></i> Manual Attendance</a></li>
+        <li class="nav-item"><a class="nav-link" href="face-capture.html"><i class="bi bi-camera"></i> Face Capture</a></li>
+        <li class="nav-item"><a class="nav-link" href="charts.html"><i class="bi bi-bar-chart"></i> Charts & Reports</a></li>
+        <li class="nav-item"><a class="nav-link" href="export.html"><i class="bi bi-download"></i> Export</a></li>
+        <li class="nav-item"><a class="nav-link" href="alerts.html"><i class="bi bi-bell"></i> Alerts</a></li>
+      </ul>
+      <hr class="text-secondary">
+
+<button id="logoutBtn" class="btn btn-danger w-100 mt-2">
+    <i class="bi bi-box-arrow-right"></i> Sign Out
+</button>
+    </div>
+
+
+    <div class="col-12 col-md-10 p-3 p-md-4">
+      <!-- Manual Attendance -->
+      <div class="manual-card">
+        <h4>Manual Attendance</h4>
+
+       <div class="row g-4 align-items-end">
+  <div class="col-md-6">
+    <label class="form-label">Course</label>
+    <select class="manual-input" id="courseSelect"></select>
+  </div>
+  <div class="col-md-6">
+    <label class="form-label">Type</label>
+    <select class="manual-input" id="typeSelect">
+      <option value="">Select Type</option>
+      <option value="section">Section</option>
+      <option value="Lecture">Lecture</option>
+    </select>
+  </div>
+  <div class="col-md-6">
+    <label class="form-label">Section</label>
+    <select class="manual-input" name="section" id="sectionSelect"></select>
+  </div>
+  <div class="col-md-6">
+    <label class="form-label">Date</label>
+    <input type="date" class="manual-input" id="dateInput">
+  </div>
+  <div class="col-md-12">
+    <button class="load-btn">Load Attendance</button>
+  </div>
+</div>
+      </div>
+
+     
+
+    </div>
+  </div>
+</div>
+<!-- Attendance Modal -->
+<div class="modal fade" id="attendanceModal" tabindex="-1">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content" style="background:#1a1a3a; color:#fff; border-radius:20px;">
+
+      <div class="modal-header border-0">
+        <h5 class="modal-title">Manage Attendance</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <div class="table-wrapper">
+          <table class="attendance-table">
+            <thead>
+              <tr>
+                <th>Student ID</th>
+                <th>Name</th>
+                <th>Status</th>
+                <th>Time</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="modalTbody"></tbody>
+          </table>
+        </div>
+
+      </div>
+
+      <div class="modal-footer border-0">
+    <button class="btn btn-success" id="saveBtn">Save Attendance</button>
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+<script>
+const API_BASE_URL = 'http://localhost:3000/api/v1';
+
+document.addEventListener("DOMContentLoaded", function () {
+
+  const logoutBtn = document.getElementById('logoutBtn');
+  const loadBtn = document.querySelector(".load-btn");
+  const saveBtn = document.getElementById("saveBtn"); 
+
+  const usernameEl = document.querySelector(".user-name");
+  const courseSelect = document.getElementById("courseSelect");
+  const typeSelect = document.getElementById("typeSelect")
+  const sectionSelect = document.querySelector("select[name='section']");
+  const dateInput = document.querySelector("input[type='date']");
+  let currentInstructorId = ""; // id instruct
+  
+  saveBtn.addEventListener("click", saveAttendance);
+
+  let loadedAttendance = [];
+
+  // UserName
+  const savedUsername = localStorage.getItem("loggedUser");
+  if (savedUsername) {
+    usernameEl.textContent = savedUsername;
+  }
+
+  // Token
+  function getToken() {
+    return localStorage.getItem('token');
+  }
+
+  function authHeaders() {
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${getToken()}`
+    };
+  }
+
+  function redirectToLogin() {
+    localStorage.clear();
+    window.location.href = "./sign in/index.html";
+  }
+
+  // Profile
+ async function loadProfile() {
+
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    showAlert("Login first", "error");
+    window.location.href = "../sign in/index.html";
+    return;
+  }
+
+  try {
+
+    const res = await fetch("http://localhost:3000/api/v1/auth/profile", {
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    });
+
+    const text = await res.text();
+    console.log("RAW:", text);
+
+    let result;
+    try {
+      result = JSON.parse(text);
+    } catch {
+      throw new Error("Invalid JSON");
+    }
+
+    console.log("RESULT:", result);
+    const user =
+      result.data?.user ||
+      result.data ||
+      result.user ||
+      result;
+
+    console.log("USER:", user);
+
+    const role = user.role || user.userType;
+
+    if (!user || !role) {
+      throw new Error("User or role missing");
+    }
+
+    document.querySelector(".user-name").textContent =
+      user.username || "Staff";
+    currentInstructorId = user.id || user.userAccountId || user.userId || "";
+    if (role.toLowerCase() !== "staff") {
+      showAlert("Staff only", "error");
+      localStorage.clear();
+      window.location.href = "../sign in/index.html";
+    }
+
+  } catch (err) {
+
+    console.error("ERROR:", err);
+    showAlert(err.message, "error");
+
+    localStorage.clear();
+    window.location.href = "../sign in/index.html";
+  }
+}
+
+  //Load Courses
+  async function loadCourses() {
+    try {
+      const res = await fetch(`${API_BASE_URL}/courses`, {
+        headers: authHeaders()
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error();
+
+      const courses = data.data || data;
+
+      courseSelect.innerHTML = `<option value="">Select Course</option>`;
+
+     courses.forEach(c => {
+  courseSelect.innerHTML += `
+   <option value="${c.courseId || c.id}">
+      ${c.name || c.title}
+    </option>
+  `;
+});
+
+    } catch (err) {
+      console.error("Courses error:", err);
+    }
+  }
+
+  // Load Sections
+async function loadSections(courseId) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/courses/${courseId}`, {
+      headers: authHeaders()
+    });
+
+    const data = await res.json();
+    const course = data.data || data;
+
+    const totalSections = course.sections || 0;
+
+    sectionSelect.innerHTML = `<option value="">Select Section</option>`;
+
+    for (let i = 1; i <= totalSections; i++) {
+      sectionSelect.innerHTML += `
+        <option value="${i}">Section ${i}</option>
+      `;
+    }
+
+  } catch (err) {
+    console.error("Sections error:", err);
+  }
+}
+  // LOAD STUDENTS
+  async function loadStudents(courseId) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/courses/${courseId}/students`, {
+        headers: authHeaders()
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error();
+
+      return data.data || [];
+
+    } catch (err) {
+      console.error("Students error:", err);
+      return [];
+    }
+  }
+
+  // Render 
+  function renderAttendanceRows(students) {
+  tbody.innerHTML = "";
+
+  if (!students.length) {
+    tbody.innerHTML = `<tr><td colspan="5">No data</td></tr>`;
+    return;
+  }
+
+  students.forEach(s => {
+    const row = document.createElement("tr");
+
+    row.setAttribute("data-record-id", s.recordId || "");
+    row.innerHTML = `
+   <td>${s.studentId}</td>
+   <td>${s.name}</td>
+   <td>${s.status}</td>
+   <td>${s.time}</td>
+   <td>
+     <select class="manual-input status-dropdown-selector">
+      <option value="Present" ${s.status === "Present" ? "selected" : ""}>Present</option>
+      <option value="Absent" ${s.status === "Absent" ? "selected" : ""}>Absent</option>
+      <option value="Late" ${s.status === "Late" ? "selected" : ""}>Late</option>
+     </select>
+    </td>
+    `;
+
+     tbody.appendChild(row);
+     });
+      }
+
+
+function renderModal() {
+
+  modalTbody.innerHTML = "";
+
+  if (!loadedAttendance.length) {
+    modalTbody.innerHTML = `
+      <tr>
+        <td colspan="5" style="text-align:center">No data</td>
+      </tr>
+    `;
+    return;
+  }
+
+  loadedAttendance.forEach(s => {
+
+    const row = document.createElement("tr");
+    
+    row.setAttribute("data-record-id", s.recordId);
+    row.setAttribute("data-student-id", s.studentId || ""); 
+    row.setAttribute("data-initial-status", s.status); 
+    row.innerHTML = `
+      <td>${s.studentId}</td>
+      <td>${s.name}</td>
+      <td>${s.status}</td>
+      <td>${s.time}</td>
+      <td>
+        <select class="manual-input status-dropdown-selector">
+          <option value="Present" ${s.status === "Present" ? "selected" : ""}>Present</option>
+          <option value="Absent" ${s.status === "Absent" ? "selected" : ""}>Absent</option>
+          <option value="Late" ${s.status === "Late" ? "selected" : ""}>Late</option>
+        </select>
+      </td>
+    `;
+
+    modalTbody.appendChild(row);
+  });
+}
+  // LOAD ATTENDANCE 
+const modal = new bootstrap.Modal(document.getElementById('attendanceModal'));
+const modalTbody = document.getElementById("modalTbody");
+const tbody = modalTbody; 
+function showAlert(message, type = "success") {
+  Swal.fire({
+    text: message,
+    icon: type, // success | error | warning | info
+    background: "#1a1a3a",
+    color: "#fff",
+    confirmButtonColor: "#3060ff",
+    confirmButtonText: "OK",
+    showClass: {
+      popup: "animate__animated animate__zoomIn"
+    },
+    hideClass: {
+      popup: "animate__animated animate__fadeOut"
+    }
+  });
+}
+
+async function loadAttendance() {
+
+if (!courseSelect.value || !sectionSelect.value || !dateInput.value) {
+  showNoData("Please select all fields");
+  return;
+}
+
+try {
+
+const studentRes = await fetch(`${API_BASE_URL}/courses/${courseSelect.value}/students`, { headers: authHeaders() });
+const studentData = await studentRes.json();
+const completeRoster = studentData.data || studentData || [];
+//Fetch today
+const url = `${API_BASE_URL}/attendance?page=1&limit=100&courseId=${courseSelect.value}&sessionNumber=${sectionSelect.value}&date=${dateInput.value}`;
+const logRes = await fetch(url, { headers: authHeaders() });
+let loggedRecords = logRes.ok ? (await logRes.json())?.data?.data || [] : [];
+
+loadedAttendance = completeRoster.map(student => {
+  const rosterStudentId = student.userAccountId || student.id || student.studentId;
+  const rosterStudentName = student.username || student.fullName || student.name || "Enrolled Student";
+
+  //if this student has a log for today
+  const matchedLog = loggedRecords.find(log => String(log.student?.userAccountId || log.studentId) === String(rosterStudentId));
+
+  if (matchedLog) {
+    return {
+      recordId: matchedLog.recordId || "",
+      studentId: rosterStudentId,
+      name: rosterStudentName,
+      status: matchedLog.attendanceStatusId == 1 ? "Present" : matchedLog.attendanceStatusId == 2 ? "Absent" : "Late",
+      time: matchedLog.checkInTime ? matchedLog.checkInTime.substring(0, 5) : "--"
+    };
+  } else {
+    return { recordId: "", studentId: rosterStudentId, name: rosterStudentName, status: "Absent", time: "--" };
+  }
+});
+
+renderModal();
+modal.show();
+
+}
+catch(err){
+console.error(err);
+showNoData("Failed to load data");
+}
+}
+
+function showNoData(message){
+
+modalTbody.innerHTML = `
+<tr>
+  <td colspan="5" style="text-align:center; padding:30px; color:#aaa;">
+    <i class="bi bi-exclamation-circle" style="font-size:22px;"></i><br>
+    ${message}
+  </td>
+</tr>
+`;
+
+modal.show();
+}
+
+ async function saveAttendance() {
+  const rows = tbody.querySelectorAll("tr");
+  if (!rows.length) return;
+
+  saveBtn.disabled = true;
+
+  const currentCourseId = courseSelect.value;
+  const currentSessionNumber = String(sectionSelect.value);
+  const currentSessionType = String(typeSelect.value).toUpperCase() || "SECTION";
+  const currentSelectedDate = dateInput.value;
+const currentLocalTime = new Date().toTimeString().substring(0, 5);
+  try {
+    let createdRecordsCount = 0;
+    let updatedRecordsCount = 0;
+    let skippedUnchangedCount = 0;
+    for (let row of rows) {
+      const recordId = row.getAttribute("data-record-id");
+      const studentId = row.getAttribute("data-student-id");
+      const initialStatus = row.getAttribute("data-initial-status"); //
+      const statusText = row.querySelector(".status-dropdown-selector").value;
+      if (recordId && initialStatus === statusText) {
+        skippedUnchangedCount++;
+        continue;
+      }
+      let attendanceStatusId =
+        statusText === "Present" ? 1 :
+        statusText === "Absent" ? 2 :   
+        statusText === "Late" ? 3 : 1; 
+
+      const payload = {
+        studentId: studentId,
+        courseId: currentCourseId,
+        attendanceStatusId: attendanceStatusId,
+        recordDate: currentSelectedDate,
+        sessionType: currentSessionType,
+        sessionNumber: currentSessionNumber,
+        markedBy: currentInstructorId, 
+        checkInTime: currentLocalTime
+      };
+
+      // Get Data
+     let targetUrl = `${API_BASE_URL}/attendance`;
+      let protocolMethod = "POST"; 
+
+       if (recordId && recordId.trim() !== "" && recordId !== "undefined") {
+          targetUrl = `${API_BASE_URL}/attendance/${recordId}`;
+          protocolMethod = "PUT"; 
+          
+          delete payload.studentId;
+          delete payload.courseId;
+          delete payload.markedBy;
+       }
+       const res = await fetch(targetUrl, {
+        method: protocolMethod,
+        headers: authHeaders(),
+        body: JSON.stringify(payload)
+        });
+      if (!res.ok) {
+        const errorLog = await res.json();
+        throw new Error(errorLog.message || "Failed processing attendance collection items.");
+      }
+
+      if (protocolMethod === "POST") {
+        createdRecordsCount++;
+      } else {
+        updatedRecordsCount++;
+      }
+    }
+
+    showAlert(`Attendance process completed!\n• Saved: ${createdRecordsCount} new logs.\n• Updated: ${updatedRecordsCount} modifications.\n• Skipped: ${skippedUnchangedCount} unchanged rows.`, "success");
+    modal.hide();
+
+    } catch (err) {
+    console.error("Attendance synchronization processing failed:", err);
+    showAlert(err.message || "Unable to fully capture and log administrative record lists.", "error");
+    } finally {
+    saveBtn.disabled = false;
+    }
+   }
+
+  // Events
+  courseSelect.addEventListener("change", () => {
+    if (courseSelect.value) {
+      loadSections(courseSelect.value);
+    }
+  });
+
+  loadBtn.addEventListener("click", loadAttendance);
+
+  logoutBtn.addEventListener("click", () => {
+  Swal.fire({
+        text: "Logged out successfully",
+        icon: "success",
+        background: "#1a1a3a",
+        color: "#fff",
+        confirmButtonColor: "#3060ff",
+        confirmButtonText: "OK"
+    }).then(() => {
+        window.location.href = "../sign in/index.html";
+    });
+  });
+
+  loadProfile();
+  loadCourses();
+
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
