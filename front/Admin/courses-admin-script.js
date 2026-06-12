@@ -86,8 +86,21 @@ document.addEventListener('DOMContentLoaded', async function() {
             e.preventDefault();
             const courseId  = document.getElementById('enrollCourseId').value;
             const studentId = document.getElementById('studentSelect').value;
-
-    
+            const alreadyEnrolled = Array.from(
+           document.querySelectorAll('#enrolledStudentsBody tr td:first-child')
+           ).map(td => td.textContent.trim());
+            if (alreadyEnrolled.includes(String(studentId))) {
+              Swal.fire({
+             icon: 'warning',
+             title: 'Already Enrolled',
+           text: 'This student is already in this course.',
+               confirmButtonColor: '#3085d6'
+                });
+               return;
+           }
+            
+              const submitBtn = enrollForm.querySelector('button[type="submit"]');
+              submitBtn.disabled = true;
               const section = document.getElementById('enrollSection').value.trim();
               const lecture = document.getElementById('enrollLecture').value.trim();
 
@@ -95,7 +108,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                if (section) enrollData.section = section;
                if (lecture) enrollData.lecture = lecture;
 
-            console.log('📤 Enroll payload:', enrollData);
+            console.log(' Enroll payload:', enrollData);
 
             try {
                 const response = await fetch(`${API_BASE_URL}/courses/${courseId}/students`, {
@@ -132,6 +145,8 @@ document.addEventListener('DOMContentLoaded', async function() {
             } catch (error) {
                 console.error('Enroll error:', error);
                 Swal.fire({ icon: 'error', title: 'Error', text: 'Server connection failed.' });
+            }finally {
+             submitBtn.disabled = false; 
             }
         };
     }
