@@ -298,29 +298,37 @@ async function downloadReport() {
 
         // DOWNLOAD FILE
   
-        const blob = new Blob(
-            [html],
-            { type: 'text/html' }
-        );
+         const { jsPDF } = window.jspdf;
+         const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
 
-        const url =
-            URL.createObjectURL(blob);
+        doc.setFontSize(16);
+        doc.setTextColor(40);
+        doc.text(`Attendance Report`, 14, 16);
+       doc.setFontSize(10);
+       doc.text(`From: ${fromDate}   To: ${toDate}`, 14, 24);
 
-        const a =
-            document.createElement('a');
+     const tableData = records.map(r => ([
+       r.student?.username || 'N/A',
+       r.student?.email || 'N/A',
+      String(r.courseId),
+      r.room || 'N/A',
+      r.recordDate?.split('T')[0] || '-',
+      r.checkInTime || '-',
+      statusLabel[r.attendanceStatusId] || '-'
+     ]));
 
-        a.href = url;
+     doc.autoTable({
+       startY: 30,
+       head: [['Student', 'Email', 'Course', 'Room', 'Date', 'Check In', 'Status']],
+       body: tableData,
+       theme: 'grid',
+       styles: { fontSize: 9, cellPadding: 3 },
+       headStyles: { fillColor: [43, 92, 255], textColor: 255, fontStyle: 'bold' },
+       alternateRowStyles: { fillColor: [245, 247, 250] },
+       margin: { left: 10, right: 10 }
+        });
 
-        a.download =
-            `attendance-report-${Date.now()}.html`;
-
-        document.body.appendChild(a);
-
-        a.click();
-
-        a.remove();
-
-        URL.revokeObjectURL(url);
+doc.save(`attendance-report-${Date.now()}.pdf`);
 
         // UPDATE RECENT
 
@@ -331,7 +339,7 @@ async function downloadReport() {
             date:
                 new Date().toISOString(),
             size:
-                `${(blob.size / 1024).toFixed(2)} KB`
+                `PDF`
         });
 
         Swal.fire(
@@ -452,23 +460,35 @@ async function generatePerformanceReport() {
   
         // DOWNLOAD FILE
 
-        const blob = new Blob([html], {
-            type: "text/html"
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+       doc.setFontSize(18);
+       doc.setTextColor(40);
+       doc.text('Attendance Performance Summary', 14, 20);
+
+       doc.autoTable({
+        startY: 30,
+         head: [['Metric', 'Count', 'Percentage']],
+         body: [
+          ['Total Records', String(total), '100%'],
+         ['Present',       String(present), `${presentPercent}%`],
+          ['Absent',        String(absent),  `${absentPercent}%`],
+          ['Late',          String(late),    `${latePercent}%`]
+           ],
+         theme: 'grid',
+        styles: { fontSize: 12, cellPadding: 5 },
+        headStyles: { fillColor: [43, 92, 255], textColor: 255, fontStyle: 'bold' },
+        alternateRowStyles: { fillColor: [245, 247, 250] },
+        margin: { left: 14, right: 14 }
         });
 
-        const url = URL.createObjectURL(blob);
-
-       const a = document.createElement("a");
-      a.href = url;
-      a.download = `performance-summary-${Date.now()}.html`;
-       document.body.appendChild(a); 
-       a.click();                   
-       a.remove();                  
-      URL.revokeObjectURL(url);
+      doc.save(`performance-summary-${Date.now()}.pdf`);
+        
       addRecentReport({
             name: 'Performance Report',
             date: new Date().toISOString(),
-            size: `${(blob.size / 1024).toFixed(2)} KB`
+            size: `PDF`
         });
 
         Swal.fire(
@@ -580,18 +600,39 @@ async function generateSysReport() {
             </html>
         `;
 
-        const blob = new Blob([html], { type: 'text/html' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `system-report-${Date.now()}.html`;
-        a.click();
-        URL.revokeObjectURL(url);
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+      doc.setFontSize(18);
+      doc.setTextColor(40);
+      doc.text('System Usage & Accuracy Report', 14, 20);
+
+      doc.autoTable({
+        startY: 30,
+        head: [['Metric', 'Value', 'Details']],
+        body: [
+          ['Total Attendance Records', String(total),              ''],
+          ['Vision AI Accuracy Rate',  `${accuracyRate}%`,         `${visionMarked} auto / ${manualMarked} manual`],
+          ['Overall Attendance Rate',  `${presentPct}%`,           `${present} present / ${absent} absent`],
+         ['Sessions Tracked',         String(lectures + sections), `${lectures} lectures · ${sections} sections`]
+         ],
+        theme: 'grid',
+        styles: { fontSize: 12, cellPadding: 5 },
+       headStyles: { fillColor: [43, 92, 255], textColor: 255, fontStyle: 'bold' },
+       alternateRowStyles: { fillColor: [245, 247, 250] },
+        margin: { left: 14, right: 14 }
+         });
+ 
+        doc.setFontSize(10);
+        doc.setTextColor(150);
+        doc.text(`Generated: ${new Date().toLocaleString()}`, 14, doc.lastAutoTable.finalY + 10);
+
+        doc.save(`system-report-${Date.now()}.pdf`);
 
         addRecentReport({
             name: 'System Report',
             date: new Date().toISOString(),
-            size: `${(blob.size / 1024).toFixed(2)} KB`
+            size: `PDF`
         });
 
         Swal.fire('Success', 'System report generated', 'success');
