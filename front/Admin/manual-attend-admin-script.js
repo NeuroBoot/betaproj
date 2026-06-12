@@ -283,7 +283,7 @@ async function openDetails() {
             const currentStatus =
                 existingRecord?.attendanceStatusId || 1;
                
-            const statusLabelMap = { 1: "Present", 2: "Late", 3: "Absent", 4: "Excused" };
+            const statusLabelMap = { 1: "Present", 2: "Absent", 3: "Late", 4: "Excused" };
             const initialStatusValueString = statusLabelMap[currentStatus] || "Absent";
 
             const tr = document.createElement('tr');
