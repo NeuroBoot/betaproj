@@ -411,13 +411,13 @@ if (e.target.closest('.btn-edit')) {
         const faceStatusEl = document.getElementById('editFaceStatus');
         if (faceStatusEl) {
 
-            if (user.hasEmbeddings || user.photos?.length > 0 || roleVal === 'student') { 
-                faceStatusEl.style.color = '#2ecc71'; // Success Green
-                faceStatusEl.innerHTML = '<i class="fas fa-check-circle"></i> Face Registered (Embeddings Exist)';
-            } else {
-                faceStatusEl.style.color = '#e74c3c'; // Warning Red
-                faceStatusEl.innerHTML = '<i class="fas fa-times-circle"></i> No Face Data Stored';
-            }
+          if (user.embeddingImagesCount > 0) {
+          faceStatusEl.style.color = '#2ecc71';
+         faceStatusEl.innerHTML = `<i class="fas fa-check-circle"></i> Face Registered (${user.embeddingImagesCount} image${user.embeddingImagesCount > 1 ? 's' : ''})`;
+          } else {
+       faceStatusEl.style.color = '#e74c3c';
+       faceStatusEl.innerHTML = '<i class="fas fa-times-circle"></i> No Face Data Stored';
+        }
         }
 
         const editPreview = document.getElementById('editImagePreview');
