@@ -241,10 +241,22 @@ document.addEventListener('DOMContentLoaded', async function () {
 
         if (enrollmentChart) {
             const monthly = new Array(12).fill(0);
-            for (let i = 0; i < studentCount; i++) monthly[i % 12]++;
-            enrollmentChart.data.datasets[0].data = monthly;
-            enrollmentChart.update();
-        }
+            const currentYear = new Date().getFullYear();
+        users
+            .filter(u => String(u.userType).toLowerCase() === 'student')
+            .forEach(u => {
+                const dateStr = u.createdAt ?? u.registeredAt ?? u.created_at;
+                if (!dateStr) return;
+
+                const date = new Date(dateStr);
+                if (date.getFullYear() === currentYear) {
+                    monthly[date.getMonth()]++;
+                }
+            });
+
+        enrollmentChart.data.datasets[0].data = monthly;
+        enrollmentChart.update();
+     }
     }
 
    
@@ -351,7 +363,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             });
             if (!result.isConfirmed) return;
 
-            
+            await apiFetch(`/alerts?userId=${dbId}`, { method: 'DELETE' });
             const { ok, status, data } = await apiFetch(`/users/${dbId}?hard=true`, { method: 'DELETE' });
             console.log('Delete response — ok:', ok, 'status:', status, data);
 
