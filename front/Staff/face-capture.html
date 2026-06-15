@@ -747,49 +747,69 @@ async function uploadCapturedImage(blob) {
     }
 
    
-    for (let i = 0; i < facesToRender.length; i++) {
-      const face = facesToRender[i];
+    const statusConfig = {
+      RECORDED:         { emoji: "✅", label: "Recorded",         color: "#2ecc71" },
+      ALREADY_RECORDED: { emoji: "⚠️", label: "Already Recorded", color: "#f39c12" },
+      NO_MATCH:         { emoji: "❌", label: "No Match",         color: "#e74c3c" },
+      NOT_REGISTERED:   { emoji: "❌", label: "Not Registered",   color: "#e74c3c" },
+      NO_FACE_DETECTED: { emoji: "ℹ️", label: "No Face Detected", color: "#3498db" },
+      ERROR:            { emoji: "⚠️", label: "Processing Error", color: "#95a5a6" },
+    };
+
+    const rows = facesToRender.map((face, i) => {
       const status = (face.status || "").toUpperCase();
       const studentName =
-       face.student?.fullName ||
-         face.student?.username ||
-         face.record?.student?.fullName ||
-          "Unknown";
+        face.student?.fullName ||
+        face.student?.username ||
+        face.record?.student?.fullName ||
+        "Unknown";
 
-
-      const confidence =
-      face.student?.confidence ??
-      face.record?.faceConfidence ?? 
-      face.confidence ??
-       0;
-
-
+      let confidence =
+        face.student?.confidence ??
+        face.record?.faceConfidence ??
+        face.confidence ??
+        0;
       if (confidence > 1) confidence = confidence / 100;
       const confText = (confidence * 100).toFixed(1) + "%";
 
-      let icon = "info", title = "Recognition Result";
-      if (status === "RECORDED")          { icon = "success"; title = "Attendance Recorded"; }
-      if (status === "ALREADY_RECORDED")  { icon = "warning"; title = "Already Recorded"; }
-      if (status === "NO_MATCH")          { icon = "error";   title = "Unknown Individual"; }
-      if (status === "NOT_REGISTERED")    { icon = "error";   title = "Not Registered"; }
-      if (status === "NO_FACE_DETECTED")  { icon = "info";    title = "No Face Detected"; }
-      if (status === "ERROR")             { icon = "error";   title = "Processing Error"; }
+      const cfg = statusConfig[status] || { emoji: "❓", label: status, color: "#aaa" };
 
-      const faceLabel = facesToRender.length > 1 ? ` (${i + 1} of ${facesToRender.length})` : "";
+      return `
+        <tr>
+          <td style="padding:6px 10px;color:#ccc;">${i + 1}</td>
+          <td style="padding:6px 10px;font-weight:600;color:#fff;">${studentName}</td>
+          <td style="padding:6px 10px;color:${cfg.color};">${cfg.emoji} ${cfg.label}</td>
+          <td style="padding:6px 10px;color:#b0b0b0;">${confText}</td>
+        </tr>`;
+    }).join("");
 
-      await Swal.fire({
-        icon, 
-        title: title + faceLabel,
-        html: `
-          <div class="text-center">
-            <h5 class="mb-2" style="color:#2ecc71">${studentName}</h5>
-            <p class="mb-1">Confidence: <strong>${confText}</strong></p>
-          </div>`,
-        background: "#1a1a3a",
-        color: "#fff",
-        confirmButtonColor: "#3060ff"
-      });
-    }
+    const statuses = facesToRender.map(f => (f.status || "").toUpperCase());
+    const allRecorded = statuses.every(s => s === "RECORDED");
+    const anyRecorded = statuses.some(s  => s === "RECORDED" || s === "ALREADY_RECORDED");
+    const overallIcon = allRecorded ? "success" : anyRecorded ? "warning" : "error";
+
+    await Swal.fire({
+      icon: overallIcon,
+      title: `${facesToRender.length} face${facesToRender.length > 1 ? "s" : ""} processed`,
+      html: `
+        <div style="overflow-x:auto; max-height:400px; overflow-y:auto;">
+          <table style="width:100%;border-collapse:collapse;font-size:14px;text-align:left;min-width:380px;">
+            <thead>
+              <tr style="border-bottom:1px solid rgba(255,255,255,0.1);">
+                <th style="padding:6px 8px;color:#888;">#</th>
+                <th style="padding:6px 8px;color:#888;">Student</th>
+                <th style="padding:6px 8px;color:#888;">Status</th>
+                <th style="padding:6px 8px;color:#888;">Conf.</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>`,
+      background: "#1a1a3a",
+      color: "#fff",
+      confirmButtonColor: "#3060ff",
+      width: "min(600px, 95vw)"
+    });
 
     await loadRecentCaptures();
 
